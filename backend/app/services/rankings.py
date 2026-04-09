@@ -76,16 +76,24 @@ async def search_schools(q: str) -> List[Dict[str, str]]:
     
     query = f"%{q}%"
     sql = """
-        SELECT DISTINCT school_name, school_code
+        SELECT school_name, school_code, MAX(establishment_type) as establishment_type, MAX(region) as region
         FROM tstt_ind
         WHERE school_name ILIKE $1
+        GROUP BY school_name, school_code
         ORDER BY school_name
         LIMIT 20
     """
     
     async with pool.acquire() as conn:
         rows = await conn.fetch(sql, query)
-        return [{"school_name": row["school_name"], "school_code": row["school_code"]} for row in rows]
+        return [
+            {
+                "school_name": row["school_name"], 
+                "school_code": row["school_code"],
+                "establishment_type": row["establishment_type"],
+                "region": row["region"]
+            } for row in rows
+        ]
 
 
 def get_indicators() -> List[Dict[str, str]]:

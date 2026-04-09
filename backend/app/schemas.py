@@ -15,6 +15,8 @@ class QueryResponse(BaseModel):
 class SchoolItem(BaseModel):
     school_name: str
     school_code: str
+    establishment_type: str
+    region: str
 
 
 class IndicatorItem(BaseModel):

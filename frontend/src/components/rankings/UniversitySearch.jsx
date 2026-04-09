@@ -77,11 +77,16 @@ export default function UniversitySearch({ onSelect, initialValue }) {
               <li key={school.school_code}>
                 <button
                   type="button"
-                  className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-surface-container transition-colors flex flex-col"
+                  className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-surface-container transition-colors flex flex-col gap-0.5"
                   onClick={() => handleSelect(school)}
                 >
-                  <span className="text-primary">{school.school_name}</span>
-                  <span className="text-[10px] text-slate-400 font-mono">{school.school_code}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-primary font-bold">{school.school_name}</span>
+                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm">
+                      {school.establishment_type} / {school.region}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono">CODE: {school.school_code}</span>
                 </button>
               </li>
             ))}

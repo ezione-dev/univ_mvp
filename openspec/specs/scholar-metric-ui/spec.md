@@ -1,6 +1,6 @@
 ## Purpose
 
-Scholar Metric UI(대시보드/404) MVP의 화면 구조, 라우팅, 디자인 토큰, 반응형 최소 기준을 정의한다.
+Scholar Metric UI(대시보드/404) MVP의 화면 구조, 라우팅, 디자인 토큰, 반응형 최소 기준을 정의한다. 애플리케이션 루트 `/`는 **메인 랜딩(`MainPage`)** 이며, 본 스펙의 대시보드 셸은 **비운영 빌드에서만** 등록된 **`/dashboard/legacy`** 에서 요구사항을 만족한다(**Frontend Routing spec**과 동일한 `import.meta.env.PROD` 정책).
 
 ## Requirements
 
@@ -8,12 +8,20 @@ Scholar Metric UI(대시보드/404) MVP의 화면 구조, 라우팅, 디자인 �
 
 The frontend SHALL render a dashboard view that matches the structural layout of `docs/scholar_metric/code.html`: fixed left sidebar (brand, primary navigation items, footer actions), a main column with top app bar (title, horizontal tabs, notifications and settings affordances, institutional login control, user avatar area), and a scrollable dashboard body.
 
-#### Scenario: Default dashboard route
+#### Scenario: Scholar dashboard on legacy path (non-production only)
 
-- **WHEN** the user navigates to the route designated for the Scholar Metric dashboard (default SHALL be `/` unless a superseding routing change explicitly documents a different path)
+- **WHEN** `import.meta.env.PROD` is false
+- **AND** the user navigates to `/dashboard/legacy`
 - **THEN** the application displays the dashboard shell with sidebar navigation labels consistent with the reference (e.g. 개요, 재정, 등록, 학생 성공, 교수진)
-- **AND** the top bar SHALL include tab labels consistent with the reference (e.g. 대시보드, 분석, 보고서, 비교)
+- **AND** the top bar SHALL include tab labels consistent with the reference (e.g. category tabs as implemented in `TopBar`)
 - **AND** the main body SHALL include a page header with institutional performance title, a filter/control cluster (search-style institution field, metric select, benchmark checkboxes), a primary heatmap card, a right-hand summary and insights column, and a tertiary row of three KPI-style tiles
+
+#### Scenario: Production — no registered Scholar dashboard URL
+
+- **WHEN** `import.meta.env.PROD` is true
+- **AND** the user navigates to `/dashboard/legacy`
+- **THEN** the path is not registered as the Scholar Metric dashboard route
+- **AND** the application follows **Frontend Routing spec** for unknown paths (not-found)
 
 ### Requirement: Dashboard MVP content and data
 
@@ -66,3 +74,44 @@ The dashboard and not-found layouts SHALL remain usable on narrow viewports: sid
 - **WHEN** the viewport width is below the desktop breakpoint used in the reference
 - **THEN** the layout SHALL avoid permanent horizontal overflow of the main dashboard grid beyond intentional scroll regions
 - **AND** the not-found page SHALL keep CTAs reachable without horizontal clipping
+
+### Requirement: Real-time University Search
+
+The system SHALL provide a search interface that allows users to find and select a university, with autocomplete results fetched from the `/api/rankings/search-schools` endpoint.
+
+#### Scenario: User searches for a university
+
+- **WHEN** the user types "서울" in the search input
+- **THEN** after a 300ms debounce, the system SHALL call the search API and display a list of matching universities
+- **THEN** selecting a university SHALL update the global dashboard state and trigger a data refresh
+
+### Requirement: Multi-Indicator Selection with Limit
+
+The system SHALL allow users to select up to 5 ranking indicators from a list fetched from the `/api/rankings/indicators` endpoint.
+
+#### Scenario: User selects indicators
+
+- **WHEN** the user clicks an unselected indicator chip
+- **THEN** the indicator SHALL be added to the selection list, and if the total selected is less than or equal to 5, the UI SHALL highlight the chip
+- **THEN** clicking a selected chip SHALL remove it from the list
+
+#### Scenario: Selection limit enforcement
+
+- **WHEN** 5 indicators are already selected
+- **THEN** all other unselected indicators SHALL be disabled or provide visual feedback that no more can be selected
+
+### Requirement: Dynamic Dashboard Visualization
+
+The system SHALL automatically update all dashboard components (Rankings Heatmap, Institution Summary) whenever the selected school or indicators change, by fetching data from the `/api/rankings/comparison` endpoint.
+
+#### Scenario: Visualization update on selection change
+
+- **WHEN** a new university is selected OR the indicator list is modified
+- **THEN** the system SHALL call the comparison API with the new parameters
+- **THEN** the `RankingHeatmapCard` SHALL update its columns and markers to reflect the new ranking data
+- **THEN** the `InstitutionSummaryPanel` SHALL update its content to reflect the new university's metadata
+
+#### Scenario: Loading state indication
+
+- **WHEN** a data refresh is in progress
+- **THEN** affected components SHALL display a loading indicator or skeleton screen to inform the user

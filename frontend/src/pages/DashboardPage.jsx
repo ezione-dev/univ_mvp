@@ -10,7 +10,12 @@ import UniversitySearch from '../components/rankings/UniversitySearch';
 import IndicatorSelector from '../components/rankings/IndicatorSelector';
 
 // Default values for initial load
-const DEFAULT_SCHOOL = { school_name: '서울대학교', school_code: '00088' };
+const DEFAULT_SCHOOL = { 
+  school_name: '서울대학교', 
+  school_code: '00088',
+  establishment_type: '국립대학법인',
+  region: '서울'
+};
 const DEFAULT_INDICATORS = [
   { id: 'employment_rate_rank', label: '졸업생의 취업률' },
   { id: 'scholarship_ratio_rank', label: '장학금 비율' },
@@ -57,7 +62,7 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 p-4 md:p-8">
       <section className="relative z-20 flex flex-col gap-6">
-        <DashboardPageHeader schoolName={selectedSchool?.school_name} />
+        <DashboardPageHeader school={selectedSchool} />
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* University Search Container */}
