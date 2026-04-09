@@ -1,24 +1,28 @@
-import { Link } from 'react-router-dom';
+import MainLayout from '../layouts/MainLayout';
+import PageTitleSection from '../components/main/PageTitleSection';
+import KpiBentoGrid from '../components/main/KpiBentoGrid';
+import StrengthWeaknessMatrix from '../components/main/StrengthWeaknessMatrix';
+import InsightsPanel from '../components/main/InsightsPanel';
+import RiskStrengthTable from '../components/main/RiskStrengthTable';
+import ProgressMetricGrid from '../components/main/ProgressMetricGrid';
+import sampleData from '../data/main_page_samples.json';
 
 export default function MainPage() {
   return (
-    <div className="min-h-screen bg-surface px-6 py-16 text-on-surface">
-      <div className="mx-auto max-w-lg text-center font-body">
-        <h1 className="font-headline text-2xl font-bold text-primary md:text-3xl">
-          메인화면
-        </h1>
-        <p className="mt-4 text-slate-600">
-          새 메인 화면입니다. 이후 콘텐츠와 내비게이션을 이어서 붙이면 됩니다.
-        </p>
-        <div className="mt-10 flex justify-center">
-          <Link
-            to="/support"
-            className="inline-flex rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
-          >
-            지원
-          </Link>
-        </div>
+    <MainLayout>
+      <PageTitleSection meta={sampleData.meta} />
+      <KpiBentoGrid
+        largeKpis={sampleData.kpis.large}
+        smallKpis={sampleData.kpis.small}
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <StrengthWeaknessMatrix matrix={sampleData.matrix} />
+        <InsightsPanel insights={sampleData.insights} />
       </div>
-    </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <RiskStrengthTable data={sampleData.riskTable} />
+        <ProgressMetricGrid metrics={sampleData.progressMetrics} />
+      </div>
+    </MainLayout>
   );
 }
