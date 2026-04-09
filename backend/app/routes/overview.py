@@ -15,6 +15,7 @@ from ..schemas import (
     OverviewDetailGridItem,
     OverviewProgressMetricsResponse,
     OverviewProgressMetricItem,
+    OverviewInsightsResponse,
     RiskTableCell,
     RiskTableIndicator,
     RiskTableJudgment,
@@ -487,4 +488,84 @@ async def get_overview_progress_metrics(
     ]
 
     return OverviewProgressMetricsResponse(title="핵심 지표 성과 추이", items=items)
+
+
+@router.get("/api/overview/insights", response_model=OverviewInsightsResponse)
+async def get_overview_insights(
+    screen_base_year: int = Query(..., ge=1900, le=3000),
+    screen_code: str = "overview",
+    screen_ver: str = "v0.1",
+    schl_nm: str = Query(..., min_length=1),
+):
+    # DEPRECATED: 기존 endpoint. 신규 `/api/insights/core` 사용 권장.
+    # block_code 규약(프론트 InsightsPanel shape에 직접 매핑)
+    wanted = ("strengths", "risks", "actions")
+
+    sql_blocks = """
+    SELECT
+      block_code,
+      block_title,
+      display_order
+    FROM public.tq_overview_text_block
+    WHERE screen_code=$1
+      AND screen_ver=$2
+      AND schl_nm=$3
+      AND screen_base_year=$4
+      AND block_code = ANY($5::text[])
+    ORDER BY display_order, block_code
+    """
+
+    sql_lines = """
+    SELECT
+      block_code,
+      line_no,
+      line_role,
+      line_text
+    FROM public.tq_overview_text_line
+    WHERE screen_code=$1
+      AND screen_ver=$2
+      AND schl_nm=$3
+      AND screen_base_year=$4
+      AND block_code = ANY($5::text[])
+    ORDER BY block_code, line_no
+    """
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        blocks = await conn.fetch(sql_blocks, screen_code, screen_ver, schl_nm, screen_base_year, list(wanted))
+        lines = await conn.fetch(sql_lines, screen_code, screen_ver, schl_nm, screen_base_year, list(wanted))
+
+    title = "핵심 인사이트"
+    if blocks:
+        # 블록들이 동일 타이틀을 공유한다고 가정하고 첫 값 사용
+        bt = (blocks[0]["block_title"] or "").strip()
+        if bt:
+            title = bt
+
+    strengths_lines: list[str] = []
+    risks_lines: list[str] = []
+    action_items: list[str] = []
+
+    for r in lines:
+        bc = (r["block_code"] or "").strip()
+        text = (r["line_text"] or "").strip()
+        if not text:
+            continue
+
+        if bc == "strengths":
+            strengths_lines.append(text)
+        elif bc == "risks":
+            risks_lines.append(text)
+        elif bc == "actions":
+            action_items.append(text)
+
+    strengths = "\n".join(strengths_lines).strip() if strengths_lines else None
+    risks = "\n".join(risks_lines).strip() if risks_lines else None
+
+    return OverviewInsightsResponse(
+        title=title,
+        strengths=strengths,
+        risks=risks,
+        actions=action_items,
+    )
 

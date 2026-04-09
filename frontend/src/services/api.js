@@ -33,3 +33,9 @@ export const getOverviewProgressMetrics = async (params) => {
   const response = await api.get('/api/overview/progress-metrics', { params });
   return response.data;
 };
+
+export const getOverviewInsights = async (params) => {
+  // NOTE: backend의 신규 endpoint로 완전 교체
+  const response = await api.get('/api/insights/core', { params });
+  return response.data;
+};

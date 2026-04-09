@@ -171,3 +171,39 @@ class OverviewProgressMetricItem(BaseModel):
 class OverviewProgressMetricsResponse(BaseModel):
     title: str
     items: list[OverviewProgressMetricItem]
+
+
+class OverviewInsightsResponse(BaseModel):
+    title: str
+    strengths: Optional[str] = None
+    risks: Optional[str] = None
+    actions: list[str] = []
+
+
+class InsightLine(BaseModel):
+    no: int
+    role: str
+    text: str
+
+
+class InsightBlock(BaseModel):
+    code: str
+    areaName: str
+    title: str
+    displayOrder: int
+    lines: list[InsightLine] = []
+
+
+class InsightCoreResponse(BaseModel):
+    # 프론트 `InsightsPanel`과 호환되는 필드들
+    title: str
+    strengths: Optional[str] = None
+    risks: Optional[str] = None
+    actions: list[str] = []
+
+    # 화면 레이아웃용 텍스트 (요청 block_code 기반)
+    headerContext: Optional[str] = None
+    summaryJudgment: Optional[str] = None
+
+    # 원본 구조(블록/라인)도 함께 제공
+    blocks: list[InsightBlock] = []

@@ -11,6 +11,7 @@ import {
   getOverviewMatrixPoints,
   getOverviewRiskTable,
   getOverviewDetailGrid,
+  getOverviewInsights,
 } from "../services/api";
 
 export default function MainPage() {
@@ -29,6 +30,9 @@ export default function MainPage() {
 
   // ✅ API 기반 상세 그리드(확인용)
   const [detailGrid, setDetailGrid] = useState([]);
+
+  // ✅ API 기반 핵심 인사이트 (기본: 샘플 fallback 유지)
+  const [insights, setInsights] = useState(sampleData.insights);
 
   // 🔁 샘플 fallback을 쓰고 싶으면 아래 3줄을 켜세요.
   // const [matrix, setMatrix] = useState(sampleData.matrix);
@@ -106,12 +110,30 @@ export default function MainPage() {
           screen_base_year: 2025,
           schl_nm: "충남대학교",
           // 한 해만 보이도록 고정 (screen_base_year=2025 → metric_year=2024)
-          metric_year: 2024,
+          metric_year: 2025,
         });
 
         setDetailGrid(Array.isArray(data?.items) ? data.items : []);
       } catch {
         // fallback: keep empty
+      }
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getOverviewInsights({
+          screen_code: "overview",
+          screen_ver: "v0.1",
+          screen_base_year: 2025,
+          schl_nm: "충남대학교",
+        });
+
+        setInsights(data || sampleData.insights);
+      } catch {
+        // fallback: keep sample insights
       }
     };
     load();
@@ -123,7 +145,7 @@ export default function MainPage() {
       <KpiBentoGrid largeKpis={largeKpis} smallKpis={smallKpis} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <StrengthWeaknessMatrix matrix={matrix} />
-        <InsightsPanel insights={sampleData.insights} />
+        <InsightsPanel insights={insights} />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <RiskStrengthTable data={riskTable} legend={riskLegend} />
