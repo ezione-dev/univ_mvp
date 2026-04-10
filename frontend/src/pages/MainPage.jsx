@@ -5,7 +5,7 @@ import KpiBentoGrid from "../components/main/KpiBentoGrid";
 import StrengthWeaknessMatrix from "../components/main/StrengthWeaknessMatrix";
 import AdmissionInsights from "../components/admission/AdmissionInsights";
 import RiskStrengthTable from "../components/main/RiskStrengthTable";
-import ProgressMetricGrid from "../components/main/ProgressMetricGrid";
+import OverviewDetailGridTable from "../components/main/OverviewDetailGridTable";
 import sampleData from "../data/main_page_samples.json";
 import { useEffect, useState } from "react";
 import {
@@ -30,6 +30,8 @@ export default function MainPage() {
   const [matrix, setMatrix] = useState(null);
   const [riskTable, setRiskTable] = useState([]);
   const [riskLegend, setRiskLegend] = useState([]);
+
+  const [detailGrid, setDetailGrid] = useState([]);
 
   const screenParams = {
     screenCode: "overview",
@@ -117,15 +119,16 @@ export default function MainPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        await getOverviewDetailGrid({
+        const data = await getOverviewDetailGrid({
           screen_code: "overview",
           screen_ver: "v0.1",
           screen_base_year: 2025,
           schl_nm: "충남대학교",
           metric_year: 2025,
         });
+        setDetailGrid(Array.isArray(data?.items) ? data.items : []);
       } catch {
-        // fallback: keep empty
+        setDetailGrid([]);
       }
     };
     load();
@@ -151,7 +154,7 @@ export default function MainPage() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <RiskStrengthTable data={riskTable} legend={riskLegend} />
-          <ProgressMetricGrid metrics={sampleData.progressMetrics} />
+          <OverviewDetailGridTable items={detailGrid} />
         </div>
       </div>
     </MainLayout>
