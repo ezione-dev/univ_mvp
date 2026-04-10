@@ -5,7 +5,7 @@ import KpiBentoGrid from "../components/main/KpiBentoGrid";
 import StrengthWeaknessMatrix from "../components/main/StrengthWeaknessMatrix";
 import AdmissionInsights from "../components/admission/AdmissionInsights";
 import RiskStrengthTable from "../components/main/RiskStrengthTable";
-import ProgressMetricGrid from "../components/main/ProgressMetricGrid";
+import OverviewDetailGridTable from "../components/main/OverviewDetailGridTable";
 import sampleData from "../data/main_page_samples.json";
 import { useEffect, useState } from "react";
 import {
@@ -16,6 +16,7 @@ import {
 } from "../services/api";
 import { useOverviewHeaderContext } from "../hooks/useOverviewHeaderContext";
 import { useOverviewTextBlockLines } from "../hooks/useOverviewTextBlockLines";
+import { useOverviewSummaryJudgmentLabel } from "../hooks/useOverviewPdfReportLabel";
 
 export default function MainPage() {
   // ✅ API 기반 KPI (기본: 빈값으로 시작해서 "깨지지 않게" 방어)
@@ -31,6 +32,8 @@ export default function MainPage() {
   const [riskTable, setRiskTable] = useState([]);
   const [riskLegend, setRiskLegend] = useState([]);
 
+  const [detailGrid, setDetailGrid] = useState([]);
+
   const screenParams = {
     screenCode: "overview",
     screenVer: "v0.1",
@@ -40,6 +43,14 @@ export default function MainPage() {
 
   const { title: headerTitle, subtitle: headerSubtitle } =
     useOverviewHeaderContext(screenParams);
+
+  const { title: summaryJudgmentTitle, subtitle: summaryJudgmentSubtitle } =
+    useOverviewSummaryJudgmentLabel(screenParams);
+
+  const showSummaryJudgment = Boolean(
+    (summaryJudgmentTitle && summaryJudgmentTitle.trim()) ||
+      (summaryJudgmentSubtitle && summaryJudgmentSubtitle.trim()),
+  );
 
   const { title: insightTitle, items: dbInsights } = useOverviewTextBlockLines({
     ...screenParams,
@@ -117,15 +128,16 @@ export default function MainPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        await getOverviewDetailGrid({
+        const data = await getOverviewDetailGrid({
           screen_code: "overview",
           screen_ver: "v0.1",
           screen_base_year: 2025,
           schl_nm: "충남대학교",
           metric_year: 2025,
         });
+        setDetailGrid(Array.isArray(data?.items) ? data.items : []);
       } catch {
-        // fallback: keep empty
+        setDetailGrid([]);
       }
     };
     load();
@@ -138,7 +150,9 @@ export default function MainPage() {
           title={headerTitle || sampleData.meta?.dashboardTitle}
           subtitle={headerSubtitle || sampleData.meta?.institutionalDashboardLabel}
           baseYear={sampleData.meta?.baseYear}
-          showPdfButton={true}
+          showSummaryJudgment={showSummaryJudgment}
+          summaryJudgmentTitle={summaryJudgmentTitle}
+          summaryJudgmentSubtitle={summaryJudgmentSubtitle}
         />
         <StatusChips filters={sampleData.filters} />
         <KpiBentoGrid
@@ -151,7 +165,7 @@ export default function MainPage() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <RiskStrengthTable data={riskTable} legend={riskLegend} />
-          <ProgressMetricGrid metrics={sampleData.progressMetrics} />
+          <OverviewDetailGridTable items={detailGrid} />
         </div>
       </div>
     </MainLayout>
