@@ -43,9 +43,7 @@ def decode_access_token(token: str) -> Optional[dict]:
 
 
 async def authenticate_user(email: str, password: str) -> Optional[dict]:
-    query = (
-        "SELECT user_cd, user_id, user_pw, user_nm FROM ts_user_info WHERE user_id = $1"
-    )
+    query = "SELECT user_cd, user_id, user_pw, user_nm, univ_cd FROM ts_user_info WHERE user_id = $1"
     df = await fetch_df(query, (email,))
 
     if df.empty:
@@ -59,10 +57,9 @@ async def authenticate_user(email: str, password: str) -> Optional[dict]:
     return user
 
 
-async def get_university_name(email: str) -> Optional[str]:
-    email_domain = email.split("@")[1]
-    query = "SELECT univ_nm FROM ts_univ_info WHERE email_domain = $1"
-    df = await fetch_df(query, (email_domain,))
+async def get_university_name_by_cd(univ_cd: str) -> Optional[str]:
+    query = "SELECT univ_nm FROM ts_univ_info WHERE univ_cd = $1"
+    df = await fetch_df(query, (univ_cd,))
 
     if df.empty:
         return None

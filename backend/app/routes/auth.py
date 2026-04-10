@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.services.auth import (
     authenticate_user,
     create_access_token,
-    get_university_name,
+    get_university_name_by_cd,
 )
 from app.dependencies import require_auth
 from app.schemas import LoginRequest, LoginResponse, OAuth2TokenResponse
@@ -21,7 +21,7 @@ async def login_for_access_token(
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    univ_nm = await get_university_name(user["user_id"])
+    univ_nm = await get_university_name_by_cd(user["univ_cd"])
 
     if not univ_nm:
         raise HTTPException(status_code=404, detail="University not found")
@@ -42,7 +42,7 @@ async def login(request: LoginRequest):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    univ_nm = await get_university_name(user["user_id"])
+    univ_nm = await get_university_name_by_cd(user["univ_cd"])
 
     if not univ_nm:
         raise HTTPException(status_code=404, detail="University not found")
