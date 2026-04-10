@@ -275,6 +275,8 @@ class ThemeChartItem(BaseModel):
     displayText: str
     noteText: str
     colorHex: str
+    # 막대 비율 표시/파싱용 (예: "3.5%") — DB `bar_ratio_display_text`
+    barRatioDisplayText: Optional[str] = None
 
 
 class ThemeChartBlock(BaseModel):
@@ -333,9 +335,11 @@ class AdmissionEnrollmentRatesResponse(BaseModel):
 
 class AdmissionOpportunityBalanceItem(BaseModel):
     category: str
+    # 막대 너비(0~100): `bar_ratio_display_text`에서만 파싱, 실패 시 0
     ratio: float
     previousRatio: Optional[float] = None
-    barRatioDisplayText: Optional[str] = None
+    # DB `bar_ratio_display_text` 원문(우측 표시 + 비율 파싱 소스)
+    bar_ratio_display_text: Optional[str] = None
 
 
 class AdmissionOpportunityBalanceResponse(BaseModel):

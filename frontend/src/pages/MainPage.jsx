@@ -3,7 +3,7 @@ import PageTitleSection from "../components/main/PageTitleSection";
 import StatusChips from "../components/main/StatusChips";
 import KpiBentoGrid from "../components/main/KpiBentoGrid";
 import StrengthWeaknessMatrix from "../components/main/StrengthWeaknessMatrix";
-import InsightsPanel from "../components/main/InsightsPanel";
+import AdmissionInsights from "../components/admission/AdmissionInsights";
 import RiskStrengthTable from "../components/main/RiskStrengthTable";
 import ProgressMetricGrid from "../components/main/ProgressMetricGrid";
 import sampleData from "../data/main_page_samples.json";
@@ -14,7 +14,8 @@ import {
   getOverviewRiskTable,
   getOverviewDetailGrid,
 } from "../services/api";
-import { useOverviewCoreInsights } from "../hooks/useOverviewCoreInsights";
+import { useOverviewHeaderContext } from "../hooks/useOverviewHeaderContext";
+import { useOverviewTextBlockLines } from "../hooks/useOverviewTextBlockLines";
 
 export default function MainPage() {
   // ✅ API 기반 KPI (기본: 빈값으로 시작해서 "깨지지 않게" 방어)
@@ -30,13 +31,20 @@ export default function MainPage() {
   const [riskTable, setRiskTable] = useState([]);
   const [riskLegend, setRiskLegend] = useState([]);
 
-  // ✅ API 기반 상세 그리드(확인용)
-  const [detailGrid, setDetailGrid] = useState([]);
-
-  const { insights } = useOverviewCoreInsights({
+  const screenParams = {
+    screenCode: "overview",
+    screenVer: "v0.1",
     screenBaseYear: 2025,
     schlNm: "충남대학교",
-    fallback: sampleData.insights,
+  };
+
+  const { title: headerTitle, subtitle: headerSubtitle } =
+    useOverviewHeaderContext(screenParams);
+
+  const { title: insightTitle, items: dbInsights } = useOverviewTextBlockLines({
+    ...screenParams,
+    blockCode: "SAMPLE_INSIGHT",
+    lineRole: "INSIGHT",
   });
 
   // 🔁 샘플 fallback을 쓰고 싶으면 아래 3줄을 켜세요.
@@ -109,16 +117,13 @@ export default function MainPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await getOverviewDetailGrid({
+        await getOverviewDetailGrid({
           screen_code: "overview",
           screen_ver: "v0.1",
           screen_base_year: 2025,
           schl_nm: "충남대학교",
-          // 한 해만 보이도록 고정 (screen_base_year=2025 → metric_year=2024)
           metric_year: 2025,
         });
-
-        setDetailGrid(Array.isArray(data?.items) ? data.items : []);
       } catch {
         // fallback: keep empty
       }
@@ -130,19 +135,19 @@ export default function MainPage() {
     <MainLayout>
       <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
         <PageTitleSection
-          title={sampleData.meta?.dashboardTitle}
-          subtitle={sampleData.meta?.institutionalDashboardLabel}
+          title={headerTitle || sampleData.meta?.dashboardTitle}
+          subtitle={headerSubtitle || sampleData.meta?.institutionalDashboardLabel}
           baseYear={sampleData.meta?.baseYear}
           showPdfButton={true}
         />
         <StatusChips filters={sampleData.filters} />
         <KpiBentoGrid
-          largeKpis={sampleData.kpis.large}
-          smallKpis={sampleData.kpis.small}
+          largeKpis={largeKpis}
+          smallKpis={smallKpis}
         />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <StrengthWeaknessMatrix matrix={matrix} />
-          <InsightsPanel insights={insights} />
+          <AdmissionInsights title={insightTitle} insights={dbInsights} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <RiskStrengthTable data={riskTable} legend={riskLegend} />
