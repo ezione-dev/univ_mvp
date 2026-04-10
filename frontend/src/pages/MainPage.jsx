@@ -16,6 +16,7 @@ import {
 } from "../services/api";
 import { useOverviewHeaderContext } from "../hooks/useOverviewHeaderContext";
 import { useOverviewTextBlockLines } from "../hooks/useOverviewTextBlockLines";
+import { useOverviewSummaryJudgmentLabel } from "../hooks/useOverviewPdfReportLabel";
 
 export default function MainPage() {
   // ✅ API 기반 KPI (기본: 빈값으로 시작해서 "깨지지 않게" 방어)
@@ -42,6 +43,14 @@ export default function MainPage() {
 
   const { title: headerTitle, subtitle: headerSubtitle } =
     useOverviewHeaderContext(screenParams);
+
+  const { title: summaryJudgmentTitle, subtitle: summaryJudgmentSubtitle } =
+    useOverviewSummaryJudgmentLabel(screenParams);
+
+  const showSummaryJudgment = Boolean(
+    (summaryJudgmentTitle && summaryJudgmentTitle.trim()) ||
+      (summaryJudgmentSubtitle && summaryJudgmentSubtitle.trim()),
+  );
 
   const { title: insightTitle, items: dbInsights } = useOverviewTextBlockLines({
     ...screenParams,
@@ -141,7 +150,9 @@ export default function MainPage() {
           title={headerTitle || sampleData.meta?.dashboardTitle}
           subtitle={headerSubtitle || sampleData.meta?.institutionalDashboardLabel}
           baseYear={sampleData.meta?.baseYear}
-          showPdfButton={true}
+          showSummaryJudgment={showSummaryJudgment}
+          summaryJudgmentTitle={summaryJudgmentTitle}
+          summaryJudgmentSubtitle={summaryJudgmentSubtitle}
         />
         <StatusChips filters={sampleData.filters} />
         <KpiBentoGrid

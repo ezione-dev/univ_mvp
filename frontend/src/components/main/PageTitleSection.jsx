@@ -2,8 +2,9 @@ export default function PageTitleSection({
   title,
   subtitle,
   baseYear,
-  showPdfButton,
-  onPdfClick,
+  showSummaryJudgment,
+  summaryJudgmentTitle,
+  summaryJudgmentSubtitle,
 }) {
   return (
     <div className="mb-8 flex justify-between items-end">
@@ -26,14 +27,24 @@ export default function PageTitleSection({
             기준연도: {baseYear}
           </div>
         )}
-        {showPdfButton && (
-          <button
-            onClick={onPdfClick}
-            className="bg-primary text-white px-5 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
-          >
-            <span className="material-symbols-outlined text-sm">download</span>
-            PDF 리포트
-          </button>
+        {showSummaryJudgment && (
+          <div className="bg-primary text-white px-5 py-2 rounded-lg shadow-lg shadow-primary/20 text-left">
+            <div className="flex items-start gap-3">
+              <span className="material-symbols-outlined text-sm mt-0.5">
+                summarize
+              </span>
+              <div className="leading-tight min-w-0">
+                <div className="text-sm font-bold">
+                  {summaryJudgmentTitle}
+                </div>
+                {summaryJudgmentSubtitle ? (
+                  <div className="text-[11px] font-medium text-white/80 mt-0.5 whitespace-pre-wrap break-words">
+                    {summaryJudgmentSubtitle}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
