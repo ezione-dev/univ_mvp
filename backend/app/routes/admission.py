@@ -28,6 +28,22 @@ def _try_parse_float(v: object):
         return None
 
 
+def _ratio_percent_from_bar_ratio_display_text(v: object) -> float | None:
+    """`bar_ratio_display_text`에 담긴 막대 비율(%) 숫자만 추출. 예: '45.2%', '45,2', '45'."""
+    if v is None:
+        return None
+    s = str(v).strip()
+    if not s:
+        return None
+    s = s.replace("%", "").replace(",", ".").strip()
+    # 앞쪽 숫자만 (예: "약 12.3" → 실패 시 None)
+    try:
+        x = float(s)
+    except ValueError:
+        return None
+    return max(0.0, min(100.0, x))
+
+
 @router.get(
     "/api/admission/enrollment-rates", response_model=AdmissionEnrollmentRatesResponse
 )
@@ -127,9 +143,9 @@ async def get_admission_opportunity_balance(
     # - **원천 테이블**: tq_screen_chart_block(제목/부제), tq_screen_chart_item(항목)
     # - **아이템 매핑 규칙**
     #   - category = item_label
-    #   - ratio = item_value_num (구성비 %, 0~100 기대)
+    #   - ratio = 막대 너비(%) — `bar_ratio_display_text`에서만 파싱, 실패 시 0 (item_value_num 미사용)
     #   - previousRatio = item_note_text (선택, 숫자 파싱)
-    #   - barRatioDisplayText = bar_ratio_display_text 우선, 없으면 item_display_text
+    #   - bar_ratio_display_text = DB 원문(우측 표시 + 막대 비율 파싱 소스)
     sql_block = """
     SELECT
       block_title,
@@ -176,29 +192,25 @@ async def get_admission_opportunity_balance(
             title=title, subtitle=subtitle, items=[]
         )
 
-    def _pick_ratio_display(row) -> str | None:
-        d = dict(row)
-        for key in ("bar_ratio_display_text", "item_display_text"):
-            v = d.get(key)
-            if v is None:
-                continue
-            s = str(v).strip()
-            if s:
-                return s
-        return None
+    def _bar_ratio_display_text_only(row: dict) -> str | None:
+        v = row.get("bar_ratio_display_text")
+        if v is None:
+            return None
+        s = str(v).strip()
+        return s if s else None
 
     items: list[AdmissionOpportunityBalanceItem] = []
     for r in rows:
-        ratio = _try_parse_float(r["item_value_num"])
-        if ratio is None:
-            continue
+        d = dict(r)
+        parsed = _ratio_percent_from_bar_ratio_display_text(d.get("bar_ratio_display_text"))
+        ratio = 0.0 if parsed is None else parsed
 
         items.append(
             AdmissionOpportunityBalanceItem(
-                category=r["item_label"],
+                category=d["item_label"],
                 ratio=ratio,
-                previousRatio=_try_parse_float(r["item_note_text"]),
-                barRatioDisplayText=_pick_ratio_display(r),
+                previousRatio=_try_parse_float(d.get("item_note_text")),
+                bar_ratio_display_text=_bar_ratio_display_text_only(d),
             )
         )
 

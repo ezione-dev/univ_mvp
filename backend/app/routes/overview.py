@@ -21,6 +21,9 @@ from ..schemas import (
     RiskTableJudgment,
     RiskTableLegendItem,
     RiskTableRow,
+    ThemeTextBlock,
+    ThemeTextBlocksResponse,
+    ThemeTextLine,
 )
 
 router = APIRouter()
@@ -568,4 +571,75 @@ async def get_overview_insights(
         risks=risks,
         actions=action_items,
     )
+
+
+@router.get("/api/overview/text-blocks", response_model=ThemeTextBlocksResponse)
+async def get_overview_text_blocks(
+    screen_base_year: int = Query(..., ge=1900, le=3000),
+    schl_nm: str = Query(..., min_length=1),
+    screen_code: str = "overview",
+    screen_ver: str = "v0.1",
+):
+    """
+    Overview 전용 텍스트 블록 API.
+    - admission에서 쓰는 `/api/theme/text-blocks`와 동일한 응답 shape
+    - 데이터 소스만 `tq_overview_text_block`, `tq_overview_text_line`를 사용
+    """
+    blocks_sql = """
+    SELECT
+      block_code,
+      block_area_name,
+      block_title,
+      display_order
+    FROM public.tq_overview_text_block
+    WHERE screen_code=$1
+      AND screen_ver=$2
+      AND screen_base_year=$3
+      AND schl_nm=$4
+    ORDER BY display_order, block_code
+    """
+
+    lines_sql = """
+    SELECT
+      block_code,
+      line_no,
+      line_role,
+      line_text
+    FROM public.tq_overview_text_line
+    WHERE screen_code=$1
+      AND screen_ver=$2
+      AND screen_base_year=$3
+      AND schl_nm=$4
+    ORDER BY block_code, line_no
+    """
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        block_rows = await conn.fetch(blocks_sql, screen_code, screen_ver, screen_base_year, schl_nm)
+        line_rows = await conn.fetch(lines_sql, screen_code, screen_ver, screen_base_year, schl_nm)
+
+    if not block_rows:
+        return ThemeTextBlocksResponse(blocks=[])
+
+    lines_by_block: dict[str, list[ThemeTextLine]] = {}
+    for r in line_rows:
+        block_code = r["block_code"]
+        lines_by_block.setdefault(block_code, []).append(
+            ThemeTextLine(no=int(r["line_no"]), role=r["line_role"], text=r["line_text"])
+        )
+
+    blocks: list[ThemeTextBlock] = []
+    for b in block_rows:
+        block_code = b["block_code"]
+        blocks.append(
+            ThemeTextBlock(
+                blockCode=block_code,
+                areaName=b["block_area_name"],
+                title=b["block_title"],
+                displayOrder=int(b["display_order"]),
+                lines=lines_by_block.get(block_code, []),
+            )
+        )
+
+    return ThemeTextBlocksResponse(blocks=blocks)
 

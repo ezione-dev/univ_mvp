@@ -14,12 +14,16 @@ import {
   getAdmissionOpportunityBalance,
   getThemeDetailGrid,
 } from "../../services/api";
-import { useThemeInsights } from "../../hooks/useThemeInsights";
 import { useThemeSourceRefs } from "../../hooks/useThemeSourceRefs";
-import { useThemeChartBlockMeta } from "../../hooks/useThemeChartBlockMeta";
+import { useThemeTextBlockLines } from "../../hooks/useThemeTextBlockLines";
+import { useThemeHeaderContext } from "../../hooks/useThemeHeaderContext";
+import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
+
+const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
+const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function AdmissionDashboard() {
-  const { pageTitle, pageSubtitle, baseYear, filters, insights } = admissionData;
+  const { pageTitle, pageSubtitle, baseYear, filters } = admissionData;
 
   // ✅ 최상단 KPI 카드는 DB 값만 사용 (샘플 fallback 제거)
   const [kpiCards, setKpiCards] = useState([]);
@@ -45,21 +49,34 @@ export default function AdmissionDashboard() {
     [],
   );
 
-  const { items: dbInsights } = useThemeInsights({
+  const { title: headerTitle, subtitle: headerSubtitle } = useThemeHeaderContext({
     screenCode: params.screen_code,
     screenVer: params.screen_ver,
     screenBaseYear: params.screen_base_year,
     schlNm: params.schl_nm,
+  });
+
+  const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
+    screenCode: params.screen_code,
+    screenVer: params.screen_ver,
+    screenBaseYear: params.screen_base_year,
+    schlNm: params.schl_nm,
+  });
+
+  const showSummaryJudgment = Boolean(
+    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
+  );
+
+  const { title: insightTitle, items: dbInsights } = useThemeTextBlockLines({
+    screenCode: params.screen_code,
+    screenVer: params.screen_ver,
+    screenBaseYear: params.screen_base_year,
+    schlNm: params.schl_nm,
+    blockCode: INSIGHT_BLOCK_CODE,
+    lineRole: INSIGHT_LINE_ROLE,
   });
 
   const { refs: sourceRefs } = useThemeSourceRefs({
-    screenCode: params.screen_code,
-    screenVer: params.screen_ver,
-    screenBaseYear: params.screen_base_year,
-    schlNm: params.schl_nm,
-  });
-
-  const { chartLeft: chartBlockLeft, chartRight: chartBlockRight } = useThemeChartBlockMeta({
     screenCode: params.screen_code,
     screenVer: params.screen_ver,
     screenBaseYear: params.screen_base_year,
@@ -132,14 +149,15 @@ export default function AdmissionDashboard() {
     load();
   }, [params]);
 
-  const insightsToRender = dbInsights?.length ? dbInsights : insights;
-
   return (
     <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
       <PageTitleSection
-        title={pageTitle}
-        subtitle={pageSubtitle}
+        title={headerTitle}
+        subtitle={headerSubtitle}
         baseYear={baseYear}
+        showSummaryJudgment={showSummaryJudgment}
+        summaryJudgmentTitle={panelTitle}
+        summaryJudgmentSubtitle={panelSubtitle}
       />
 
       <StatusChips filters={filters} />
@@ -147,19 +165,19 @@ export default function AdmissionDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <EnrollmentRateChart
-          title={enrollmentMeta.title || chartBlockLeft.title}
-          subtitle={enrollmentMeta.subtitle || chartBlockLeft.subtitle}
+          title={enrollmentMeta.title}
+          subtitle={enrollmentMeta.subtitle}
           enrollmentRates={dbEnrollmentRates}
         />
         <OpportunityBalanceChart
-          title={opportunityBalanceMeta.title || chartBlockRight.title}
-          subtitle={opportunityBalanceMeta.subtitle || chartBlockRight.subtitle}
+          title={opportunityBalanceMeta.title}
+          subtitle={opportunityBalanceMeta.subtitle}
           opportunityBalance={dbOpportunityBalance}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <AdmissionInsights insights={insightsToRender} />
+        <AdmissionInsights title={insightTitle} insights={dbInsights} />
         <AdmissionTable refs={sourceRefs} />
       </div>
     </div>
