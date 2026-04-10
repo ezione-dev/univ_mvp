@@ -346,3 +346,19 @@ class AdmissionOpportunityBalanceResponse(BaseModel):
 
 class AdmissionInsightItem(BaseModel):
     text: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    univ_nm: Optional[str] = None
+
+
+class TokenPayload(BaseModel):
+    sub: str
+    univ_nm: str
+    exp: int

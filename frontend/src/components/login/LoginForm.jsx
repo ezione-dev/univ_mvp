@@ -1,0 +1,128 @@
+import { useState } from 'react';
+
+/** MVP: 비밀번호 재설정 등 미구현 — 나중에 true로 켜고 링크 대상만 연결하면 됨 */
+const SHOW_CREDENTIAL_RECOVERY_LINK = false;
+
+export default function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm mx-auto" noValidate>
+      <div className="space-y-2">
+        <label
+          htmlFor="loginEmail"
+          className="block text-[0.75rem] uppercase tracking-wider font-bold text-on-surface-variant px-4 font-login-body"
+        >
+          이메일 주소 (EMAIL)
+        </label>
+        <div className="relative">
+          <input
+            id="loginEmail"
+            type="email"
+            inputMode="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="이메일 주소를 입력하세요"
+            className="custom-input w-full h-12 px-6 pr-12 placeholder:text-outline-variant text-on-surface outline-none font-login-body"
+            autoComplete="username"
+          />
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none">
+            <span className="material-symbols-outlined text-[22px]">badge</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label
+          htmlFor="password"
+          className="block text-[0.75rem] uppercase tracking-wider font-bold text-on-surface-variant px-4 font-login-body"
+        >
+          비밀번호 (PASSWORD)
+        </label>
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="custom-input w-full h-12 px-6 pr-12 placeholder:text-outline-variant text-on-surface outline-none font-login-body"
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 cursor-pointer hover:text-primary-container transition-colors"
+            aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
+          >
+            <span className="material-symbols-outlined text-[22px]">
+              {showPassword ? 'visibility_off' : 'visibility'}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        className={`flex items-center py-1 px-1 gap-3 flex-wrap ${
+          SHOW_CREDENTIAL_RECOVERY_LINK ? 'justify-between' : ''
+        }`}
+      >
+        <label htmlFor="rememberMe" className="flex items-center gap-2.5 cursor-pointer group">
+          <span className="relative flex items-center shrink-0">
+            <input
+              id="rememberMe"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="sr-only"
+            />
+            <span
+              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                rememberMe
+                  ? 'bg-primary-container border-primary-container'
+                  : 'border-outline-variant'
+              }`}
+            >
+              <span
+                className={`material-symbols-outlined text-white text-[16px] transition-transform ${
+                  rememberMe ? 'scale-100' : 'scale-0'
+                }`}
+              >
+                check
+              </span>
+            </span>
+          </span>
+          <span className="text-sm font-medium text-on-surface-variant group-hover:text-primary-container transition-colors font-login-body">
+            이 기기에서 이메일 저장
+          </span>
+        </label>
+        {SHOW_CREDENTIAL_RECOVERY_LINK ? (
+          <a
+            href="#"
+            className="text-sm font-bold text-primary-container hover:underline transition-all font-login-body shrink-0"
+          >
+            자격 증명 찾기
+          </a>
+        ) : null}
+      </div>
+
+      <button
+        type="submit"
+        className="w-full h-14 bg-primary-container text-on-primary rounded-full font-login-headline font-bold flex items-center justify-center gap-3 shadow-xl shadow-primary-container/25 hover:bg-[#00366b] active:scale-[0.98] transition-all border-0 cursor-pointer"
+      >
+        로그인
+        <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+      </button>
+    </form>
+  );
+}

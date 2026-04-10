@@ -12,6 +12,7 @@ import CampusPage from "./pages/CampusPage";
 import QueryPage from "./pages/QueryPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SupportPage from "./pages/SupportPage";
+import LoginPage from "./pages/LoginPage";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/insights" element={<QueryPage />} />
       )}
       <Route path="/support" element={<SupportPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
