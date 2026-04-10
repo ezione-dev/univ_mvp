@@ -90,3 +90,8 @@ export const getOverviewInsights = async (params) => {
   return response.data;
 };
 
+export const getOverviewTextBlocks = async (params) => {
+  const response = await api.get('/api/overview/text-blocks', { params });
+  return response.data;
+};
+
