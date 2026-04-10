@@ -2,6 +2,10 @@ export default function CourseSizeDistributionChart({ courseDistribution, title,
   const heading = title?.trim() ? title : '강좌 규모 분포';
   const sub = subtitle?.trim() ? subtitle : '2024 최신 확정치 기준';
 
+  if (!Array.isArray(courseDistribution) || courseDistribution.length === 0) {
+    return null;
+  }
+
   return (
     <div className="bg-surface-container-lowest p-8 rounded-lg shadow-sm border border-outline-variant/10">
       <div className="flex justify-between items-start mb-6 gap-4">
@@ -13,17 +17,20 @@ export default function CourseSizeDistributionChart({ courseDistribution, title,
         </div>
       </div>
       <div className="space-y-4">
-        {courseDistribution.map(({ range, count, percentage }) => (
+        {courseDistribution.map(({ range, count, percentage, colorHex }) => (
           <div key={range} className="grid grid-cols-[100px_1fr_60px] items-center gap-4">
             <span className="text-[11px] text-slate-500">{range}</span>
             <div className="h-4 bg-surface-container-high rounded-sm overflow-hidden">
               <div
                 className="bg-tertiary/70 h-full"
-                style={{ width: `${percentage}%` }}
-              ></div>
+                style={{
+                  width: `${percentage}%`,
+                  ...(colorHex ? { backgroundColor: colorHex } : {}),
+                }}
+              />
             </div>
             <span className="text-[11px] font-bold text-right text-on-surface">
-              {count.toLocaleString()}
+              {Number(count).toLocaleString()}
             </span>
           </div>
         ))}

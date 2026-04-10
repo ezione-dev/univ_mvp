@@ -78,7 +78,7 @@ export const getAdmissionInsights = async (params) => {
 };
 
 // 기회균형 선발 구성 차트용 (OpportunityBalanceChart)
-// - items: [{ category, ratio, previousRatio? }]
+// - items: [{ category, ratio(막대%=bar_ratio_display_text 파싱만, 실패 시 0), previousRatio?, bar_ratio_display_text }]
 export const getOverviewProgressMetrics = async (params) => {
   const response = await api.get('/api/overview/progress-metrics', { params });
   return response.data;
@@ -90,17 +90,8 @@ export const getOverviewInsights = async (params) => {
   return response.data;
 };
 
-export const getGovernanceKpis = async (params) => {
-  const response = await api.get('/api/governance/kpis', { params });
+export const getOverviewTextBlocks = async (params) => {
+  const response = await api.get('/api/overview/text-blocks', { params });
   return response.data;
 };
 
-export const getGovernanceComplianceTable = async (params) => {
-  const response = await api.get('/api/governance/compliance-table', { params });
-  return response.data;
-};
-
-export const getGovernanceInsights = async (params) => {
-  const response = await api.get('/api/governance/insights', { params });
-  return response.data;
-};

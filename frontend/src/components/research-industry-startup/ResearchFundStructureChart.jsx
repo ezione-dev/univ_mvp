@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { normalizeResearchFundSources } from '../../utils/normalizeResearchFundSources';
 
 const BAR_COLORS = {
   '교내 연구비': 'bg-primary',
@@ -9,29 +10,20 @@ const BAR_COLORS = {
   외국: 'bg-outline',
 };
 
-/** 레거시 4분류(지자체/민간 합산) → 5행 표시용 */
-function normalizeSources(sources) {
-  if (!Array.isArray(sources)) return [];
-  const out = [];
-  for (const s of sources) {
-    const name = s?.name;
-    const pct = Number(s?.percentage);
-    if (!name || Number.isNaN(pct)) continue;
-    if (name === '지자체/민간') {
-      const half = Math.round((pct / 2) * 10) / 10;
-      const rest = Math.round((pct - half) * 10) / 10;
-      out.push({ name: '지자체', percentage: half });
-      out.push({ name: '민간', percentage: rest });
-    } else if (name === '교내') {
-      out.push({ name: '교내 연구비', percentage: pct });
-    } else {
-      out.push({ name, percentage: pct });
-    }
-  }
-  return out;
-}
-
-export default function ResearchFundStructureChart({ fundStructure, title, subtitle }) {
+/**
+ * @param {object} props
+ * @param {Array} [props.overrideSources] — undefined: 샘플 fundStructure 사용. 배열(빈 배열 포함): API/DB 행만 사용(빈 배열이면 차트 없음).
+ * @param {string|number} [props.bannerYear] — override 사용 시 상단 연도(샘플 JSON 연도와 섞이지 않게)
+ * @param {string} [props.bannerTotalText] — override 사용 시 상단 합계 문구
+ */
+export default function ResearchFundStructureChart({
+  fundStructure,
+  title,
+  subtitle,
+  overrideSources,
+  bannerYear,
+  bannerTotalText,
+}) {
   const heading = title?.trim() ? title : '연구비 재원 구조';
   const sub = subtitle?.trim() ? subtitle : '';
 
@@ -40,20 +32,38 @@ export default function ResearchFundStructureChart({ fundStructure, title, subti
     return [...fundStructure].sort((a, b) => Number(b.year) - Number(a.year))[0];
   }, [fundStructure]);
 
-  const rows = useMemo(() => normalizeSources(latest?.sources), [latest]);
+  const rows = useMemo(() => {
+    if (overrideSources !== undefined) {
+      return normalizeResearchFundSources(overrideSources);
+    }
+    return normalizeResearchFundSources(latest?.sources);
+  }, [latest, overrideSources]);
 
-  if (!latest || rows.length === 0) return null;
+  if (rows.length === 0) return null;
+
+  const showDbBanner = overrideSources !== undefined && bannerYear != null;
+  const banner = showDbBanner
+    ? { year: String(bannerYear), total: bannerTotalText ?? '' }
+    : latest
+      ? { year: String(latest.year), total: latest.total }
+      : null;
 
   return (
     <div className="bg-surface-container-lowest rounded-lg p-8 shadow-sm border border-outline-variant/10">
       <div className="mb-8">
         <h3 className="text-xl font-bold font-headline text-primary">{heading}</h3>
         {sub ? <p className="mt-1 text-xs text-on-surface-variant">{sub}</p> : null}
-        <p className="mt-2 text-sm text-on-surface-variant">
-          <span className="font-semibold text-primary">{latest.year}년</span>
-          <span className="mx-2 text-outline">·</span>
-          <span>{latest.total}</span>
-        </p>
+        {banner ? (
+          <p className="mt-2 text-sm text-on-surface-variant">
+            <span className="font-semibold text-primary">{banner.year}년</span>
+            {banner.total ? (
+              <>
+                <span className="mx-2 text-outline">·</span>
+                <span>{banner.total}</span>
+              </>
+            ) : null}
+          </p>
+        ) : null}
       </div>
       <div className="space-y-6">
         {rows.map((item) => {
