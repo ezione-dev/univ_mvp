@@ -10,12 +10,6 @@ import {
   AdmissionTable,
 } from "./index";
 import { getThemeDetailGrid } from "../../services/api";
-} from './index';
-import {
-  getAdmissionEnrollmentRates,
-  getAdmissionInsights,
-  getThemeDetailGrid,
-} from "../../services/api";
 
 export default function AdmissionDashboard() {
   const {
