@@ -36,7 +36,11 @@ export default function OpportunityBalanceChart({ title, subtitle, opportunityBa
               />
             </div>
             <span className="text-xs font-bold text-primary min-w-[3rem] text-right">
-              {item.barRatioDisplayText ?? `${item.ratio}%`}
+              {typeof item.bar_ratio_display_text === "string" && item.bar_ratio_display_text.trim()
+                ? item.bar_ratio_display_text.trim()
+                : typeof item.barRatioDisplayText === "string" && item.barRatioDisplayText.trim()
+                  ? item.barRatioDisplayText.trim()
+                  : ""}
             </span>
           </div>
         ))}

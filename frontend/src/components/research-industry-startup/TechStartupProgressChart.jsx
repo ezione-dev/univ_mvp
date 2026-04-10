@@ -1,6 +1,34 @@
-export default function TechStartupProgressChart({ startupProgress, title, subtitle }) {
+/**
+ * @param {object} props
+ * @param {Array<{label:string,current:number,target:number,unit:string}>} [props.startupProgress] — 샘플/폴백
+ * @param {Array<{label:string,percentage:number,valueCaption:string}>} [props.overrideProgress] — undefined: startupProgress 사용. 배열: DB 행만(빈 배열이면 null)
+ */
+export default function TechStartupProgressChart({
+  startupProgress,
+  title,
+  subtitle,
+  overrideProgress,
+}) {
   const heading = title?.trim() ? title : '기술이전 및 창업 성과 지표';
   const sub = subtitle?.trim() ? subtitle : '';
+
+  const rows =
+    overrideProgress !== undefined
+      ? overrideProgress
+      : Array.isArray(startupProgress)
+        ? startupProgress.map((item) => ({
+            kind: 'legacy',
+            label: item.label,
+            percentage: item.target > 0 ? Math.min(100, (item.current / item.target) * 100) : 0,
+            current: item.current,
+            target: item.target,
+            unit: item.unit,
+          }))
+        : [];
+
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return null;
+  }
 
   return (
     <div className="bg-surface-container-lowest rounded-lg p-8 shadow-sm border border-outline-variant/10">
@@ -9,21 +37,30 @@ export default function TechStartupProgressChart({ startupProgress, title, subti
         {sub ? <p className="mt-1 text-xs text-on-surface-variant">{sub}</p> : null}
       </div>
       <div className="space-y-6">
-        {startupProgress.map((item) => {
-          const percentage = (item.current / item.target) * 100;
+        {rows.map((item) => {
+          const pct = Math.min(100, Math.max(0, Number(item.percentage) || 0));
+          const isLegacy = item.kind === 'legacy';
           return (
             <div key={item.label} className="space-y-2">
               <div className="flex justify-between items-center text-sm">
                 <span className="font-medium text-on-surface-variant">{item.label}</span>
-                <span className="font-bold text-secondary">
-                  {item.current}{item.unit} <span className="text-xs font-normal text-outline">/ {item.target}{item.unit}</span>
+                <span className="font-bold text-secondary text-right">
+                  {isLegacy ? (
+                    <>
+                      {item.current}
+                      {item.unit}{' '}
+                      <span className="text-xs font-normal text-outline">
+                        / {item.target}
+                        {item.unit}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-sm">{item.valueCaption}</span>
+                  )}
                 </span>
               </div>
               <div className="h-2 bg-surface-container rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-secondary rounded-full"
-                  style={{ width: `${percentage}%` }}
-                ></div>
+                <div className="h-full bg-secondary rounded-full" style={{ width: `${pct}%` }} />
               </div>
             </div>
           );

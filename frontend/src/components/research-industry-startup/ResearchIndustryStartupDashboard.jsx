@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import researchData from '../../data/research-industry-startup-data.json';
 import PageTitleSection from '../main/PageTitleSection';
 import StatusChips from '../main/StatusChips';
@@ -11,6 +12,10 @@ import {
 import { useThemeInsights } from '../../hooks/useThemeInsights';
 import { useThemeSourceRefs } from '../../hooks/useThemeSourceRefs';
 import { useThemeChartBlockMeta } from '../../hooks/useThemeChartBlockMeta';
+import { mapThemeItemsToResearchFundSources } from '../../utils/mapThemeItemsToResearchFundSources';
+import { mapThemeItemsToResearchStartupProgress } from '../../utils/mapThemeItemsToResearchStartupProgress';
+
+const RESEARCH_SCREEN_BASE_YEAR = 2025;
 
 export default function ResearchIndustryStartupDashboard() {
   const { pageTitle, pageSubtitle, baseYear, filters, kpiCards, fundStructure, startupProgress, insights, tablePreview } =
@@ -19,23 +24,38 @@ export default function ResearchIndustryStartupDashboard() {
   const { items: dbInsights } = useThemeInsights({
     screenCode: 'research',
     screenVer: 'v0.1',
-    screenBaseYear: 2025,
+    screenBaseYear: RESEARCH_SCREEN_BASE_YEAR,
     schlNm: '충남대학교',
   });
 
   const { refs: sourceRefs } = useThemeSourceRefs({
     screenCode: 'research',
     screenVer: 'v0.1',
-    screenBaseYear: 2025,
+    screenBaseYear: RESEARCH_SCREEN_BASE_YEAR,
     schlNm: '충남대학교',
   });
 
-  const { chartLeft, chartRight } = useThemeChartBlockMeta({
+  const { chartLeft, chartRight, leftBlockItems, rightBlockItems, chartBlocksStatus } = useThemeChartBlockMeta({
     screenCode: 'research',
     screenVer: 'v0.1',
-    screenBaseYear: 2025,
+    screenBaseYear: RESEARCH_SCREEN_BASE_YEAR,
     schlNm: '충남대학교',
   });
+
+  const fundSourcesFromDb = useMemo(
+    () => mapThemeItemsToResearchFundSources(leftBlockItems),
+    [leftBlockItems],
+  );
+
+  /** chart-blocks가 성공했을 때만 override — 실패 시에만 샘플 JSON 비율(15/55/…) 사용 */
+  const fundOverrideSources = chartBlocksStatus === 'ok' ? fundSourcesFromDb : undefined;
+
+  const startupProgressFromDb = useMemo(
+    () => mapThemeItemsToResearchStartupProgress(rightBlockItems),
+    [rightBlockItems],
+  );
+
+  const startupOverrideProgress = chartBlocksStatus === 'ok' ? startupProgressFromDb : undefined;
 
   const insightsToRender = dbInsights?.length ? dbInsights : insights;
   const tableToRender = sourceRefs?.length ? sourceRefs : tablePreview;
@@ -51,12 +71,15 @@ export default function ResearchIndustryStartupDashboard() {
         <div className="lg:col-span-2">
           <ResearchFundStructureChart
             fundStructure={fundStructure}
+            overrideSources={fundOverrideSources}
+            bannerYear={fundOverrideSources !== undefined ? RESEARCH_SCREEN_BASE_YEAR : undefined}
             title={chartLeft.title}
             subtitle={chartLeft.subtitle}
           />
         </div>
         <TechStartupProgressChart
           startupProgress={startupProgress}
+          overrideProgress={startupOverrideProgress}
           title={chartRight.title}
           subtitle={chartRight.subtitle}
         />

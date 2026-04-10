@@ -11,6 +11,10 @@ import {
 import { useThemeInsights } from '../../hooks/useThemeInsights';
 import { useThemeSourceRefs } from '../../hooks/useThemeSourceRefs';
 import { useThemeChartBlockMeta } from '../../hooks/useThemeChartBlockMeta';
+import {
+  mapThemeItemsToCourseDistribution,
+  mapThemeItemsToSemesterRatios,
+} from '../../utils/mapThemeChartItemsToEducationBars';
 
 export default function EducationFacultyDashboard() {
   const { pageTitle, pageSubtitle, baseYear, filters, kpiCards, semesterRatios, courseDistribution, insights, tablePreview } =
@@ -30,12 +34,17 @@ export default function EducationFacultyDashboard() {
     schlNm: '충남대학교',
   });
 
-  const { chartLeft, chartRight } = useThemeChartBlockMeta({
+  const { chartLeft, chartRight, leftBlockItems, rightBlockItems } = useThemeChartBlockMeta({
     screenCode: 'education',
     screenVer: 'v0.1',
     screenBaseYear: 2025,
     schlNm: '충남대학교',
   });
+
+  const semesterFromDb = mapThemeItemsToSemesterRatios(leftBlockItems);
+  const courseFromDb = mapThemeItemsToCourseDistribution(rightBlockItems);
+  const semesterToRender = semesterFromDb.length > 0 ? semesterFromDb : semesterRatios;
+  const courseToRender = courseFromDb.length > 0 ? courseFromDb : courseDistribution;
 
   const insightsToRender = dbInsights?.length ? dbInsights : insights;
   const tableToRender = sourceRefs?.length ? sourceRefs : tablePreview;
@@ -49,12 +58,12 @@ export default function EducationFacultyDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SemesterFullTimeRatioChart
-          semesterRatios={semesterRatios}
+          semesterRatios={semesterToRender}
           title={chartLeft.title}
           subtitle={chartLeft.subtitle}
         />
         <CourseSizeDistributionChart
-          courseDistribution={courseDistribution}
+          courseDistribution={courseToRender}
           title={chartRight.title}
           subtitle={chartRight.subtitle}
         />
