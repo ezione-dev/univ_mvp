@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import financeData from "../../data/finance-data.json";
 import PageTitleSection from "../main/PageTitleSection";
 import StatusChips from "../main/StatusChips";
+import InsightsTableLayout from "../main/InsightsTableLayout";
+import InsightsPanel from "../main/InsightsPanel";
 import { FinanceKPICards } from "./index";
 import AdmissionTable from "../admission/AdmissionTable";
 import { getThemeDetailGrid } from "../../services/api";
@@ -9,14 +11,13 @@ import { useThemeSourceRefs } from "../../hooks/useThemeSourceRefs";
 import { useThemeChartBlockMeta } from "../../hooks/useThemeChartBlockMeta";
 import { useThemeTextBlockLines } from "../../hooks/useThemeTextBlockLines";
 import { useThemeHeaderContext } from "../../hooks/useThemeHeaderContext";
-import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
 import { useUniversityContext } from "../../hooks/useUniversityContext";
 import {
   mapThemeItemsToFinanceRevenueTop,
   mapThemeItemsToFinanceTuitionBars,
 } from "../../utils/mapThemeItemsToFinanceCharts";
+import { AnimatedPercentBarFill } from "../common/AnimatedPercentBarFill";
 
-/** docs/6tap/code.html 계열별 막대(bg-primary, bg-secondary, …)와 동일 — JIT 누락 방지용 hex */
 const BAR_FILL = {
   primary: "#002c5a",
   secondary: "#006492",
@@ -38,8 +39,8 @@ const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
 const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function FinanceDashboard() {
-  const { schlNm, ready: universityReady } = useUniversityContext();
-  const { meta, filters, tuitionByField, revenueStructure } = financeData;
+  const { schlNm, ready: universityReady, statusChips } = useUniversityContext();
+  const { meta, tuitionByField, revenueStructure } = financeData;
 
   const [kpiCards, setKpiCards] = useState([]);
 
@@ -59,17 +60,6 @@ export default function FinanceDashboard() {
     screenBaseYear: themeParams.screen_base_year,
     schlNm: themeParams.schl_nm,
   });
-
-  const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
-    screenCode: themeParams.screen_code,
-    screenVer: themeParams.screen_ver,
-    screenBaseYear: themeParams.screen_base_year,
-    schlNm: themeParams.schl_nm,
-  });
-
-  const showSummaryJudgment = Boolean(
-    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
-  );
 
   const {
     title: insightTitle,
@@ -97,6 +87,7 @@ export default function FinanceDashboard() {
     screenVer: themeParams.screen_ver,
     screenBaseYear: themeParams.screen_base_year,
     schlNm: themeParams.schl_nm,
+    blockCode: "CHART_BLOCK",
   });
 
   const tuitionBlockTitle =
@@ -147,17 +138,14 @@ export default function FinanceDashboard() {
   }, [themeParams, universityReady, schlNm]);
 
   return (
-    <div className="max-w-[1920px] mx-auto px-8 py-8 space-y-8">
+    <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
       <PageTitleSection
         title={headerTitle}
         subtitle={headerSubtitle}
         baseYear={meta.baseYear}
-        showSummaryJudgment={showSummaryJudgment}
-        summaryJudgmentTitle={panelTitle}
-        summaryJudgmentSubtitle={panelSubtitle}
       />
 
-      <StatusChips filters={filters} />
+      <StatusChips filters={statusChips} />
       <FinanceKPICards kpiCards={kpiCards} />
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -192,11 +180,11 @@ export default function FinanceDashboard() {
                     <span>{item.field}</span>
                     <span>{item.amount.toLocaleString()}원</span>
                   </div>
-                  <div className="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-surface-variant">
+                    <AnimatedPercentBarFill
+                      percent={item.percentage}
+                      className="h-full shrink-0 rounded-full"
                       style={{
-                        width: `${item.percentage}%`,
                         backgroundColor:
                           item.colorHex ||
                           BAR_FILL[item.colorToken || item.color] ||
@@ -257,35 +245,16 @@ export default function FinanceDashboard() {
         </div>
       </section>
 
-      {(insightsLoading || dbInsights.length > 0) && (
-        <section className="bg-white rounded-lg p-8 border-l-8 border-primary shadow-sm">
-          <h3 className="text-lg font-bold text-primary mb-6 font-headline flex items-center gap-2">
-            <span className="material-symbols-outlined">lightbulb</span>
-            {(insightTitle || "인사이트").trim() || "인사이트"}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {insightsLoading ? (
-              <p className="text-sm text-on-surface-variant col-span-full">
-                인사이트를 불러오는 중…
-              </p>
-            ) : (
-              dbInsights.map((item, index) => (
-                <div key={`insight-${index}`} className="flex gap-4">
-                  <span className="text-xl font-extrabold text-primary opacity-30 font-headline">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <p
-                    className="text-sm text-on-surface-variant leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: item.text }}
-                  />
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-      )}
-
-      <AdmissionTable refs={sourceRefs} />
+      <InsightsTableLayout
+        insightsComponent={
+          <InsightsPanel
+            title={insightTitle}
+            items={dbInsights}
+            loading={insightsLoading}
+          />
+        }
+        tableComponent={<AdmissionTable refs={sourceRefs} />}
+      />
     </div>
   );
 }

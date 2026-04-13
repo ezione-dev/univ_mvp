@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import campusData from '../../data/campus-data.json';
 import PageTitleSection from '../main/PageTitleSection';
 import StatusChips from '../main/StatusChips';
+import InsightsTableLayout from '../main/InsightsTableLayout';
+import InsightsPanel from '../main/InsightsPanel';
 import { CampusKPICards } from './index';
 import AdmissionTable from '../admission/AdmissionTable';
 import { getThemeDetailGrid } from '../../services/api';
@@ -9,12 +11,12 @@ import { useThemeSourceRefs } from '../../hooks/useThemeSourceRefs';
 import { useThemeChartBlockMeta } from '../../hooks/useThemeChartBlockMeta';
 import { useThemeTextBlockLines } from '../../hooks/useThemeTextBlockLines';
 import { useThemeHeaderContext } from '../../hooks/useThemeHeaderContext';
-import { useThemePanelSummary } from '../../hooks/useThemePanelSummary';
 import { useUniversityContext } from '../../hooks/useUniversityContext';
 import {
   mapThemeItemsToCampusConfiguration,
   mapThemeItemsToCampusSafetyStatus,
 } from '../../utils/mapThemeItemsToCampusCharts';
+import { AnimatedPercentBarFill } from '../common/AnimatedPercentBarFill';
 
 const BAR_FILL = {
   primary: '#002c5a',
@@ -41,8 +43,8 @@ const INSIGHT_BLOCK_CODE = 'SAMPLE_INSIGHT';
 const INSIGHT_LINE_ROLE = 'INSIGHT';
 
 export default function CampusDashboard() {
-  const { schlNm, ready: universityReady } = useUniversityContext();
-  const { meta, filters, campusConfiguration, safetyStatus } = campusData;
+  const { schlNm, ready: universityReady, statusChips } = useUniversityContext();
+  const { meta, campusConfiguration, safetyStatus } = campusData;
 
   const [kpiCards, setKpiCards] = useState([]);
 
@@ -62,17 +64,6 @@ export default function CampusDashboard() {
     screenBaseYear: themeParams.screen_base_year,
     schlNm: themeParams.schl_nm,
   });
-
-  const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
-    screenCode: themeParams.screen_code,
-    screenVer: themeParams.screen_ver,
-    screenBaseYear: themeParams.screen_base_year,
-    schlNm: themeParams.schl_nm,
-  });
-
-  const showSummaryJudgment = Boolean(
-    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
-  );
 
   const {
     title: insightTitle,
@@ -100,6 +91,7 @@ export default function CampusDashboard() {
     screenVer: themeParams.screen_ver,
     screenBaseYear: themeParams.screen_base_year,
     schlNm: themeParams.schl_nm,
+    blockCode: "CHART_BLOCK",
   });
 
   const campusConfigTitle =
@@ -150,17 +142,14 @@ export default function CampusDashboard() {
   }, [themeParams, universityReady, schlNm]);
 
   return (
-    <div className="max-w-[1920px] mx-auto px-8 py-8 space-y-8">
+    <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
       <PageTitleSection
         title={headerTitle}
         subtitle={headerSubtitle}
         baseYear={meta.baseYear}
-        showSummaryJudgment={showSummaryJudgment}
-        summaryJudgmentTitle={panelTitle}
-        summaryJudgmentSubtitle={panelSubtitle}
       />
 
-      <StatusChips filters={filters} />
+      <StatusChips filters={statusChips} />
       <CampusKPICards kpiCards={kpiCards} />
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -194,11 +183,11 @@ export default function CampusDashboard() {
                     <span className="text-on-surface">{item.item}</span>
                     <span className="text-primary">{item.value.toLocaleString()} {item.unit}</span>
                   </div>
-                  <div className="w-full h-8 bg-surface-container-highest rounded-full overflow-hidden flex">
-                    <div
-                      className="h-full rounded-full"
+                  <div className="flex h-8 w-full overflow-hidden rounded-full bg-surface-container-highest">
+                    <AnimatedPercentBarFill
+                      percent={item.percentage}
+                      className="h-full shrink-0 rounded-full"
                       style={{
-                        width: `${item.percentage}%`,
                         backgroundColor:
                           item.colorHex ||
                           BAR_FILL[item.colorToken || item.color] ||
@@ -256,37 +245,16 @@ export default function CampusDashboard() {
         </div>
       </section>
 
-      <section className="space-y-8">
-        {(insightsLoading || dbInsights.length > 0) && (
-          <div className="bg-white p-8 rounded-lg shadow-sm border border-outline-variant/10">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
-              <h2 className="text-lg font-headline font-bold text-primary">
-                {(insightTitle || '인사이트 분석').trim() || '인사이트 분석'}
-              </h2>
-            </div>
-            <div className="space-y-4">
-              {insightsLoading ? (
-                <p className="text-sm text-on-surface-variant">인사이트를 불러오는 중…</p>
-              ) : (
-                dbInsights.map((item, index) => (
-                  <div key={`insight-${index}`} className="flex gap-3 p-4 bg-surface-container-low/50 rounded-xl">
-                    <span className="text-xl font-extrabold text-primary opacity-30 font-headline shrink-0">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <p
-                      className="text-sm text-on-surface leading-relaxed flex-1"
-                      dangerouslySetInnerHTML={{ __html: item.text }}
-                    />
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
-        <AdmissionTable refs={sourceRefs} />
-      </section>
+      <InsightsTableLayout
+        insightsComponent={
+          <InsightsPanel
+            title={insightTitle}
+            items={dbInsights}
+            loading={insightsLoading}
+          />
+        }
+        tableComponent={<AdmissionTable refs={sourceRefs} />}
+      />
     </div>
   );
 }

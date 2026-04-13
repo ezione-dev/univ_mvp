@@ -3,24 +3,27 @@ import PageTitleSection from "../components/main/PageTitleSection";
 import StatusChips from "../components/main/StatusChips";
 import KpiBentoGrid from "../components/main/KpiBentoGrid";
 import StrengthWeaknessMatrix from "../components/main/StrengthWeaknessMatrix";
-import AdmissionInsights from "../components/admission/AdmissionInsights";
+import InsightsPanel from "../components/main/InsightsPanel";
 import RiskStrengthTable from "../components/main/RiskStrengthTable";
 import OverviewDetailGridTable from "../components/main/OverviewDetailGridTable";
 import sampleData from "../data/main_page_samples.json";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   getOverviewKpis,
   getOverviewMatrixPoints,
   getOverviewRiskTable,
   getOverviewDetailGrid,
 } from "../services/api";
-import { useOverviewHeaderContext } from "../hooks/useOverviewHeaderContext";
+import {
+  applySchoolPrefix,
+  useOverviewHeaderContext,
+} from "../hooks/useOverviewHeaderContext";
 import { useOverviewTextBlockLines } from "../hooks/useOverviewTextBlockLines";
 import { useOverviewSummaryJudgmentLabel } from "../hooks/useOverviewPdfReportLabel";
 import { useUniversityContext } from "../hooks/useUniversityContext";
 
 export default function MainPage() {
-  const { schlNm, ready: universityReady } = useUniversityContext();
+  const { schlNm, ready: universityReady, statusChips } = useUniversityContext();
 
   // ✅ API 기반 KPI (기본: 빈값으로 시작해서 "깨지지 않게" 방어)
   const [largeKpis, setLargeKpis] = useState([]);
@@ -52,7 +55,7 @@ export default function MainPage() {
 
   const showSummaryJudgment = Boolean(
     (summaryJudgmentTitle && summaryJudgmentTitle.trim()) ||
-      (summaryJudgmentSubtitle && summaryJudgmentSubtitle.trim()),
+    (summaryJudgmentSubtitle && summaryJudgmentSubtitle.trim()),
   );
 
   const { title: insightTitle, items: dbInsights } = useOverviewTextBlockLines({
@@ -60,6 +63,12 @@ export default function MainPage() {
     blockCode: "SAMPLE_INSIGHT",
     lineRole: "INSIGHT",
   });
+
+  const pageTitle = useMemo(() => {
+    const raw = (headerTitle || sampleData.meta?.dashboardTitle || "").trim();
+    if (!raw) return "";
+    return applySchoolPrefix(schlNm, raw) || raw;
+  }, [headerTitle, schlNm]);
 
   // 🔁 샘플 fallback을 쓰고 싶으면 아래 3줄을 켜세요.
   // const [matrix, setMatrix] = useState(sampleData.matrix);
@@ -159,20 +168,19 @@ export default function MainPage() {
       <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
         <PageTitleSection
           title={headerTitle || sampleData.meta?.dashboardTitle}
-          subtitle={headerSubtitle || sampleData.meta?.institutionalDashboardLabel}
+          subtitle={
+            headerSubtitle || sampleData.meta?.institutionalDashboardLabel
+          }
           baseYear={sampleData.meta?.baseYear}
           showSummaryJudgment={showSummaryJudgment}
           summaryJudgmentTitle={summaryJudgmentTitle}
           summaryJudgmentSubtitle={summaryJudgmentSubtitle}
         />
-        <StatusChips filters={sampleData.filters} />
-        <KpiBentoGrid
-          largeKpis={largeKpis}
-          smallKpis={smallKpis}
-        />
+        <StatusChips filters={statusChips} />
+        <KpiBentoGrid largeKpis={largeKpis} smallKpis={smallKpis} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <StrengthWeaknessMatrix matrix={matrix} />
-          <AdmissionInsights title={insightTitle} insights={dbInsights} />
+          <InsightsPanel title="인사이트" items={dbInsights} loading={false} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <RiskStrengthTable data={riskTable} legend={riskLegend} />
