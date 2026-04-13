@@ -3,7 +3,7 @@ import PageTitleSection from "../components/main/PageTitleSection";
 import StatusChips from "../components/main/StatusChips";
 import KpiBentoGrid from "../components/main/KpiBentoGrid";
 import StrengthWeaknessMatrix from "../components/main/StrengthWeaknessMatrix";
-import AdmissionInsights from "../components/admission/AdmissionInsights";
+import InsightsPanel from "../components/main/InsightsPanel";
 import RiskStrengthTable from "../components/main/RiskStrengthTable";
 import OverviewDetailGridTable from "../components/main/OverviewDetailGridTable";
 import sampleData from "../data/main_page_samples.json";
@@ -172,7 +172,7 @@ export default function MainPage() {
         />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <StrengthWeaknessMatrix matrix={matrix} />
-          <AdmissionInsights title={insightTitle} insights={dbInsights} />
+          <InsightsPanel title="인사이트" items={dbInsights} loading={false} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <RiskStrengthTable data={riskTable} legend={riskLegend} />
