@@ -172,7 +172,11 @@ export default function MainPage() {
           summaryJudgmentSubtitle={summaryJudgmentSubtitle}
         />
         <StatusChips filters={sampleData.filters} />
-        <KpiBentoGrid largeKpis={largeKpis} smallKpis={smallKpis} />
+        <KpiBentoGrid
+          baseYear={selectedBaseYear}
+          largeKpis={largeKpis}
+          smallKpis={smallKpis}
+        />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <StrengthWeaknessMatrix matrix={matrix} />
           <AdmissionInsights title={insightTitle} insights={dbInsights} />

@@ -33,6 +33,10 @@ const valueColors = {
 };
 
 function TrendText({ value, status }) {
+  const isUndisclosed = value == null || value === "";
+  if (isUndisclosed) {
+    return <span className="font-medium text-slate-400">미공시</span>;
+  }
   const colorClass = status === 'positive'
     ? 'text-tertiary'
     : status === 'negative'
@@ -56,14 +60,16 @@ export default function KPICard({
   auxLabel,
   auxText,
 }) {
-  if (!label || !value) return null;
+  if (!label) return null;
+
+  const isUndisclosed = value == null || value === "";
 
   const yearBadgeColor = yearBadgeColors[accentColor] || yearBadgeColors.secondary;
   const valueColor = accentColorHex
     ? undefined
     : valueColors[accentColor] || valueColors.primary;
 
-  const valueText = value == null ? "" : String(value);
+  const valueText = isUndisclosed ? "미공시" : String(value);
   const shouldAppendUnit = Boolean(unit && !valueText.includes(String(unit)));
 
   /** accentColorHex가 있으면 본문 숫자와 같은 액센트로 배지를 맞춤(스펙: 액센트에 맞는 연도 배지). */
@@ -78,6 +84,11 @@ export default function KPICard({
   const cardStyle = cardBorderColor
     ? { borderBottom: `4px solid ${cardBorderColor}` }
     : undefined;
+
+  const regionalAvgText =
+    regionalAvg == null || regionalAvg === "" ? "미공시" : `${regionalAvg}${unit || ""}`;
+  const nationalAvgText =
+    nationalAvg == null || nationalAvg === "" ? "미공시" : `${nationalAvg}${unit || ""}`;
 
   return (
     <div
@@ -101,8 +112,8 @@ export default function KPICard({
         className={`text-3xl font-semibold mb-3 ${valueColor || ''}`}
         style={accentColorHex ? { color: accentColorHex } : undefined}
       >
-        {isMainDashboard ? (
-    <AnimatedNumberText text={valueText} duration={1500} />
+        {isMainDashboard && !isUndisclosed ? (
+          <AnimatedNumberText text={valueText} duration={1500} />
         ) : (
           valueText
         )}
@@ -132,11 +143,11 @@ export default function KPICard({
           <>
             <div className="flex justify-between text-[11px]">
               <span className="text-slate-400">권역평균</span>
-              <span className="font-medium text-slate-600">{regionalAvg}{unit}</span>
+              <span className="font-medium text-slate-600">{regionalAvgText}</span>
             </div>
             <div className="flex justify-between text-[11px]">
               <span className="text-slate-400">전국평균</span>
-              <span className="font-medium text-slate-600">{nationalAvg}{unit}</span>
+              <span className="font-medium text-slate-600">{nationalAvgText}</span>
             </div>
           </>
         )}
