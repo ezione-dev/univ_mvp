@@ -14,7 +14,6 @@ import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
 import { useUniversityContext } from "../../hooks/useUniversityContext";
 import { mapDetailGridRowToGovernanceKpiCard } from "../../utils/mapThemeDetailGridToGovernanceKpiCards";
 import { mapThemeChartItemsToGovernanceCompliance } from "../../utils/mapThemeChartItemsToGovernanceCompliance";
-import { useSchlNm } from "../../hooks/useSchlNm";
 import {
   GovernanceKPICards,
   GovernanceComplianceTable,
@@ -28,7 +27,6 @@ const INSIGHT_LINE_ROLE = "INSIGHT";
 export default function GovernanceDashboard() {
   const { schlNm, ready: universityReady } = useUniversityContext();
   const { meta, filters } = governanceData;
-  const schlNm = useSchlNm();
 
   const [kpiCards, setKpiCards] = useState([]);
   const [complianceItems, setComplianceItems] = useState([]);

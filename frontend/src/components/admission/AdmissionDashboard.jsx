@@ -26,7 +26,6 @@ const INSIGHT_LINE_ROLE = "INSIGHT";
 export default function AdmissionDashboard() {
   const { schlNm, ready: universityReady } = useUniversityContext();
   const { pageTitle, pageSubtitle, baseYear, filters } = admissionData;
-  const schlNm = useSchlNm();
 
   // ✅ 최상단 KPI 카드는 DB 값만 사용 (샘플 fallback 제거)
   const [kpiCards, setKpiCards] = useState([]);

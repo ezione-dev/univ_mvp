@@ -26,7 +26,6 @@ const INSIGHT_LINE_ROLE = "INSIGHT";
 export default function ResearchIndustryStartupDashboard() {
   const { schlNm, ready: universityReady } = useUniversityContext();
   const { pageTitle, pageSubtitle, baseYear, filters } = researchData;
-  const schlNm = useSchlNm();
 
   const [kpiCards, setKpiCards] = useState([]);
 

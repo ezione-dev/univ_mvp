@@ -28,7 +28,6 @@ const INSIGHT_LINE_ROLE = "INSIGHT";
 export default function EducationFacultyDashboard() {
   const { schlNm, ready: universityReady } = useUniversityContext();
   const { pageTitle, pageSubtitle, baseYear, filters } = educationFacultyData;
-  const schlNm = useSchlNm();
 
   const [kpiCards, setKpiCards] = useState([]);
 
