@@ -10,6 +10,7 @@ import { useThemeChartBlockMeta } from '../../hooks/useThemeChartBlockMeta';
 import { useThemeTextBlockLines } from '../../hooks/useThemeTextBlockLines';
 import { useThemeHeaderContext } from '../../hooks/useThemeHeaderContext';
 import { useThemePanelSummary } from '../../hooks/useThemePanelSummary';
+import { useUniversityContext } from '../../hooks/useUniversityContext';
 import {
   mapThemeItemsToCampusConfiguration,
   mapThemeItemsToCampusSafetyStatus,
@@ -41,6 +42,7 @@ const INSIGHT_BLOCK_CODE = 'SAMPLE_INSIGHT';
 const INSIGHT_LINE_ROLE = 'INSIGHT';
 
 export default function CampusDashboard() {
+  const { schlNm, ready: universityReady } = useUniversityContext();
   const { meta, filters, campusConfiguration, safetyStatus } = campusData;
   const schlNm = useSchlNm();
 
@@ -123,6 +125,8 @@ export default function CampusDashboard() {
   const safetyRows = chartBlocksStatus === 'ok' ? safetyFromDb : [];
 
   useEffect(() => {
+    if (!universityReady || !schlNm) return;
+
     const load = async () => {
       try {
         const data = await getThemeDetailGrid(themeParams);
@@ -145,10 +149,10 @@ export default function CampusDashboard() {
       }
     };
     load();
-  }, [themeParams]);
+  }, [themeParams, universityReady, schlNm]);
 
   return (
-    <div className="max-w-[1920px] mx-auto px-8 py-8 space-y-8">
+    <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
       <PageTitleSection
         title={headerTitle}
         subtitle={headerSubtitle}

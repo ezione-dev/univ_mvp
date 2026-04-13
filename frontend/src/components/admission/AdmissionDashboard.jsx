@@ -18,12 +18,13 @@ import { useThemeSourceRefs } from "../../hooks/useThemeSourceRefs";
 import { useThemeTextBlockLines } from "../../hooks/useThemeTextBlockLines";
 import { useThemeHeaderContext } from "../../hooks/useThemeHeaderContext";
 import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
-import { useSchlNm } from "../../hooks/useSchlNm";
+import { useUniversityContext } from "../../hooks/useUniversityContext";
 
 const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
 const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function AdmissionDashboard() {
+  const { schlNm, ready: universityReady } = useUniversityContext();
   const { pageTitle, pageSubtitle, baseYear, filters } = admissionData;
   const schlNm = useSchlNm();
 
@@ -51,12 +52,13 @@ export default function AdmissionDashboard() {
     [schlNm],
   );
 
-  const { title: headerTitle, subtitle: headerSubtitle } = useThemeHeaderContext({
-    screenCode: params.screen_code,
-    screenVer: params.screen_ver,
-    screenBaseYear: params.screen_base_year,
-    schlNm: params.schl_nm,
-  });
+  const { title: headerTitle, subtitle: headerSubtitle } =
+    useThemeHeaderContext({
+      screenCode: params.screen_code,
+      screenVer: params.screen_ver,
+      screenBaseYear: params.screen_base_year,
+      schlNm: params.schl_nm,
+    });
 
   const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
     screenCode: params.screen_code,
@@ -66,7 +68,8 @@ export default function AdmissionDashboard() {
   });
 
   const showSummaryJudgment = Boolean(
-    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
+    (panelTitle && panelTitle.trim()) ||
+    (panelSubtitle && panelSubtitle.trim()),
   );
 
   const { title: insightTitle, items: dbInsights } = useThemeTextBlockLines({
@@ -86,6 +89,8 @@ export default function AdmissionDashboard() {
   });
 
   useEffect(() => {
+    if (!universityReady || !schlNm) return;
+
     const load = async () => {
       try {
         const data = await getThemeDetailGrid(params);
@@ -97,6 +102,7 @@ export default function AdmissionDashboard() {
           label: row.metricName,
           value: row.myValueDisplay,
           unit: "",
+          year: row.metricYear,
           regionalAvg: row.regionAvgDisplay,
           nationalAvg: row.nationalAvgDisplay,
           accentColorHex: row.accentColorHex,
@@ -109,9 +115,11 @@ export default function AdmissionDashboard() {
       }
     };
     load();
-  }, [params]);
+  }, [params, universityReady, schlNm]);
 
   useEffect(() => {
+    if (!universityReady || !schlNm) return;
+
     const load = async () => {
       try {
         const data = await getAdmissionEnrollmentRates({
@@ -129,9 +137,11 @@ export default function AdmissionDashboard() {
       }
     };
     load();
-  }, [params]);
+  }, [params, universityReady, schlNm]);
 
   useEffect(() => {
+    if (!universityReady || !schlNm) return;
+
     const load = async () => {
       try {
         const data = await getAdmissionOpportunityBalance({
@@ -149,7 +159,7 @@ export default function AdmissionDashboard() {
       }
     };
     load();
-  }, [params]);
+  }, [params, universityReady, schlNm]);
 
   return (
     <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">

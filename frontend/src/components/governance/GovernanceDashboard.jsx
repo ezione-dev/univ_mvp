@@ -11,6 +11,7 @@ import {
 import { useThemeSourceRefs } from "../../hooks/useThemeSourceRefs";
 import { useThemeHeaderContext } from "../../hooks/useThemeHeaderContext";
 import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
+import { useUniversityContext } from "../../hooks/useUniversityContext";
 import { mapDetailGridRowToGovernanceKpiCard } from "../../utils/mapThemeDetailGridToGovernanceKpiCards";
 import { mapThemeChartItemsToGovernanceCompliance } from "../../utils/mapThemeChartItemsToGovernanceCompliance";
 import { useSchlNm } from "../../hooks/useSchlNm";
@@ -25,6 +26,7 @@ const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
 const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function GovernanceDashboard() {
+  const { schlNm, ready: universityReady } = useUniversityContext();
   const { meta, filters } = governanceData;
   const schlNm = useSchlNm();
 
@@ -71,6 +73,8 @@ export default function GovernanceDashboard() {
   });
 
   useEffect(() => {
+    if (!universityReady || !schlNm) return;
+
     let cancelled = false;
     const load = async () => {
       try {
@@ -87,9 +91,11 @@ export default function GovernanceDashboard() {
     return () => {
       cancelled = true;
     };
-  }, [params]);
+  }, [params, universityReady, schlNm]);
 
   useEffect(() => {
+    if (!universityReady || !schlNm) return;
+
     let cancelled = false;
     const load = async () => {
       setInsightsLoading(true);
@@ -124,9 +130,11 @@ export default function GovernanceDashboard() {
     return () => {
       cancelled = true;
     };
-  }, [params]);
+  }, [params, universityReady, schlNm]);
 
   useEffect(() => {
+    if (!universityReady || !schlNm) return;
+
     let cancelled = false;
     const load = async () => {
       try {
@@ -147,7 +155,7 @@ export default function GovernanceDashboard() {
     return () => {
       cancelled = true;
     };
-  }, [params]);
+  }, [params, universityReady, schlNm]);
 
   return (
     <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
@@ -169,12 +177,11 @@ export default function GovernanceDashboard() {
           items={insightItems}
           loading={insightsLoading}
         />
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
           <GovernanceComplianceTable complianceItems={complianceItems} />
+          <AdmissionTable refs={sourceRefs} />
         </div>
       </div>
-
-      <AdmissionTable refs={sourceRefs} />
     </div>
   );
 }

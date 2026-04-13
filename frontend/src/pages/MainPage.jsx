@@ -17,10 +17,10 @@ import {
 import { useOverviewHeaderContext } from "../hooks/useOverviewHeaderContext";
 import { useOverviewTextBlockLines } from "../hooks/useOverviewTextBlockLines";
 import { useOverviewSummaryJudgmentLabel } from "../hooks/useOverviewPdfReportLabel";
-import { useSchlNm } from "../hooks/useSchlNm";
+import { useUniversityContext } from "../hooks/useUniversityContext";
 
 export default function MainPage() {
-  const schlNm = useSchlNm();
+  const { schlNm, ready: universityReady } = useUniversityContext();
 
   // ✅ API 기반 KPI (기본: 빈값으로 시작해서 "깨지지 않게" 방어)
   const [largeKpis, setLargeKpis] = useState([]);
@@ -41,7 +41,7 @@ export default function MainPage() {
     screenCode: "overview",
     screenVer: "v0.1",
     screenBaseYear: 2025,
-    schlNm,
+    schlNm: schlNm,
   };
 
   const { title: headerTitle, subtitle: headerSubtitle } =
@@ -52,7 +52,7 @@ export default function MainPage() {
 
   const showSummaryJudgment = Boolean(
     (summaryJudgmentTitle && summaryJudgmentTitle.trim()) ||
-      (summaryJudgmentSubtitle && summaryJudgmentSubtitle.trim()),
+    (summaryJudgmentSubtitle && summaryJudgmentSubtitle.trim()),
   );
 
   const { title: insightTitle, items: dbInsights } = useOverviewTextBlockLines({
@@ -67,7 +67,8 @@ export default function MainPage() {
   // const [riskLegend, setRiskLegend] = useState(sampleData.riskLegend || []);
 
   useEffect(() => {
-    if (!schlNm) return;
+    if (!universityReady || !schlNm) return;
+
     const load = async () => {
       try {
         const data = await getOverviewKpis({
@@ -88,10 +89,11 @@ export default function MainPage() {
       }
     };
     load();
-  }, [schlNm]);
+  }, [universityReady, schlNm]);
 
   useEffect(() => {
-    if (!schlNm) return;
+    if (!universityReady || !schlNm) return;
+
     const load = async () => {
       try {
         const data = await getOverviewMatrixPoints({
@@ -107,10 +109,11 @@ export default function MainPage() {
       }
     };
     load();
-  }, [schlNm]);
+  }, [universityReady, schlNm]);
 
   useEffect(() => {
-    if (!schlNm) return;
+    if (!universityReady || !schlNm) return;
+
     const load = async () => {
       try {
         const data = await getOverviewRiskTable({
@@ -129,10 +132,11 @@ export default function MainPage() {
       }
     };
     load();
-  }, [schlNm]);
+  }, [universityReady, schlNm]);
 
   useEffect(() => {
-    if (!schlNm) return;
+    if (!universityReady || !schlNm) return;
+
     const load = async () => {
       try {
         const data = await getOverviewDetailGrid({
@@ -148,24 +152,23 @@ export default function MainPage() {
       }
     };
     load();
-  }, [schlNm]);
+  }, [universityReady, schlNm]);
 
   return (
     <MainLayout>
       <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
         <PageTitleSection
           title={headerTitle || sampleData.meta?.dashboardTitle}
-          subtitle={headerSubtitle || sampleData.meta?.institutionalDashboardLabel}
+          subtitle={
+            headerSubtitle || sampleData.meta?.institutionalDashboardLabel
+          }
           baseYear={sampleData.meta?.baseYear}
           showSummaryJudgment={showSummaryJudgment}
           summaryJudgmentTitle={summaryJudgmentTitle}
           summaryJudgmentSubtitle={summaryJudgmentSubtitle}
         />
         <StatusChips filters={sampleData.filters} />
-        <KpiBentoGrid
-          largeKpis={largeKpis}
-          smallKpis={smallKpis}
-        />
+        <KpiBentoGrid largeKpis={largeKpis} smallKpis={smallKpis} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <StrengthWeaknessMatrix matrix={matrix} />
           <AdmissionInsights title={insightTitle} insights={dbInsights} />
