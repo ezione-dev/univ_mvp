@@ -8,7 +8,6 @@ import { useEffect, useMemo, useState } from "react";
 import { getThemeDetailGrid, getThemeTextBlocks } from "../../services/api";
 import { useThemeSourceRefs } from "../../hooks/useThemeSourceRefs";
 import { useThemeHeaderContext } from "../../hooks/useThemeHeaderContext";
-import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
 import { useUniversityContext } from "../../hooks/useUniversityContext";
 import { mapDetailGridRowToGovernanceKpiCard } from "../../utils/mapThemeDetailGridToGovernanceKpiCards";
 import { GovernanceKPICards } from "./index";
@@ -21,7 +20,9 @@ export default function GovernanceDashboard() {
   const { meta, filters } = governanceData;
 
   const BASE_YEAR_OPTIONS = [2025, 2024, 2023];
-  const [selectedBaseYear, setSelectedBaseYear] = useState(meta?.baseYear ?? 2025);
+  const [selectedBaseYear, setSelectedBaseYear] = useState(
+    meta?.baseYear ?? 2025,
+  );
 
   const [kpiCards, setKpiCards] = useState([]);
   const [insightsLoading, setInsightsLoading] = useState(true);
@@ -45,17 +46,6 @@ export default function GovernanceDashboard() {
       screenBaseYear: params.screen_base_year,
       schlNm: params.schl_nm,
     });
-
-  const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
-    screenCode: params.screen_code,
-    screenVer: params.screen_ver,
-    screenBaseYear: params.screen_base_year,
-    schlNm: params.schl_nm,
-  });
-
-  const showSummaryJudgment = Boolean(
-    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
-  );
 
   const { refs: sourceRefs } = useThemeSourceRefs({
     screenCode: params.screen_code,
@@ -132,9 +122,6 @@ export default function GovernanceDashboard() {
         baseYear={selectedBaseYear}
         baseYearOptions={BASE_YEAR_OPTIONS}
         onBaseYearChange={setSelectedBaseYear}
-        showSummaryJudgment={showSummaryJudgment}
-        summaryJudgmentTitle={panelTitle}
-        summaryJudgmentSubtitle={panelSubtitle}
       />
 
       <StatusChips filters={filters} />

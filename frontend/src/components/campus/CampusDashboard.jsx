@@ -11,6 +11,7 @@ import { useThemeSourceRefs } from "../../hooks/useThemeSourceRefs";
 import { useThemeChartBlockMeta } from "../../hooks/useThemeChartBlockMeta";
 import { useThemeTextBlockLines } from "../../hooks/useThemeTextBlockLines";
 import { useThemeHeaderContext } from "../../hooks/useThemeHeaderContext";
+import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
 import { useUniversityContext } from "../../hooks/useUniversityContext";
 import {
   mapThemeItemsToCampusConfiguration,
@@ -42,16 +43,10 @@ const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
 const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function CampusDashboard() {
-  const {
-    schlNm,
-    ready: universityReady,
-    statusChips,
-  } = useUniversityContext();
-  const { meta, campusConfiguration, safetyStatus } = campusData;
-  const { schlNm, ready: universityReady } = useUniversityContext();
-  const { meta, filters, campusConfiguration, safetyStatus } = campusData;
+  const { schlNm, ready: universityReady, statusChips } = useUniversityContext();
+  const { meta } = campusData;
   const BASE_YEAR_OPTIONS = [2025, 2024, 2023];
-  const [selectedBaseYear, setSelectedBaseYear] = useState(2025);
+  const [selectedBaseYear, setSelectedBaseYear] = useState(meta?.baseYear ?? 2025);
 
   const [kpiCards, setKpiCards] = useState([]);
 
@@ -72,6 +67,17 @@ export default function CampusDashboard() {
       screenBaseYear: themeParams.screen_base_year,
       schlNm: themeParams.schl_nm,
     });
+
+  const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
+    screenCode: themeParams.screen_code,
+    screenVer: themeParams.screen_ver,
+    screenBaseYear: themeParams.screen_base_year,
+    schlNm: themeParams.schl_nm,
+  });
+
+  const showSummaryJudgment = Boolean(
+    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
+  );
 
   const {
     title: insightTitle,

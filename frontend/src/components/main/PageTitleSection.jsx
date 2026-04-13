@@ -4,11 +4,11 @@ export default function PageTitleSection({
   baseYear,
   baseYearOptions,
   onBaseYearChange,
-  showSummaryJudgment,
-  showSummaryJudgment = false,
+  showSummaryJudgment: _showSummaryJudgment = false,
   summaryJudgmentTitle,
   summaryJudgmentSubtitle,
 }) {
+  const showSummaryJudgment = false;
   const yearOptions = Array.isArray(baseYearOptions) ? baseYearOptions : null;
   const canToggleYear =
     yearOptions &&

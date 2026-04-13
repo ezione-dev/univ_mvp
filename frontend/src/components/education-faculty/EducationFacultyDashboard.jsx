@@ -19,22 +19,17 @@ import {
 } from "../../utils/mapThemeChartItemsToEducationBars";
 import { useThemeTextBlockLines } from "../../hooks/useThemeTextBlockLines";
 import { useThemeHeaderContext } from "../../hooks/useThemeHeaderContext";
+import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
 import { useUniversityContext } from "../../hooks/useUniversityContext";
 
 const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
 const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function EducationFacultyDashboard() {
-  const {
-    schlNm,
-    ready: universityReady,
-    statusChips,
-  } = useUniversityContext();
-  const { pageTitle, pageSubtitle, baseYear } = educationFacultyData;
-  const { schlNm, ready: universityReady } = useUniversityContext();
-  const { pageTitle, pageSubtitle, baseYear, filters } = educationFacultyData;
+  const { schlNm, ready: universityReady, statusChips } = useUniversityContext();
+  const { baseYear } = educationFacultyData;
   const BASE_YEAR_OPTIONS = [2025, 2024, 2023];
-  const [selectedBaseYear, setSelectedBaseYear] = useState(2025);
+  const [selectedBaseYear, setSelectedBaseYear] = useState(baseYear ?? 2025);
 
   const [kpiCards, setKpiCards] = useState([]);
 
@@ -55,6 +50,17 @@ export default function EducationFacultyDashboard() {
       screenBaseYear: themeParams.screen_base_year,
       schlNm: themeParams.schl_nm,
     });
+
+  const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
+    screenCode: themeParams.screen_code,
+    screenVer: themeParams.screen_ver,
+    screenBaseYear: themeParams.screen_base_year,
+    schlNm: themeParams.schl_nm,
+  });
+
+  const showSummaryJudgment = Boolean(
+    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
+  );
 
   useEffect(() => {
     if (!universityReady || !schlNm) return;

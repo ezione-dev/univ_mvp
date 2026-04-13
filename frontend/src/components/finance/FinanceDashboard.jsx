@@ -39,10 +39,10 @@ const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
 const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function FinanceDashboard() {
-  const { schlNm, ready: universityReady } = useUniversityContext();
-  const { meta, filters, tuitionByField, revenueStructure } = financeData;
+  const { schlNm, ready: universityReady, statusChips } = useUniversityContext();
+  const { meta } = financeData;
   const BASE_YEAR_OPTIONS = [2025, 2024, 2023];
-  const [selectedBaseYear, setSelectedBaseYear] = useState(2025);
+  const [selectedBaseYear, setSelectedBaseYear] = useState(meta?.baseYear ?? 2025);
 
   const [kpiCards, setKpiCards] = useState([]);
 
@@ -56,12 +56,13 @@ export default function FinanceDashboard() {
     [schlNm, selectedBaseYear],
   );
 
-  const { title: headerTitle, subtitle: headerSubtitle } = useThemeHeaderContext({
-    screenCode: themeParams.screen_code,
-    screenVer: themeParams.screen_ver,
-    screenBaseYear: themeParams.screen_base_year,
-    schlNm: themeParams.schl_nm,
-  });
+  const { title: headerTitle, subtitle: headerSubtitle } =
+    useThemeHeaderContext({
+      screenCode: themeParams.screen_code,
+      screenVer: themeParams.screen_ver,
+      screenBaseYear: themeParams.screen_base_year,
+      schlNm: themeParams.schl_nm,
+    });
 
   const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
     screenCode: themeParams.screen_code,
@@ -94,8 +95,13 @@ export default function FinanceDashboard() {
     schlNm: themeParams.schl_nm,
   });
 
-  const { chartLeft, chartRight, leftBlockItems, rightBlockItems, chartBlocksStatus } =
-    useThemeChartBlockMeta({
+  const {
+    chartLeft,
+    chartRight,
+    leftBlockItems,
+    rightBlockItems,
+    chartBlocksStatus,
+  } = useThemeChartBlockMeta({
     screenCode: themeParams.screen_code,
     screenVer: themeParams.screen_ver,
     screenBaseYear: themeParams.screen_base_year,
@@ -103,11 +109,9 @@ export default function FinanceDashboard() {
     blockCode: "CHART_BLOCK",
   });
 
-  const tuitionBlockTitle =
-    chartLeft.title?.trim() || "계열별 등록금 수준";
+  const tuitionBlockTitle = chartLeft.title?.trim() || "계열별 등록금 수준";
   const tuitionBlockSubtitle = chartLeft.subtitle?.trim() || "";
-  const revenueBlockTitle =
-    chartRight.title?.trim() || "세입 구조 상위 항목";
+  const revenueBlockTitle = chartRight.title?.trim() || "세입 구조 상위 항목";
   const revenueBlockSubtitle = chartRight.subtitle?.trim() || "";
 
   const tuitionFromDb = useMemo(() => {
@@ -163,7 +167,7 @@ export default function FinanceDashboard() {
         summaryJudgmentSubtitle={panelSubtitle}
       />
 
-      <StatusChips filters={filters} />
+      <StatusChips filters={statusChips} />
       <FinanceKPICards kpiCards={kpiCards} />
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">

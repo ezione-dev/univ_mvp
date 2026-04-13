@@ -17,6 +17,7 @@ import {
 import { useThemeSourceRefs } from "../../hooks/useThemeSourceRefs";
 import { useThemeTextBlockLines } from "../../hooks/useThemeTextBlockLines";
 import { useThemeHeaderContext } from "../../hooks/useThemeHeaderContext";
+import { useThemePanelSummary } from "../../hooks/useThemePanelSummary";
 import { useUniversityContext } from "../../hooks/useUniversityContext";
 import InsightsPanel from "../main/InsightsPanel";
 
@@ -24,16 +25,10 @@ const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
 const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function AdmissionDashboard() {
-  const {
-    schlNm,
-    ready: universityReady,
-    statusChips,
-  } = useUniversityContext();
-  const { pageTitle, pageSubtitle, baseYear } = admissionData;
-  const { schlNm, ready: universityReady } = useUniversityContext();
-  const { pageTitle, pageSubtitle, baseYear, filters } = admissionData;
+  const { schlNm, ready: universityReady, statusChips } = useUniversityContext();
+  const { baseYear } = admissionData;
   const BASE_YEAR_OPTIONS = [2025, 2024, 2023];
-  const [selectedBaseYear, setSelectedBaseYear] = useState(2025);
+  const [selectedBaseYear, setSelectedBaseYear] = useState(baseYear ?? 2025);
 
   const [kpiCards, setKpiCards] = useState([]);
   const [dbEnrollmentRates, setDbEnrollmentRates] = useState([]);
@@ -64,6 +59,17 @@ export default function AdmissionDashboard() {
       screenBaseYear: params.screen_base_year,
       schlNm: params.schl_nm,
     });
+
+  const { title: panelTitle, subtitle: panelSubtitle } = useThemePanelSummary({
+    screenCode: params.screen_code,
+    screenVer: params.screen_ver,
+    screenBaseYear: params.screen_base_year,
+    schlNm: params.schl_nm,
+  });
+
+  const showSummaryJudgment = Boolean(
+    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
+  );
 
   const { title: insightTitle, items: dbInsights } = useThemeTextBlockLines({
     screenCode: params.screen_code,

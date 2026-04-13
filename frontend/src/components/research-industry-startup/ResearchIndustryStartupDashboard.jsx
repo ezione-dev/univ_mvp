@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import researchData from '../../data/research-industry-startup-data.json';
-import PageTitleSection from '../main/PageTitleSection';
-import StatusChips from '../main/StatusChips';
-import InsightsTableLayout from '../main/InsightsTableLayout';
-import InsightsPanel from '../main/InsightsPanel';
+import { useEffect, useMemo, useState } from "react";
+import researchData from "../../data/research-industry-startup-data.json";
+import PageTitleSection from "../main/PageTitleSection";
+import StatusChips from "../main/StatusChips";
+import InsightsTableLayout from "../main/InsightsTableLayout";
+import InsightsPanel from "../main/InsightsPanel";
 import {
   ResearchIndustryStartupKPICards,
   ResearchFundStructureChart,
@@ -24,10 +24,14 @@ const INSIGHT_BLOCK_CODE = "SAMPLE_INSIGHT";
 const INSIGHT_LINE_ROLE = "INSIGHT";
 
 export default function ResearchIndustryStartupDashboard() {
-  const { schlNm, ready: universityReady } = useUniversityContext();
-  const { pageTitle, pageSubtitle, baseYear, filters } = researchData;
+  const {
+    schlNm,
+    ready: universityReady,
+    statusChips,
+  } = useUniversityContext();
+  const { baseYear } = researchData;
   const BASE_YEAR_OPTIONS = [2025, 2024, 2023];
-  const [selectedBaseYear, setSelectedBaseYear] = useState(2025);
+  const [selectedBaseYear, setSelectedBaseYear] = useState(baseYear ?? 2025);
 
   const [kpiCards, setKpiCards] = useState([]);
 
@@ -57,8 +61,7 @@ export default function ResearchIndustryStartupDashboard() {
   });
 
   const showSummaryJudgment = Boolean(
-    (panelTitle && panelTitle.trim()) ||
-    (panelSubtitle && panelSubtitle.trim()),
+    (panelTitle && panelTitle.trim()) || (panelSubtitle && panelSubtitle.trim()),
   );
 
   useEffect(() => {
@@ -135,7 +138,7 @@ export default function ResearchIndustryStartupDashboard() {
         summaryJudgmentSubtitle={panelSubtitle}
       />
 
-      <StatusChips filters={filters} />
+      <StatusChips filters={statusChips} />
       <ResearchIndustryStartupKPICards kpiCards={kpiCards} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -143,9 +146,7 @@ export default function ResearchIndustryStartupDashboard() {
           <ResearchFundStructureChart
             overrideSources={fundSourcesFromDb}
             bannerYear={
-              fundSourcesFromDb.length > 0
-                ? selectedBaseYear
-                : undefined
+              fundSourcesFromDb.length > 0 ? selectedBaseYear : undefined
             }
             title={chartLeft.title}
             subtitle={chartLeft.subtitle}
@@ -160,9 +161,15 @@ export default function ResearchIndustryStartupDashboard() {
 
       <InsightsTableLayout
         insightsComponent={
-          <InsightsPanel title={insightTitle} items={dbInsights} loading={false} />
+          <InsightsPanel
+            title={insightTitle}
+            items={dbInsights}
+            loading={false}
+          />
         }
-        tableComponent={<ResearchIndustryStartupTable tablePreview={sourceRefs} />}
+        tableComponent={
+          <ResearchIndustryStartupTable tablePreview={sourceRefs} />
+        }
       />
     </div>
   );
