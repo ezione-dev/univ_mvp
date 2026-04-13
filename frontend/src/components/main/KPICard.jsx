@@ -35,8 +35,8 @@ function TrendText({ value, status }) {
     ? 'text-tertiary'
     : status === 'negative'
     ? 'text-error'
-    : 'text-slate-600';
-  return <span className={`font-medium ${colorClass}`}>{value}</span>;
+    : 'text-on-surface';
+  return <span className={`text-sm font-semibold tabular-nums ${colorClass}`}>{value}</span>;
 }
 
 export default function KPICard({
@@ -79,38 +79,38 @@ export default function KPICard({
       className="bg-surface-container-lowest p-5 rounded-lg border border-transparent hover:border-outline-variant/15 transition-all"
       style={cardStyle}
     >
-      <div className="flex justify-between items-start mb-2">
-        <span className="text-[0.6875rem] font-semibold text-slate-400 uppercase tracking-wider">
-          {label}
-        </span>
+      <div className={`relative mb-1 ${year ? 'pt-5' : ''}`}>
         {year && (
           <span
-            className={`px-2 py-0.5 text-[10px] font-semibold rounded-full ${accentColorHex ? '' : yearBadgeColor}`}
+            className={`absolute left-0 top-0 z-[1] px-2 py-0.5 text-xs font-semibold leading-none rounded-full ${accentColorHex ? '' : yearBadgeColor}`}
             style={yearBadgeStyle}
           >
             {year}
           </span>
         )}
+        <span className="relative z-0 block text-xs font-semibold text-on-surface-variant uppercase tracking-wide leading-tight break-words break-keep">
+          {label}
+        </span>
       </div>
       <div
-        className={`text-3xl font-semibold mb-3 ${valueColor || ''}`}
+        className={`text-3xl font-semibold tabular-nums mb-3 ${valueColor || ''}`}
         style={accentColorHex ? { color: accentColorHex } : undefined}
       >
         {value}
         {unit && <span className="text-base font-medium ml-0.5">{unit}</span>}
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {isMainDashboard ? (
           <>
-            <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">지역 대비</span>
+            <div className="flex justify-between items-baseline gap-2 text-sm">
+              <span className="text-on-surface-variant font-semibold shrink-0 leading-snug">지역 대비</span>
               <TrendText
                 value={regionalComparison?.value}
                 status={regionalComparison?.status}
               />
             </div>
-            <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">전국 대비</span>
+            <div className="flex justify-between items-baseline gap-2 text-sm">
+              <span className="text-on-surface-variant font-semibold shrink-0 leading-snug">전국 대비</span>
               <TrendText
                 value={nationalComparison?.value}
                 status={nationalComparison?.status}
@@ -119,21 +119,21 @@ export default function KPICard({
           </>
         ) : (
           <>
-            <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">권역평균</span>
-              <span className="font-medium text-slate-600">{regionalAvg}{unit}</span>
+            <div className="flex justify-between items-baseline gap-2 text-sm">
+              <span className="text-on-surface-variant font-semibold shrink-0 leading-snug">권역평균</span>
+              <span className="text-sm font-semibold tabular-nums text-on-surface">{regionalAvg}{unit}</span>
             </div>
-            <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">전국평균</span>
-              <span className="font-medium text-slate-600">{nationalAvg}{unit}</span>
+            <div className="flex justify-between items-baseline gap-2 text-sm">
+              <span className="text-on-surface-variant font-semibold shrink-0 leading-snug">전국평균</span>
+              <span className="text-sm font-semibold tabular-nums text-on-surface">{nationalAvg}{unit}</span>
             </div>
           </>
         )}
       </div>
       {auxLabel && auxText && (
-        <div className="flex justify-between text-[10px] mt-2 pt-2 border-t border-outline-variant/10">
-          <span className="text-slate-400">{auxLabel}</span>
-          <span className="font-medium text-slate-600">{auxText}</span>
+        <div className="flex justify-between items-baseline gap-2 text-sm mt-2 pt-2 border-t border-outline-variant/70">
+          <span className="text-on-surface-variant font-semibold leading-snug">{auxLabel}</span>
+          <span className="font-semibold tabular-nums text-on-surface">{auxText}</span>
         </div>
       )}
     </div>

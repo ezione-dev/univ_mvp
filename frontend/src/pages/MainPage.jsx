@@ -7,14 +7,17 @@ import InsightsPanel from "../components/main/InsightsPanel";
 import RiskStrengthTable from "../components/main/RiskStrengthTable";
 import OverviewDetailGridTable from "../components/main/OverviewDetailGridTable";
 import sampleData from "../data/main_page_samples.json";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   getOverviewKpis,
   getOverviewMatrixPoints,
   getOverviewRiskTable,
   getOverviewDetailGrid,
 } from "../services/api";
-import { useOverviewHeaderContext } from "../hooks/useOverviewHeaderContext";
+import {
+  applySchoolPrefix,
+  useOverviewHeaderContext,
+} from "../hooks/useOverviewHeaderContext";
 import { useOverviewTextBlockLines } from "../hooks/useOverviewTextBlockLines";
 import { useOverviewSummaryJudgmentLabel } from "../hooks/useOverviewPdfReportLabel";
 import { useUniversityContext } from "../hooks/useUniversityContext";
@@ -60,6 +63,12 @@ export default function MainPage() {
     blockCode: "SAMPLE_INSIGHT",
     lineRole: "INSIGHT",
   });
+
+  const pageTitle = useMemo(() => {
+    const raw = (headerTitle || sampleData.meta?.dashboardTitle || "").trim();
+    if (!raw) return "";
+    return applySchoolPrefix(schlNm, raw) || raw;
+  }, [headerTitle, schlNm]);
 
   // 🔁 샘플 fallback을 쓰고 싶으면 아래 3줄을 켜세요.
   // const [matrix, setMatrix] = useState(sampleData.matrix);
@@ -158,7 +167,7 @@ export default function MainPage() {
     <MainLayout>
       <div className="max-w-[1600px] mx-auto px-8 py-6 space-y-8">
         <PageTitleSection
-          title={headerTitle || sampleData.meta?.dashboardTitle}
+          title={pageTitle}
           subtitle={headerSubtitle || sampleData.meta?.institutionalDashboardLabel}
           baseYear={sampleData.meta?.baseYear}
           showSummaryJudgment={showSummaryJudgment}
