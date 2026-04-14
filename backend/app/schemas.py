@@ -6,10 +6,18 @@ class QueryRequest(BaseModel):
     question: str
 
 
+class ChartConfig(BaseModel):
+    type: str  # "line" | "bar" | "pie" | "heatmap" etc.
+    x: Optional[str] = None
+    y: Optional[str] = None
+    title: Optional[str] = None
+
+
 class QueryResponse(BaseModel):
     data: Optional[list[dict[str, Any]]] = None
     sql: Optional[str] = None
     message: Optional[str] = None
+    chart_config: Optional[ChartConfig] = None
 
 
 class SchoolItem(BaseModel):
