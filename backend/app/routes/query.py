@@ -7,7 +7,7 @@ from ..dependencies import require_auth
 router = APIRouter()
 
 
-@router.post("/api/query", response_model=QueryResponse)
+@router.post("/api/query")
 async def query(request: QueryRequest, _current_user: dict = Depends(require_auth)):
     try:
         sql, message, chart_config_raw = await generate_sql(request.question)

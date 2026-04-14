@@ -5,34 +5,70 @@ import { Search } from 'lucide-react';
 
 function QueryPage() {
   const [question, setQuestion] = useState('');
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [candidates, setCandidates] = useState([]);
+  const [bestIndex, setBestIndex] = useState(-1);
+  const [activeTab, setActiveTab] = useState(0);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isRefining, setIsRefining] = useState(false);
   const [error, setError] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!question.trim()) return;
+    if (!question.trim() || isStreaming) return;
 
-    setLoading(true);
+    setIsStreaming(true);
     setError(null);
     setResult(null);
 
-    try {
-      const data = await query(question);
-      setResult(data);
-    } catch (err) {
-      const detail = err.response?.data?.detail;
-      const message =
-        typeof detail === 'string'
-          ? detail
-          : Array.isArray(detail)
-            ? detail.map((d) => d.msg).join('; ')
-            : err.message;
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    await queryStream(
+      question,
+      (candidate) => {
+        setCandidates((prev) => [...prev, candidate]);
+      },
+      (done) => {
+        setBestIndex(done.best_index);
+        setActiveTab(done.best_index >= 0 ? done.best_index : 0);
+        setIsStreaming(false);
+      },
+      (err) => {
+        setError(err.message || '조회 중 오류가 발생했습니다.');
+        setIsStreaming(false);
+      }
+    );
   };
+
+  const handleRefine = async (feedback) => {
+    if (isRefining || isStreaming) return;
+
+    setIsRefining(true);
+    setError(null);
+
+    const previousCandidates = candidates.map((c) => ({
+      sql: c.sql,
+      evaluation: c.evaluation || '',
+    }));
+
+    await refineQuery(
+      currentQuestion,
+      feedback,
+      previousCandidates,
+      (candidate) => {
+        setCandidates((prev) => [...prev, candidate]);
+      },
+      (done) => {
+        setBestIndex(done.best_index >= 0 ? done.best_index : bestIndex);
+        setActiveTab(done.best_index >= 0 ? done.best_index : activeTab);
+        setIsRefining(false);
+      },
+      (err) => {
+        setError(err.message || '재조회 중 오류가 발생했습니다.');
+        setIsRefining(false);
+      }
+    );
+  };
+
+  const hasResults = candidates.length > 0;
 
   return (
     <div className="min-h-screen bg-background">

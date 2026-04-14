@@ -1,9 +1,9 @@
 import logging
-from typing import Any, Optional, Tuple
+from typing import Any, AsyncGenerator, Optional, Tuple
 
 from ..config import settings
 from . import schema as schema_service
-from .chain import create_sql_chain, run_sql_chain, normalize_sql_for_execution
+from .chain import create_sql_chain, run_sql_chain, run_sql_chain_multi, normalize_sql_for_execution
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +67,24 @@ async def generate_sql(question: str) -> tuple[Optional[str], Optional[str], Opt
     except Exception as e:
         logger.error(f"Error generating SQL: {e}")
         raise
+
+
+async def generate_sql_multi(
+    question: str,
+) -> AsyncGenerator[tuple[str, dict], None]:
+    """멀티 후보 SQL 생성 제너레이터.
+
+    run_sql_chain_multi()를 호출하고 (event_type, payload) 튜플을 yield한다.
+
+    Yields:
+        ("candidate", {"index": int, "sql": str, "data": list[dict],
+                       "chart_config": dict|None, "evaluation": str})
+        ("done", {"best_index": int, "reason": str})
+    """
+    logger.info("[generate_sql_multi] 시작: question=%r", question)
+    chain_info = await get_lcel_chain()
+    async for event_type, payload in run_sql_chain_multi(question, chain_info):
+        yield event_type, payload
 
 
 def reset_lcel_chain_cache() -> None:
