@@ -1,5 +1,9 @@
 import { AnimatedPercentBarFill } from "../common/AnimatedPercentBarFill";
 import EmptyState from "../common/EmptyState";
+import {
+  formatBarRatioNumPercent,
+  parseBarRatioDisplayTextPercent,
+} from "../../utils/parseBarRatioDisplayTextPercent";
 
 export default function EnrollmentRateChart({ title, subtitle, enrollmentRates }) {
   const rows = Array.isArray(enrollmentRates) ? enrollmentRates : [];
@@ -25,11 +29,13 @@ export default function EnrollmentRateChart({ title, subtitle, enrollmentRates }
             <div key={index} className="space-y-2">
               <div className="flex justify-between text-xs font-bold mb-1">
                 <span className="text-slate-600">{rate.type}</span>
-                <span className="text-primary">{rate.currentYear}%</span>
+                <span className="text-primary">
+                  {formatBarRatioNumPercent(rate.bar_ratio_num)}
+                </span>
               </div>
               <div className="w-full bg-surface-container h-2 rounded-full overflow-hidden">
                 <AnimatedPercentBarFill
-                  percent={rate.currentYear}
+                  percent={parseBarRatioDisplayTextPercent(rate.bar_ratio_display_text)}
                   className="h-full rounded-full bg-secondary"
                 />
               </div>

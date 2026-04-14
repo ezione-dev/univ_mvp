@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import axios from "axios";
+import api from "../services/api";
 
 export const AuthContext = createContext(null);
 
@@ -11,10 +11,7 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("auth_token"));
 
   const login = useCallback(async (email, password) => {
-    const res = await axios.post(`${API_BASE}/api/auth/login`, {
-      email,
-      password,
-    });
+    const res = await api.post("/api/auth/login", { email, password });
     const { access_token, univ_nm, institution_chips } = res.data;
 
     localStorage.setItem("auth_token", access_token);
