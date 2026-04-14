@@ -130,6 +130,29 @@ def extract_sql_from_content(content: str) -> Optional[str]:
     return None
 
 
+def extract_chart_config_from_tool_calls(response: AIMessage) -> Optional[dict]:
+    """tool_calls에서 chart_config를 추출한다. execute_sql 도구의 chart_config 인자 파싱."""
+    import json as _json
+    if not hasattr(response, "tool_calls") or not response.tool_calls:
+        return None
+    for tc in response.tool_calls:
+        tool_name, args, _ = _parse_tool_call(tc)
+        if tool_name == "execute_sql" and isinstance(args, dict):
+            raw = args.get("chart_config")
+            if not raw:
+                return None
+            if isinstance(raw, dict):
+                return raw
+            if isinstance(raw, str):
+                try:
+                    parsed = _json.loads(raw)
+                    if isinstance(parsed, dict):
+                        return parsed
+                except _json.JSONDecodeError:
+                    pass
+    return None
+
+
 def _get_tool_by_name(name: str, tools: list[BaseTool]) -> Optional[BaseTool]:
     for t in tools:
         if t.name == name:
