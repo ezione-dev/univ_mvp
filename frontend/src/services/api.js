@@ -63,8 +63,8 @@ export const getAdmissionEnrollmentRates = async (params) => {
   return response.data;
 };
 
-// 전형별 최종등록률 차트용 (EnrollmentRateChart)
-// - items: [{ type, currentYear, previousYear? }]
+// 전형별 최종등록률 / 동일 막대 차트용 (EnrollmentRateChart, student-career 등)
+// - items: [{ type, bar_ratio_num(표시%), bar_ratio_display_text(막대 렌더) }]
 export const getAdmissionOpportunityBalance = async (params) => {
   const response = await api.get('/api/admission/opportunity-balance', { params });
   return response.data;
@@ -78,7 +78,7 @@ export const getAdmissionInsights = async (params) => {
 };
 
 // 기회균형 선발 구성 차트용 (OpportunityBalanceChart)
-// - items: [{ category, ratio(막대%=bar_ratio_display_text 파싱만, 실패 시 0), previousRatio?, bar_ratio_display_text }]
+// - items: [{ category, bar_ratio_num(표시%), bar_ratio_display_text(막대 렌더) }]
 export const getOverviewProgressMetrics = async (params) => {
   const response = await api.get('/api/overview/progress-metrics', { params });
   return response.data;
@@ -106,7 +106,7 @@ async function parseSseStream(response, onEvent) {
 
     buffer += decoder.decode(value, { stream: true });
     const parts = buffer.split('\n\n');
-    buffer = parts.pop(); // keep incomplete last part
+    buffer = parts.pop();
 
     for (const part of parts) {
       if (!part.trim()) continue;
@@ -205,3 +205,5 @@ export const refineQuery = async (
     onError?.(err);
   }
 };
+
+export default api;
