@@ -1,5 +1,9 @@
 import { AnimatedPercentBarFill } from "../common/AnimatedPercentBarFill";
 import EmptyState from "../common/EmptyState";
+import {
+  formatBarRatioNumPercent,
+  parseBarRatioDisplayTextPercent,
+} from "../../utils/parseBarRatioDisplayTextPercent";
 
 export default function OpportunityBalanceChart({ title, subtitle, opportunityBalance }) {
   const rows = Array.isArray(opportunityBalance) ? opportunityBalance : [];
@@ -31,17 +35,13 @@ export default function OpportunityBalanceChart({ title, subtitle, opportunityBa
               <span className="text-xs font-bold text-slate-600 w-24">{item.category}</span>
               <div className="flex-1 h-8 bg-surface-container rounded-lg overflow-hidden flex flex-row min-w-0">
                 <AnimatedPercentBarFill
-                  percent={item.ratio}
+                  percent={parseBarRatioDisplayTextPercent(item.bar_ratio_display_text)}
                   className="h-full shrink-0 bg-primary"
                 />
                 <div className="h-full min-w-0 flex-1 bg-secondary opacity-20" />
               </div>
               <span className="text-xs font-bold text-primary min-w-[3rem] text-right">
-                {typeof item.bar_ratio_display_text === "string" && item.bar_ratio_display_text.trim()
-                  ? item.bar_ratio_display_text.trim()
-                  : typeof item.barRatioDisplayText === "string" && item.barRatioDisplayText.trim()
-                    ? item.barRatioDisplayText.trim()
-                    : ""}
+                {formatBarRatioNumPercent(item.bar_ratio_num)}
               </span>
             </div>
           ))}

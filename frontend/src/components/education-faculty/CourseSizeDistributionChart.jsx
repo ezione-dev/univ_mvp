@@ -1,4 +1,4 @@
-import { AnimatedPercentBarFill } from '../common/AnimatedPercentBarFill';
+import ThemeBarRatioFill from '../common/ThemeBarRatioFill';
 import EmptyState from "../common/EmptyState";
 
 export default function CourseSizeDistributionChart({ courseDistribution, title, subtitle }) {
@@ -19,16 +19,16 @@ export default function CourseSizeDistributionChart({ courseDistribution, title,
       </div>
       {rows.length ? (
         <div className="space-y-4">
-          {rows.map(({ range, count, percentage, colorHex }) => (
+          {rows.map(({ range, count, percentage, bar_ratio_display_text, colorHex }) => (
             <div key={range} className="grid grid-cols-[100px_1fr_60px] items-center gap-4">
               <span className="text-[11px] text-slate-500">{range}</span>
-              <div className="h-4 overflow-hidden rounded-sm bg-surface-container-high">
-                <AnimatedPercentBarFill
-                  percent={percentage}
-                  className="h-full shrink-0 bg-tertiary/70"
-                  style={colorHex ? { backgroundColor: colorHex } : undefined}
-                />
-              </div>
+              <ThemeBarRatioFill
+                percent={percentage}
+                barRatioDisplayText={bar_ratio_display_text}
+                trackClassName="bg-surface-container-high"
+                fillClassName="bg-tertiary/70"
+                fillStyle={colorHex ? { backgroundColor: colorHex } : undefined}
+              />
               <span className="text-[11px] font-bold text-right text-on-surface">
                 {Number(count).toLocaleString()}
               </span>

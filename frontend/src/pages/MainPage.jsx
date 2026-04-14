@@ -34,10 +34,6 @@ export default function MainPage() {
   const [largeKpis, setLargeKpis] = useState([]);
   const [smallKpis, setSmallKpis] = useState([]);
 
-  // 🔁 바로 샘플 fallback으로 되돌리고 싶으면 아래 2줄을 켜세요.
-  // const [largeKpis, setLargeKpis] = useState(sampleData.kpis.large);
-  // const [smallKpis, setSmallKpis] = useState(sampleData.kpis.small);
-
   // ✅ API 기반 매트릭스/리스크테이블 (기본: 빈값)
   const [matrix, setMatrix] = useState(null);
   const [riskTable, setRiskTable] = useState([]);
@@ -74,11 +70,6 @@ export default function MainPage() {
     if (!raw) return "";
     return applySchoolPrefix(schlNm, raw) || raw;
   }, [headerTitle, schlNm]);
-
-  // 🔁 샘플 fallback을 쓰고 싶으면 아래 3줄을 켜세요.
-  // const [matrix, setMatrix] = useState(sampleData.matrix);
-  // const [riskTable, setRiskTable] = useState(sampleData.riskTable);
-  // const [riskLegend, setRiskLegend] = useState(sampleData.riskLegend || []);
 
   useEffect(() => {
     if (!universityReady || !schlNm) return;

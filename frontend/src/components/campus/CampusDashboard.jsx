@@ -16,7 +16,8 @@ import {
   mapThemeItemsToCampusConfiguration,
   mapThemeItemsToCampusSafetyStatus,
 } from "../../utils/mapThemeItemsToCampusCharts";
-import { AnimatedPercentBarFill } from "../common/AnimatedPercentBarFill";
+import ThemeBarRatioFill from "../common/ThemeBarRatioFill";
+import { formatBarRatioNumPercent } from "../../utils/parseBarRatioDisplayTextPercent";
 
 const BAR_FILL = {
   primary: "#002c5a",
@@ -208,22 +209,26 @@ export default function CampusDashboard() {
                 <div key={index} className="space-y-2">
                   <div className="flex justify-between text-xs font-bold mb-1">
                     <span className="text-on-surface">{item.item}</span>
-                    <span className="text-primary">
-                      {item.value.toLocaleString()} {item.unit}
-                    </span>
+                    <div className="text-right">
+                      <span className="block text-primary">
+                        {formatBarRatioNumPercent(item.bar_ratio_num)}
+                      </span>
+                      <span className="text-[10px] font-medium text-on-surface-variant">
+                        {item.value.toLocaleString()} {item.unit}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex h-8 w-full overflow-hidden rounded-full bg-surface-container-highest">
-                    <AnimatedPercentBarFill
-                      percent={item.percentage}
-                      className="h-full shrink-0 rounded-full"
-                      style={{
-                        backgroundColor:
-                          item.colorHex ||
-                          BAR_FILL[item.colorToken || item.color] ||
-                          BAR_FILL.primary,
-                      }}
-                    />
-                  </div>
+                  <ThemeBarRatioFill
+                    percent={item.barPercent}
+                    barRatioDisplayText={item.bar_ratio_display_text}
+                    trackClassName="bg-surface-container-highest"
+                    fillStyle={{
+                      backgroundColor:
+                        item.colorHex ||
+                        BAR_FILL[item.colorToken || item.color] ||
+                        BAR_FILL.primary,
+                    }}
+                  />
                 </div>
               ))
             )}

@@ -16,7 +16,8 @@ import {
   mapThemeItemsToFinanceRevenueTop,
   mapThemeItemsToFinanceTuitionBars,
 } from "../../utils/mapThemeItemsToFinanceCharts";
-import { AnimatedPercentBarFill } from "../common/AnimatedPercentBarFill";
+import ThemeBarRatioFill from "../common/ThemeBarRatioFill";
+import { formatBarRatioNumPercent } from "../../utils/parseBarRatioDisplayTextPercent";
 
 const BAR_FILL = {
   primary: "#002c5a",
@@ -199,20 +200,20 @@ export default function FinanceDashboard() {
                 <div key={index} className="space-y-2">
                   <div className="flex justify-between text-xs font-semibold text-on-surface-variant">
                     <span>{item.field}</span>
-                    <span>{item.amount.toLocaleString()}원</span>
+                    <span className="text-primary">
+                      {formatBarRatioNumPercent(item.bar_ratio_num)}
+                    </span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-surface-variant">
-                    <AnimatedPercentBarFill
-                      percent={item.percentage}
-                      className="h-full shrink-0 rounded-full"
-                      style={{
-                        backgroundColor:
-                          item.colorHex ||
-                          BAR_FILL[item.colorToken || item.color] ||
-                          BAR_FILL.primary,
-                      }}
-                    />
-                  </div>
+                  <ThemeBarRatioFill
+                    percent={item.barPercent}
+                    barRatioDisplayText={item.bar_ratio_display_text}
+                    fillStyle={{
+                      backgroundColor:
+                        item.colorHex ||
+                        BAR_FILL[item.colorToken || item.color] ||
+                        BAR_FILL.primary,
+                    }}
+                  />
                 </div>
               ))
             )}
@@ -256,8 +257,15 @@ export default function FinanceDashboard() {
                   }}
                 >
                   <span className="text-sm font-medium">{item.item}</span>
-                  <span className="text-sm font-extrabold text-secondary">
-                    {item.percentage}%
+                  <span className="text-sm font-extrabold text-secondary text-right">
+                    <span className="block">
+                      {formatBarRatioNumPercent(item.bar_ratio_num)}
+                    </span>
+                    {item.bar_ratio_display_text ? (
+                      <span className="mt-0.5 block text-[10px] font-semibold text-on-surface-variant">
+                        {item.bar_ratio_display_text}
+                      </span>
+                    ) : null}
                   </span>
                 </div>
               ))
