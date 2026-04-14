@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any, Optional
+from typing import Any, AsyncGenerator, Optional
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.messages import AIMessage
@@ -304,3 +304,221 @@ async def run_sql_chain(
 
 
 normalize_sql_for_execution = _normalize_sql_for_execution
+
+MAX_CANDIDATES = 3
+
+
+def _null_ratio(data: list[dict]) -> float:
+    """데이터 레코드의 NULL 비율을 계산한다."""
+    if not data:
+        return 1.0
+    total = sum(len(row) for row in data)
+    nulls = sum(1 for row in data for v in row.values() if v is None)
+    return nulls / total if total > 0 else 1.0
+
+
+async def run_sql_chain_multi(
+    question: str, chain_info: dict[str, Any]
+) -> AsyncGenerator[tuple[str, dict], None]:
+    """멀티 후보 SQL 루프.
+
+    최대 MAX_CANDIDATES(3)개의 SQL 후보를 생성하고 각각 DB에서 실행한다.
+    LLM이 결과를 보고 execute_sql을 다시 호출하면 다음 후보를 시도하고,
+    done을 호출하거나 텍스트만 응답하면 종료한다.
+
+    Yields:
+        ("candidate", {"index": int, "sql": str, "data": list[dict],
+                       "chart_config": dict|None, "evaluation": str})
+        ("done", {"best_index": int, "reason": str})
+    """
+    import pandas as pd
+
+    from ..database import fetch_df
+
+    llm_with_tools = chain_info["llm"]
+    tools = chain_info["tools"]
+    system_message = chain_info["prompt"]
+
+    messages = [system_message, HumanMessage(content=question)]
+    candidates: list[dict] = []
+    iteration = 0
+    loop_done = False
+
+    logger.info("[MultiChain] 시작: question=%r", question)
+
+    while not loop_done and iteration < MAX_ITERATIONS and len(candidates) < MAX_CANDIDATES:
+        iteration += 1
+        logger.info(
+            "[MultiChain] iteration=%d candidates=%d/%d",
+            iteration,
+            len(candidates),
+            MAX_CANDIDATES,
+        )
+
+        response = await llm_with_tools.ainvoke(messages)
+        response_msg = (
+            response if isinstance(response, AIMessage) else AIMessage(content=str(response))
+        )
+
+        has_tool_calls = hasattr(response_msg, "tool_calls") and response_msg.tool_calls
+
+        if not has_tool_calls:
+            logger.info(
+                "[MultiChain] iteration=%d 도구 호출 없음(텍스트 응답), 루프 종료",
+                iteration,
+            )
+            messages.append(response_msg)
+            break
+
+        messages.append(response_msg)
+
+        for tc in response_msg.tool_calls:
+            tool_name, arguments, tool_call_id = _parse_tool_call(tc)
+            logger.info(
+                "[MultiChain] iteration=%d tool_call=%r tool_call_id=%r",
+                iteration,
+                tool_name,
+                tool_call_id,
+            )
+
+            if tool_name == "execute_sql":
+                sql = (
+                    arguments.get("sql", "").strip()
+                    if isinstance(arguments, dict)
+                    else ""
+                )
+
+                if not sql:
+                    messages.append(
+                        ToolMessage(
+                            content="Error: SQL이 비어있습니다.",
+                            tool_call_id=tool_call_id,
+                        )
+                    )
+                    break
+
+                sql = _normalize_sql_for_execution(sql)
+
+                try:
+                    df = await fetch_df(sql)
+                    data_records = (
+                        df.where(pd.notnull(df), None).to_dict(orient="records")
+                    )
+
+                    result_summary = f"SQL 실행 결과: {len(df)} 행\n"
+                    cols = df.columns.tolist()
+                    null_cols = [c for c in cols if df[c].isnull().all()]
+                    if null_cols:
+                        result_summary += f"⚠️ 전체 NULL 컬럼: {', '.join(null_cols)}\n"
+                    result_summary += df.head(5).to_string(index=False)
+
+                    messages.append(
+                        ToolMessage(content=result_summary, tool_call_id=tool_call_id)
+                    )
+
+                    candidate_idx = len(candidates)
+                    null_r = _null_ratio(data_records)
+                    candidates.append(
+                        {
+                            "sql": sql,
+                            "data": data_records,
+                            "chart_config": None,
+                            "evaluation": result_summary,
+                            "_null_ratio": null_r,
+                        }
+                    )
+
+                    logger.info(
+                        "[MultiChain] 후보 %d 추가 (rows=%d, null_ratio=%.3f)",
+                        candidate_idx,
+                        len(df),
+                        null_r,
+                    )
+
+                    yield (
+                        "candidate",
+                        {
+                            "index": candidate_idx,
+                            "sql": sql,
+                            "data": data_records,
+                            "chart_config": None,
+                            "evaluation": result_summary,
+                        },
+                    )
+
+                except Exception as e:
+                    error_msg = f"SQL 실행 오류: {e}"
+                    logger.warning("[MultiChain] %s", error_msg)
+                    messages.append(
+                        ToolMessage(content=error_msg, tool_call_id=tool_call_id)
+                    )
+
+                break
+
+            elif tool_name == "done":
+                reason = (
+                    arguments.get("reason", "완료")
+                    if isinstance(arguments, dict)
+                    else str(arguments)
+                )
+                logger.info("[MultiChain] done 도구 호출, 루프 종료. reason=%r", reason)
+                messages.append(
+                    ToolMessage(content=reason, tool_call_id=tool_call_id)
+                )
+                loop_done = True
+                break
+
+            else:
+                tool = _get_tool_by_name(tool_name, tools)
+                if tool:
+                    try:
+                        tool_result = await tool.ainvoke(arguments)
+                        logger.info(
+                            "[MultiChain] iteration=%d 도구=%r 결과 미리보기=%r",
+                            iteration,
+                            tool_name,
+                            str(tool_result)[:200],
+                        )
+                        messages.append(
+                            ToolMessage(
+                                content=str(tool_result), tool_call_id=tool_call_id
+                            )
+                        )
+                    except Exception as e:
+                        logger.error(
+                            "[MultiChain] iteration=%d 도구 실행 오류 %r: %s",
+                            iteration,
+                            tool_name,
+                            e,
+                        )
+                        messages.append(
+                            ToolMessage(
+                                content=f"Error: {e}", tool_call_id=tool_call_id
+                            )
+                        )
+                else:
+                    logger.warning(
+                        "[MultiChain] iteration=%d 알 수 없는 도구: %s",
+                        iteration,
+                        tool_name,
+                    )
+                    messages.append(
+                        ToolMessage(
+                            content=f"Unknown tool: {tool_name}",
+                            tool_call_id=tool_call_id,
+                        )
+                    )
+
+    if not candidates:
+        logger.warning("[MultiChain] 후보 SQL이 없습니다.")
+        yield ("done", {"best_index": -1, "reason": "실행 가능한 SQL 후보가 없습니다."})
+        return
+
+    best_idx = min(range(len(candidates)), key=lambda i: candidates[i]["_null_ratio"])
+    best_null_r = candidates[best_idx]["_null_ratio"]
+    reason = (
+        f"후보 {len(candidates)}개 중 NULL 비율이 가장 낮은 후보 {best_idx}번 선택 "
+        f"(NULL ratio={best_null_r:.3f})"
+    )
+    logger.info("[MultiChain] 최적 후보 선택: %s", reason)
+    yield ("done", {"best_index": best_idx, "reason": reason})
