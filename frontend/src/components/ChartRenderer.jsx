@@ -125,8 +125,8 @@ function ChartRenderer({ data, chartConfig }) {
   }
 
   return (
-    <div style={{ width: '100%', height: '400px' }}>
-      <ReactECharts option={option} style={{ height: '100%' }} />
+    <div style={{ width: '100%', height: '100%' }}>
+      <ReactECharts option={option} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 }
