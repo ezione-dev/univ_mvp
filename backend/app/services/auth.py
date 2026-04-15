@@ -196,3 +196,9 @@ async def verify_and_mark_code_used(email: str, code: str) -> tuple[bool, str]:
         await conn.execute(update_query, email, code)
 
     return True, ""
+
+
+async def get_groups() -> list[dict]:
+    query = "SELECT grp_cd, grp_nm FROM ts_grp_info WHERE del_fg = 'N' ORDER BY grp_id"
+    df = await fetch_df(query, ())
+    return df.to_dict(orient="records") if not df.empty else []

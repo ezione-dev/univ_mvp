@@ -446,3 +446,8 @@ class RegisterResponse(BaseModel):
     token_type: str = "bearer"
     univ_nm: Optional[str] = None
     institution_chips: Optional[InstitutionChips] = None
+
+
+class GroupResponse(BaseModel):
+    grp_cd: str
+    grp_nm: str

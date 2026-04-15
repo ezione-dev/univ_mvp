@@ -10,6 +10,7 @@ from app.services.auth import (
     send_verification_email,
     verify_and_mark_code_used,
     get_user_by_email,
+    get_groups,
 )
 from app.schemas import InstitutionChips
 from app.dependencies import require_auth
@@ -23,6 +24,7 @@ from app.schemas import (
     VerifyCodeResponse,
     RegisterRequest,
     RegisterResponse,
+    GroupResponse,
 )
 
 router = APIRouter()
@@ -146,9 +148,14 @@ async def register(request: RegisterRequest):
 
     hashed_password = get_password_hash(request.password)
 
+    parts = request.phone.split("-")
+    mobile1 = parts[0] if len(parts) > 0 else None
+    mobile2 = parts[1] if len(parts) > 1 else None
+    mobile3 = parts[2] if len(parts) > 2 else None
+
     query = """
-        INSERT INTO ts_user_info (user_id, user_pw, user_nm, univ_cd, mobile_co_cd, dept_nm, grade_nm, pos_nm)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO ts_user_info (user_id, user_pw, user_nm, univ_cd, mobile1, mobile2, mobile3, mobile_co_cd, dept_nm, grade_nm, pos_nm)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING user_cd
     """
     from app.database import fetch_df
@@ -160,6 +167,9 @@ async def register(request: RegisterRequest):
             hashed_password,
             request.name,
             univ_info["univ_cd"],
+            mobile1,
+            mobile2,
+            mobile3,
             request.mobile_co_cd,
             request.dept_nm,
             request.grade_nm,
@@ -182,3 +192,9 @@ async def register(request: RegisterRequest):
         univ_nm=univ_info["univ_nm"],
         institution_chips=InstitutionChips(**chips),
     )
+
+
+@router.get("/groups", response_model=list[GroupResponse])
+async def get_groups_list():
+    groups = await get_groups()
+    return [GroupResponse(**g) for g in groups]

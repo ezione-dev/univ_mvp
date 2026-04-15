@@ -1,28 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-
-const gradeOptions = [
-  '교수',
-  '부교수',
-  '조교수',
-  '전임강사',
-  '연구원',
-  '박사과정',
-  '석사과정',
-];
+import api from '../../services/api';
 
 const step3Schema = z.object({
   dept_nm: z.string().min(1, '부서명을 입력해주세요.'),
-  grade_nm: z.string().min(1, '직급을 선택해주세요.').refine(
-    (val) => gradeOptions.includes(val),
-    { message: '유효한 직급을 선택해주세요.' }
-  ),
+  grade_nm: z.string().min(1, '구분을 선택해주세요.'),
   pos_nm: z.string().optional(),
 });
 
 export default function Step3Form({ initialData, onComplete, onBack, loading }) {
+  const [groups, setGroups] = useState([]);
   const {
     register,
     handleSubmit,
@@ -41,6 +30,18 @@ export default function Step3Form({ initialData, onComplete, onBack, loading }) 
     if (initialData?.grade_nm) register('grade_nm');
     if (initialData?.pos_nm) register('pos_nm');
   }, [initialData, register]);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const res = await api.get('/api/auth/groups');
+        setGroups(res.data);
+      } catch (err) {
+        console.error('Failed to fetch groups:', err);
+      }
+    };
+    fetchGroups();
+  }, []);
 
   const onSubmit = (data) => {
     onComplete(data);
@@ -74,7 +75,7 @@ export default function Step3Form({ initialData, onComplete, onBack, loading }) 
           htmlFor="grade_nm"
           className="block text-[0.75rem] uppercase tracking-wider font-bold text-on-surface-variant px-4 font-login-body"
         >
-          직급
+          구분
         </label>
         <div className="relative">
           <select
@@ -82,10 +83,10 @@ export default function Step3Form({ initialData, onComplete, onBack, loading }) 
             {...register('grade_nm')}
             className="custom-input w-full h-12 px-6 placeholder:text-outline-variant text-on-surface outline-none font-login-body appearance-none bg-transparent"
           >
-            <option value="">직급을 선택하세요</option>
-            {gradeOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
+            <option value="">구분을 선택하세요</option>
+            {groups.map((group) => (
+              <option key={group.grp_cd} value={group.grp_nm}>
+                {group.grp_nm}
               </option>
             ))}
           </select>

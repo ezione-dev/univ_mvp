@@ -104,7 +104,7 @@ export default function SignupPage() {
               <div className="mt-16">
                 {step === 1 && (
                   <Step1Form
-                    initialData={{ email: formData.email, password: formData.password }}
+                    initialData={{ email: formData.email, password: formData.password, verificationCode: formData.verificationCode }}
                     verified={verified}
                     onComplete={handleStep1Complete}
                   />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -39,6 +39,13 @@ export default function Step1Form({
 }) {
   const [verified, setVerified] = useState(verifiedProp || false);
   const [verificationSent, setVerificationSent] = useState(false);
+
+  useEffect(() => {
+    setVerified(verifiedProp || false);
+    if (verifiedProp) {
+      setVerificationSent(true);
+    }
+  }, [verifiedProp]);
   const [sendLoading, setSendLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [sendError, setSendError] = useState("");
@@ -55,9 +62,11 @@ export default function Step1Form({
     resolver: zodResolver(step1Schema),
     defaultValues: {
       email: initialData?.email || "",
-      verificationCode: "",
+      verificationCode: initialData?.verificationCode || "",
       password: initialData?.password || "",
-      confirmation: "",
+      // 뒤로가기 후 재마운트 시 이미 입력된 비밀번호가 있으면 confirmation도 동일하게 초기화
+      // 그래야 verifiedProp=true 상태로 돌아올 때 isFormValid가 true가 됨
+      confirmation: initialData?.password || "",
     },
     mode: "onChange",
   });
