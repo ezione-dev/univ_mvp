@@ -209,3 +209,16 @@ async def insert_grp_user(user_cd: int, grp_id: int) -> None:
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute(query, user_cd, grp_id)
+
+
+async def get_user_roles(user_cd: int) -> list[str]:
+    query = """
+        SELECT g.grp_cd
+        FROM ts_grp_user gu
+        JOIN ts_grp_info g ON gu.grp_id = g.grp_id
+        WHERE gu.user_cd = $1
+    """
+    df = await fetch_df(query, (user_cd,))
+    if df.empty:
+        return []
+    return df["grp_cd"].tolist()

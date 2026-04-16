@@ -251,6 +251,39 @@ class TestGetInstitutionChips:
         assert result["stts"] == "정상"
 
 
+class TestLoginReturnsRoles:
+    @pytest.mark.asyncio
+    async def test_login_returns_user_roles(self, mock_db_fetch_df):
+        from app.services.auth import get_user_roles
+        import pandas as pd
+
+        mock_db_fetch_df.return_value = pd.DataFrame(
+            [{"grp_cd": "STDNT"}, {"grp_cd": "CLUB"}]
+        )
+
+        roles = await get_user_roles(123)
+        assert roles == ["STDNT", "CLUB"]
+
+    @pytest.mark.asyncio
+    async def test_login_returns_empty_roles_for_user_with_no_groups(
+        self, mock_db_fetch_df
+    ):
+        from app.services.auth import get_user_roles
+        import pandas as pd
+
+        mock_db_fetch_df.return_value = pd.DataFrame([])
+
+        roles = await get_user_roles(999)
+        assert roles == []
+
+    @pytest.mark.asyncio
+    async def test_login_response_has_roles_field(self):
+        from app.schemas import LoginResponse
+
+        resp = LoginResponse(access_token="token", roles=["STDNT", "CLUB"])
+        assert resp.roles == ["STDNT", "CLUB"]
+
+
 class TestInstitutionChipsSchema:
     def test_institution_chips_model_exists(self):
         from app.schemas import InstitutionChips

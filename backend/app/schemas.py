@@ -395,6 +395,7 @@ class LoginResponse(BaseModel):
     token_type: str = "bearer"
     univ_nm: Optional[str] = None
     institution_chips: Optional[InstitutionChips] = None
+    roles: Optional[list[str]] = None
 
 
 class OAuth2TokenResponse(BaseModel):

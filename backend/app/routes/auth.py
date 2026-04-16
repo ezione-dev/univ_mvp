@@ -13,6 +13,7 @@ from app.services.auth import (
     get_groups,
     get_grp_id_by_grp_cd,
     insert_grp_user,
+    get_user_roles,
 )
 from app.schemas import InstitutionChips
 from app.dependencies import require_auth
@@ -78,11 +79,13 @@ async def login(request: LoginRequest):
     )
 
     chips = await get_institution_chips(univ_nm)
+    roles = await get_user_roles(user["user_cd"])
 
     return LoginResponse(
         access_token=access_token,
         univ_nm=univ_nm,
         institution_chips=InstitutionChips(**chips),
+        roles=roles,
     )
 
 
