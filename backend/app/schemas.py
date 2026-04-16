@@ -439,6 +439,7 @@ class RegisterRequest(BaseModel):
     grade_nm: str
     pos_nm: str
     verification_code: str
+    role: Optional[str] = "STDNT"
 
 
 class RegisterResponse(BaseModel):
