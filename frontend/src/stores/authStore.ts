@@ -33,7 +33,10 @@ type AuthActions = {
 
 function readStoredToken(): string | null {
   try {
-    return localStorage.getItem(STORAGE_TOKEN_KEY);
+    const raw = localStorage.getItem(STORAGE_TOKEN_KEY);
+    if (!raw) return null;
+    const token = raw.trim();
+    return token.length > 0 ? token : null;
   } catch {
     return null;
   }
