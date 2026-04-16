@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "./useAuth";
 import { getUserMenus } from "../services/api";
 
 export function useUserMenus() {
-  const { user, setMenus } = useAuth();
+  const { user, setUserMenus } = useAuth();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -15,11 +15,11 @@ export function useUserMenus() {
       try {
         const data = await getUserMenus();
         if (!cancelled && data.menu_tree) {
-          setMenus(data.menu_tree);
+          setUserMenus(data.menu_tree);
         }
       } catch {
         if (!cancelled) {
-          setMenus([]);
+          setUserMenus([]);
         }
       } finally {
         if (!cancelled) {
@@ -31,7 +31,7 @@ export function useUserMenus() {
     return () => {
       cancelled = true;
     };
-  }, [user, setMenus]);
+  }, [user, setUserMenus]);
 
   return { loading };
 }

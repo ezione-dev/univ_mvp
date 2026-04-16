@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from './useAuth';
 
 const STATUS_CHIP_LABELS = [
   { key: 'schl_tp', label: '학교종류' },

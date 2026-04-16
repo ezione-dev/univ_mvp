@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 
 const SHOW_CREDENTIAL_RECOVERY_LINK =

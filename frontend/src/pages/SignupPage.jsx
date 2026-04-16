@@ -5,7 +5,7 @@ import Step1Form from '../components/signup/Step1Form';
 import Step2Form from '../components/signup/Step2Form';
 import Step3Form from '../components/signup/Step3Form';
 import api from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 export default function SignupPage() {
   const [step, setStep] = useState(1);

@@ -1,4 +1,4 @@
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import MenuItem from './MenuItem';
 
 export default function LNBMenu() {

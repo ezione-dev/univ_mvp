@@ -26,6 +26,7 @@ type AuthState = {
 
 type AuthActions = {
   login: (email: string, password: string) => Promise<void>;
+  loginWithToken: (token: string) => void;
   logout: () => void;
   setUserMenus: (menus: MenuItem[]) => void;
   hydrateFromStorage: () => void;
@@ -91,6 +92,22 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
     set({
       token: access_token.trim(),
+      user,
+    });
+  },
+
+  loginWithToken(token) {
+    const trimmed = typeof token === 'string' ? token.trim() : '';
+    if (trimmed.length === 0) {
+      throw new Error('loginWithToken failed: missing token');
+    }
+
+    const existingUser = readStoredUser();
+    const user = existingUser ?? {};
+    writeStoredAuth(trimmed, user);
+
+    set({
+      token: trimmed,
       user,
     });
   },
