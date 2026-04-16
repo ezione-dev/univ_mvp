@@ -15,6 +15,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import SupportPage from "./pages/SupportPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import RoleMenuMatrix from "./pages/admin/RoleMenuMatrix";
+import UserRoleManager from "./pages/admin/UserRoleManager";
 
 function App() {
   return (
@@ -111,6 +113,22 @@ function App() {
         element={
           <ProtectedRoute>
             <SupportPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/role-menu"
+        element={
+          <ProtectedRoute>
+            <RoleMenuMatrix />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute>
+            <UserRoleManager />
           </ProtectedRoute>
         }
       />
