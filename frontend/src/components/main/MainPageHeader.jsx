@@ -23,6 +23,7 @@ const BASE_NAV_TABS = [
   { label: '재정/등록금/학생지원', path: '/finance' },
   { label: '캠퍼스/복지/안전', path: '/campus' },
   { label: '거버넌스', path: '/governance' },
+  { label: '통계관리', path: '/stats' },
 ];
 
 const isSysAdm = (user) => user?.roles?.includes('SYS_ADM');
@@ -60,7 +61,7 @@ export default function MainPageHeader() {
             EZ Dashboard
           </Link>
           <nav
-            className="hidden md:flex flex-wrap gap-1.5 items-center max-w-[min(100%,52rem)]"
+            className="hidden md:flex flex-wrap gap-1.5 items-center max-w-[min(100%,68rem)]"
             aria-label="주요 화면"
           >
             {buildNavTabs(user).map((tab) => {

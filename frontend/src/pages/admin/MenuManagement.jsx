@@ -52,11 +52,12 @@ const menuData = [
   },
 ];
 
-function MenuTreeNode({ node, level = 0, selectedId, onSelect }) {
+function MenuTreeNode({ node, level = 0, selectedId, onSelect, searchTerm }) {
   const [expanded, setExpanded] = useState(level === 0);
   const hasChildren = node.children && node.children.length > 0;
   const isSelected = selectedId === node.id;
   const isActive = node.active;
+  const isHighlighted = searchTerm && node.name.toLowerCase().includes(searchTerm.toLowerCase());
 
   return (
     <div className="select-none">
@@ -66,6 +67,8 @@ function MenuTreeNode({ node, level = 0, selectedId, onSelect }) {
             ? 'bg-primary-container/10 text-error'
             : isActive
             ? 'bg-primary-container/10 text-error'
+            : isHighlighted
+            ? 'bg-yellow-100 text-primary font-semibold'
             : 'hover:bg-surface-container text-on-surface'
         }`}
         style={{ paddingLeft: level > 0 ? `${level * 12 + 8}px` : '8px' }}
@@ -103,6 +106,7 @@ function MenuTreeNode({ node, level = 0, selectedId, onSelect }) {
               level={level + 1}
               selectedId={selectedId}
               onSelect={onSelect}
+              searchTerm={searchTerm}
             />
           ))}
         </div>
@@ -111,7 +115,7 @@ function MenuTreeNode({ node, level = 0, selectedId, onSelect }) {
   );
 }
 
-function MenuTree({ selectedId, onSelect }) {
+function MenuTree({ selectedId, onSelect, searchTerm }) {
   return (
     <aside className="w-full lg:w-[350px] shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-5 relative group">
       <div className="absolute inset-0 rounded-lg shadow-[0_8px_32px_rgba(24,28,30,0.04)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -128,9 +132,14 @@ function MenuTree({ selectedId, onSelect }) {
             className="w-full bg-surface-container-low text-sm text-on-surface py-2 pl-9 pr-3 rounded-md border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
             placeholder="메뉴 항목 검색..."
             type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className="bg-secondary text-on-secondary px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-container transition-colors">
+        <button
+          className="bg-secondary text-on-secondary px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-container transition-colors"
+          onClick={() => setSearchTerm(searchTerm)}
+        >
           검색
         </button>
       </div>
@@ -141,6 +150,7 @@ function MenuTree({ selectedId, onSelect }) {
             node={node}
             selectedId={selectedId}
             onSelect={onSelect}
+            searchTerm={searchTerm}
           />
         ))}
       </div>
@@ -258,7 +268,7 @@ function MenuDetailForm({ node, formData, onChange, onSave }) {
               <div className="flex-1 flex gap-2">
                 <input
                   className="flex-1 bg-transparent border-0 border-b border-outline focus:border-primary focus:ring-0 py-1 text-sm font-mono text-on-surface"
-                  readonly
+                  readOnly
                   type="text"
                   value={node.icon}
                 />
@@ -355,6 +365,7 @@ function MenuDetailForm({ node, formData, onChange, onSave }) {
 
 export default function MenuManagement() {
   const [selectedNode, setSelectedNode] = useState(menuData[0].children[1].children[1]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     menuName: '메뉴상세조회',
     menuType: 'SCREEN',
@@ -399,7 +410,7 @@ export default function MenuManagement() {
         description="시스템 탐색 계층 구조를 구성하고, 라우팅 경로를 정의하며, 교육기관 플랫폼 전체의 컴포넌트 가시성을 관리합니다."
       />
       <div className="flex flex-col lg:flex-row gap-8 items-start">
-        <MenuTree selectedId={selectedNode?.id} onSelect={handleNodeSelect} />
+        <MenuTree selectedId={selectedNode?.id} onSelect={handleNodeSelect} searchTerm={searchTerm} />
         <MenuDetailForm
           node={selectedNode}
           formData={formData}
