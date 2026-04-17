@@ -21,6 +21,8 @@ import PublicRoute from "./components/PublicRoute";
 import RoleMenuMatrix from "./pages/admin/RoleMenuMatrix";
 import UserRoleManager from "./pages/admin/UserRoleManager";
 import MenuManagement from "./pages/admin/MenuManagement";
+import GroupManagement from "./pages/admin/GroupManagement";
+import RoleAuthorityMenu from "./pages/admin/RoleAuthorityMenu";
 
 function App() {
   return (
@@ -157,6 +159,8 @@ function App() {
         <Route path="role-menu" element={<RoleMenuMatrix />} />
         <Route path="users" element={<UserRoleManager />} />
         <Route path="menus" element={<MenuManagement />} />
+        <Route path="groups" element={<GroupManagement />} />
+        <Route path="role-authority-menu" element={<RoleAuthorityMenu />} />
       </Route>
       <Route path="/signup" element={<SignupPage />} />
       <Route path="*" element={<NotFoundPage />} />
