@@ -5,7 +5,6 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import MainLayout from "./layouts/MainLayout";
 import DashboardPage from "./pages/DashboardPage";
 import MainPage from "./pages/MainPage";
-import StatsPage from "./pages/StatsPage";
 import AdmissionPage from "./pages/AdmissionPage";
 import StudentCareerPage from "./pages/StudentCareerPage";
 import EducationFacultyPage from "./pages/EducationFacultyPage";
@@ -38,15 +37,9 @@ function App() {
         path="/"
         element={
           <ProtectedRoute>
-            <MainPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/stats"
-        element={
-          <ProtectedRoute>
-            <StatsPage />
+            <MainLayout>
+              <MainPage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
@@ -54,7 +47,9 @@ function App() {
         path="/admission"
         element={
           <ProtectedRoute>
-            <AdmissionPage />
+            <MainLayout>
+              <AdmissionPage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
@@ -62,7 +57,9 @@ function App() {
         path="/student-career"
         element={
           <ProtectedRoute>
-            <StudentCareerPage />
+            <MainLayout>
+              <StudentCareerPage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
@@ -70,7 +67,9 @@ function App() {
         path="/education-faculty"
         element={
           <ProtectedRoute>
-            <EducationFacultyPage />
+            <MainLayout>
+              <EducationFacultyPage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
@@ -78,7 +77,9 @@ function App() {
         path="/research"
         element={
           <ProtectedRoute>
-            <ResearchIndustryStartupPage />
+            <MainLayout>
+              <ResearchIndustryStartupPage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
@@ -86,7 +87,9 @@ function App() {
         path="/finance"
         element={
           <ProtectedRoute>
-            <FinancePage />
+            <MainLayout>
+              <FinancePage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
@@ -94,7 +97,9 @@ function App() {
         path="/governance"
         element={
           <ProtectedRoute>
-            <GovernancePage />
+            <MainLayout>
+              <GovernancePage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
@@ -102,7 +107,19 @@ function App() {
         path="/campus"
         element={
           <ProtectedRoute>
-            <CampusPage />
+            <MainLayout>
+              <CampusPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/support"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <SupportPage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
@@ -128,14 +145,6 @@ function App() {
           }
         />
       )}
-      <Route
-        path="/support"
-        element={
-          <ProtectedRoute>
-            <SupportPage />
-          </ProtectedRoute>
-        }
-      />
       <Route
         path="/admin"
         element={

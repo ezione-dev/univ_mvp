@@ -15,7 +15,6 @@ function profileInitials(user) {
 }
 
 const BASE_NAV_TABS = [
-  { label: '종합현황', path: '/' },
   { label: '입시/충원', path: '/admission' },
   { label: '학생/진로', path: '/student-career' },
   { label: '교육/교원', path: '/education-faculty' },
@@ -23,7 +22,6 @@ const BASE_NAV_TABS = [
   { label: '재정/등록금/학생지원', path: '/finance' },
   { label: '캠퍼스/복지/안전', path: '/campus' },
   { label: '거버넌스', path: '/governance' },
-  { label: '통계관리', path: '/stats' },
 ];
 
 const isSysAdm = (user) => user?.roles?.includes('SYS_ADM');
