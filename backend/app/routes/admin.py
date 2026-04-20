@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from app.dependencies import require_sys_adm
+from app.schemas import AdminGroupItem
 from app.services.admin import (
     search_users,
     update_user_role,
@@ -11,6 +12,10 @@ from app.services.admin import (
     create_menu,
     patch_menu,
     soft_delete_menu,
+    list_groups_admin,
+    create_group,
+    patch_group,
+    soft_delete_group,
 )
 from app.services.menu import treeify
 
@@ -46,6 +51,96 @@ class AdminMenuPatchBody(BaseModel):
     screen_id: Optional[str] = None
     sort_order: Optional[int] = None
     del_fg: Optional[str] = None
+
+
+class AdminGroupCreateBody(BaseModel):
+    grp_cd: str = Field(..., min_length=1)
+    grp_nm: str = Field(..., min_length=1)
+
+
+class AdminGroupPatchBody(BaseModel):
+    grp_cd: Optional[str] = None
+    grp_nm: Optional[str] = None
+    use_yn: Optional[bool] = None
+
+
+@router.get("/admin/groups", response_model=list[AdminGroupItem])
+async def get_admin_groups(_: dict = Depends(require_sys_adm)):
+    rows = await list_groups_admin()
+    return [AdminGroupItem(**r) for r in rows]
+
+
+@router.post("/admin/groups", status_code=status.HTTP_201_CREATED)
+async def post_admin_group(
+    body: AdminGroupCreateBody,
+    _: dict = Depends(require_sys_adm),
+):
+    try:
+        grp_id = await create_group(body.grp_cd, body.grp_nm)
+    except ValueError as e:
+        if str(e) == "duplicate_grp_cd":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="이미 사용 중인 그룹코드입니다.",
+            ) from e
+        raise
+    return {"grp_id": grp_id}
+
+
+@router.patch("/admin/groups/{grp_id}")
+async def patch_admin_group(
+    grp_id: int,
+    body: AdminGroupPatchBody,
+    _: dict = Depends(require_sys_adm),
+):
+    data = body.model_dump(exclude_unset=True)
+    if not data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No fields to update",
+        )
+    use_yn = data.pop("use_yn", None)
+    del_fg = "N" if use_yn is True else ("Y" if use_yn is False else None)
+    try:
+        await patch_group(
+            grp_id,
+            grp_cd=data.get("grp_cd"),
+            grp_nm=data.get("grp_nm"),
+            del_fg=del_fg,
+        )
+    except ValueError as e:
+        if str(e) == "duplicate_grp_cd":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="이미 사용 중인 그룹코드입니다.",
+            ) from e
+        if str(e) == "invalid_del_fg":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid del_fg",
+            ) from e
+        raise
+    except LookupError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Group not found",
+        )
+    return {"ok": True}
+
+
+@router.delete("/admin/groups/{grp_id}")
+async def delete_admin_group(
+    grp_id: int,
+    _: dict = Depends(require_sys_adm),
+):
+    try:
+        await soft_delete_group(grp_id)
+    except LookupError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Group not found",
+        )
+    return {"ok": True}
 
 
 @router.get("/admin/menus/tree")

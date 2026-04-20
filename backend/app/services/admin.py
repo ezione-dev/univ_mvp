@@ -154,3 +154,90 @@ async def toggle_role_menu(menu_id: int, grp_id: int, enabled: bool) -> None:
                 grp_id,
                 menu_id,
             )
+
+
+async def list_groups_admin() -> list[dict]:
+    query = """
+        SELECT grp_id, grp_cd, grp_nm, reg_dt, del_fg
+        FROM ts_grp_info
+        ORDER BY grp_id
+    """
+    df = await fetch_df(query, ())
+    if df.empty:
+        return []
+    return df.to_dict(orient="records")
+
+
+async def _active_grp_cd_exists(grp_cd: str, exclude_grp_id: Optional[int] = None) -> bool:
+    if exclude_grp_id is None:
+        query = "SELECT 1 FROM ts_grp_info WHERE del_fg = 'N' AND grp_cd = $1"
+        params: tuple[Any, ...] = (grp_cd.strip(),)
+    else:
+        query = "SELECT 1 FROM ts_grp_info WHERE del_fg = 'N' AND grp_cd = $1 AND grp_id <> $2"
+        params = (grp_cd.strip(), exclude_grp_id)
+    df = await fetch_df(query, params)
+    return not df.empty
+
+
+async def create_group(grp_cd: str, grp_nm: str) -> int:
+    cd = grp_cd.strip()
+    nm = grp_nm.strip()
+    if await _active_grp_cd_exists(cd):
+        raise ValueError("duplicate_grp_cd")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            INSERT INTO ts_grp_info (grp_cd, grp_nm, del_fg)
+            VALUES ($1, $2, 'N')
+            RETURNING grp_id
+            """,
+            cd,
+            nm,
+        )
+        return int(row["grp_id"])
+
+
+async def patch_group(
+    grp_id: int,
+    grp_cd: Optional[str] = None,
+    grp_nm: Optional[str] = None,
+    del_fg: Optional[str] = None,
+) -> None:
+    fields: list[str] = []
+    values: list[Any] = []
+    idx = 1
+
+    def add(field: str, val: Any):
+        nonlocal idx
+        fields.append(f"{field} = ${idx}")
+        values.append(val)
+        idx += 1
+
+    if grp_cd is not None:
+        cd = grp_cd.strip()
+        if await _active_grp_cd_exists(cd, exclude_grp_id=grp_id):
+            raise ValueError("duplicate_grp_cd")
+        add("grp_cd", cd)
+    if grp_nm is not None:
+        add("grp_nm", str(grp_nm).strip())
+    if del_fg is not None:
+        fg = str(del_fg).strip().upper()
+        if fg not in ("Y", "N"):
+            raise ValueError("invalid_del_fg")
+        add("del_fg", fg)
+
+    if not fields:
+        return
+
+    values.append(grp_id)
+    query = f"UPDATE ts_grp_info SET {', '.join(fields)} WHERE grp_id = ${idx}"
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        result = str(await conn.execute(query, *values))
+        if result.strip() == "UPDATE 0":
+            raise LookupError("group_not_found")
+
+
+async def soft_delete_group(grp_id: int) -> None:
+    await patch_group(grp_id, del_fg="Y")

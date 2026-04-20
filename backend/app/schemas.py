@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 from typing import Any, Optional
 
@@ -455,3 +457,13 @@ class GroupResponse(BaseModel):
     grp_id: int
     grp_cd: str
     grp_nm: str
+
+
+class AdminGroupItem(BaseModel):
+    """SYS_ADM: ts_grp_info 전체 행(삭제 포함)."""
+
+    grp_id: int
+    grp_cd: str
+    grp_nm: str
+    reg_dt: datetime
+    del_fg: str

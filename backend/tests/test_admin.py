@@ -91,6 +91,44 @@ class TestGetAllMenus:
             assert result == []
 
 
+class TestListGroupsAdmin:
+    @pytest.mark.asyncio
+    async def test_list_groups_admin_returns_rows(self):
+        from app.services.admin import list_groups_admin
+
+        with patch("app.services.admin.fetch_df", new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = pd.DataFrame(
+                [
+                    {
+                        "grp_id": 1,
+                        "grp_cd": "STDNT",
+                        "grp_nm": "학생",
+                        "reg_dt": pd.Timestamp("2026-01-01"),
+                        "del_fg": "N",
+                    }
+                ]
+            )
+            result = await list_groups_admin()
+            assert len(result) == 1
+            assert result[0]["grp_cd"] == "STDNT"
+
+
+class TestCreateGroup:
+    @pytest.mark.asyncio
+    async def test_create_group_inserts(self):
+        from app.services.admin import create_group
+
+        with patch("app.services.admin._active_grp_cd_exists", new_callable=AsyncMock) as dup:
+            dup.return_value = False
+            pool_mock = MagicMock()
+            conn_mock = AsyncMock()
+            conn_mock.fetchrow = AsyncMock(return_value={"grp_id": 42})
+            pool_mock.acquire.return_value.__aenter__.return_value = conn_mock
+            with patch("app.services.admin.get_pool", return_value=pool_mock):
+                gid = await create_group(" NEW ", "이름 ")
+                assert gid == 42
+
+
 class TestToggleRoleMenu:
     @pytest.mark.asyncio
     async def test_toggle_role_menu_enable(self):
@@ -191,6 +229,58 @@ class TestCreateMenu:
         with patch("app.services.admin.get_pool", return_value=pool_mock):
             mid = await create_menu(menu_cd="T1", menu_nm="테스트")
             assert mid == 99
+
+
+class TestAdminGroupsRoute:
+    @pytest.mark.asyncio
+    async def test_admin_groups_forbidden_without_sys_adm(self):
+        from fastapi.testclient import TestClient
+        from app.main import app
+        from app.services.auth import create_access_token
+
+        client = TestClient(app)
+        token = create_access_token(
+            data={"sub": "1", "univ_nm": "Test Univ", "roles": ["EMP"]}
+        )
+        response = client.get(
+            "/api/admin/groups",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == 403
+
+    @pytest.mark.asyncio
+    async def test_admin_groups_ok_with_sys_adm(self):
+        from fastapi.testclient import TestClient
+        from app.main import app
+        from app.services.auth import create_access_token
+        from unittest.mock import patch, AsyncMock
+        import pandas as pd
+
+        client = TestClient(app)
+        token = create_access_token(
+            data={"sub": "1", "univ_nm": "Test Univ", "roles": ["SYS_ADM"]}
+        )
+
+        with patch("app.services.admin.fetch_df", new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = pd.DataFrame(
+                [
+                    {
+                        "grp_id": 1,
+                        "grp_cd": "STDNT",
+                        "grp_nm": "학생",
+                        "reg_dt": pd.Timestamp("2026-01-01"),
+                        "del_fg": "N",
+                    }
+                ]
+            )
+            response = client.get(
+                "/api/admin/groups",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body) == 1
+        assert body[0]["grp_cd"] == "STDNT"
 
 
 class TestAdminMenuTreeRoute:
