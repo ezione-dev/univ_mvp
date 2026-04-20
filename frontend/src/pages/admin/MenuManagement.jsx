@@ -64,9 +64,9 @@ function MenuTreeNode({ node, level = 0, selectedId, onSelect, searchTerm }) {
               ? "opacity-40"
               : isDisabled
                 ? "opacity-70"
-              : isHighlighted
-                ? "bg-yellow-100 text-primary font-semibold"
-                : "hover:bg-surface-container text-on-surface"
+                : isHighlighted
+                  ? "bg-yellow-100 text-primary font-semibold"
+                  : "hover:bg-surface-container text-on-surface"
         }`}
         style={{ paddingLeft: level > 0 ? `${level * 12 + 8}px` : "8px" }}
         onClick={() => onSelect(node)}
@@ -127,7 +127,7 @@ function MenuTree({
   loading,
 }) {
   return (
-    <aside className="w-full lg:w-[350px] shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-5 relative group">
+    <aside className="w-full lg:w-[350px] shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-5 relative group h-full min-h-0">
       <div className="absolute inset-0 rounded-lg shadow-[0_8px_32px_rgba(24,28,30,0.04)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       <div className="flex justify-between items-center mb-2">
         <h2 className="font-headline font-semibold text-lg text-primary">
@@ -165,7 +165,7 @@ function MenuTree({
           검색
         </button>
       </div>
-      <div className="overflow-y-auto no-scrollbar max-h-[600px] -mx-2 px-2 flex flex-col gap-1 text-sm mt-2">
+      <div className="overflow-y-auto no-scrollbar flex-1 min-h-0 -mx-2 px-2 flex flex-col gap-1 text-sm mt-2">
         {loading ? (
           <p className="text-on-surface-variant text-sm py-4">불러오는 중…</p>
         ) : roots.length === 0 ? (
@@ -208,7 +208,7 @@ function MenuDetailForm({
 }) {
   if (!node) {
     return (
-      <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)]">
+      <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)] min-h-0">
         <div className="h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-primary to-primary-container" />
         <div className="p-8 flex items-center justify-center h-full">
           <p className="text-on-surface-variant">왼쪽에서 메뉴를 선택하세요</p>
@@ -223,9 +223,9 @@ function MenuDetailForm({
   const isUseYnDirty = savedEnabled !== isEnabled;
 
   return (
-    <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)]">
+    <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)] min-h-0">
       <div className="h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-primary to-primary-container" />
-      <div className="p-8 flex flex-col gap-6 h-full overflow-y-auto">
+      <div className="p-8 flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto">
         <div className="flex justify-between items-start mb-2">
           <div>
             <span className="font-label text-xs tracking-wider text-error uppercase mb-1 block">
@@ -452,7 +452,7 @@ function MenuDetailForm({
               onClick={onDelete}
               disabled={saving}
             >
-              삭제 (soft)
+              삭제
             </button>
             <button
               type="button"
@@ -665,7 +665,7 @@ export default function MenuManagement() {
   };
 
   return (
-    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
+    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8 h-full min-h-0">
       <PageHeader
         title="메뉴 관리"
         description="시스템 탐색 계층 구조를 구성하고, 라우팅 경로를 정의하며, 교육기관 플랫폼 전체의 컴포넌트 가시성을 관리합니다."
@@ -675,7 +675,7 @@ export default function MenuManagement() {
           {error}
         </div>
       )}
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
+      <div className="flex flex-col lg:flex-row gap-8 items-stretch flex-1 min-h-0">
         <MenuTree
           roots={displayRoots}
           selectedId={selectedNode?.menu_id}

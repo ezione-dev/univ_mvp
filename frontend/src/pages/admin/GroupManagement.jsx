@@ -31,14 +31,18 @@ function formatRegDate(iso) {
 }
 
 function mapGroupFromApi(row) {
+  const isDeleted = String(row.del_fg ?? 'N').toUpperCase() === 'Y';
+  const useYn = String(row.use_yn ?? 'Y').toUpperCase() !== 'N';
   return {
     id: Number(row.grp_id),
     grp_code: row.grp_cd,
     grp_nm: row.grp_nm,
     description: row.description ?? '',
     reg_date: formatRegDate(row.reg_dt),
-    use_yn: row.del_fg === 'N',
+    use_yn: isDeleted ? false : useYn,
     reg_dt: row.reg_dt,
+    del_fg: row.del_fg,
+    use_yn_raw: row.use_yn,
   };
 }
 
@@ -177,7 +181,7 @@ function GroupDetailForm({ group, isCreating, formData, onChange, onSave, onDele
           <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-lg">
             <div>
               <p className="text-sm font-medium text-on-surface">사용 여부</p>
-              <p className="text-xs text-outline-variant">비활성 시 del_fg = Y (가입 시 그룹 목록에서 제외)</p>
+              <p className="text-xs text-outline-variant">비활성 시 use_yn = N (삭제는 del_fg = Y)</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input

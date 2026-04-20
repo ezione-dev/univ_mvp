@@ -173,7 +173,7 @@ async def toggle_role_menu(menu_id: int, grp_id: int, enabled: bool) -> None:
 
 async def list_groups_admin() -> list[dict]:
     query = """
-        SELECT grp_id, grp_cd, grp_nm, reg_dt, del_fg, description
+        SELECT grp_id, grp_cd, grp_nm, reg_dt, use_yn, del_fg, description
         FROM ts_grp_info
         ORDER BY grp_id
     """
@@ -215,8 +215,8 @@ async def create_group(
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
             """
-            INSERT INTO ts_grp_info (grp_cd, grp_nm, del_fg, description)
-            VALUES ($1, $2, 'N', $3)
+            INSERT INTO ts_grp_info (grp_cd, grp_nm, use_yn, del_fg, description)
+            VALUES ($1, $2, 'Y', 'N', $3)
             RETURNING grp_id
             """,
             cd,
@@ -230,6 +230,7 @@ async def patch_group(
     grp_id: int,
     grp_cd: Optional[str] = None,
     grp_nm: Optional[str] = None,
+    use_yn: Optional[str] = None,
     del_fg: Optional[str] = None,
     description: Any = _PATCH_UNSET,
 ) -> None:
@@ -250,6 +251,11 @@ async def patch_group(
         add("grp_cd", cd)
     if grp_nm is not None:
         add("grp_nm", str(grp_nm).strip())
+    if use_yn is not None:
+        yn = str(use_yn).strip().upper()
+        if yn not in ("Y", "N"):
+            raise ValueError("invalid_use_yn")
+        add("use_yn", yn)
     if del_fg is not None:
         fg = str(del_fg).strip().upper()
         if fg not in ("Y", "N"):

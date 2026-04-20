@@ -104,7 +104,7 @@ async def patch_admin_group(
             detail="No fields to update",
         )
     use_yn = data.pop("use_yn", None)
-    del_fg = "N" if use_yn is True else ("Y" if use_yn is False else None)
+    use_yn_db = "Y" if use_yn is True else ("N" if use_yn is False else None)
 
     desc_kw: Any = _PATCH_UNSET
     if "description" in data:
@@ -119,7 +119,7 @@ async def patch_admin_group(
             grp_id,
             grp_cd=data.get("grp_cd"),
             grp_nm=data.get("grp_nm"),
-            del_fg=del_fg,
+            use_yn=use_yn_db,
             description=desc_kw,
         )
     except ValueError as e:
@@ -127,6 +127,11 @@ async def patch_admin_group(
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="이미 사용 중인 그룹코드입니다.",
+            ) from e
+        if str(e) == "invalid_use_yn":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid use_yn",
             ) from e
         if str(e) == "invalid_del_fg":
             raise HTTPException(

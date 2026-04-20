@@ -467,5 +467,6 @@ class AdminGroupItem(BaseModel):
     grp_cd: str
     grp_nm: str
     reg_dt: datetime
+    use_yn: Optional[str] = None
     del_fg: str
     description: Optional[str] = None
