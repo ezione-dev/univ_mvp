@@ -188,14 +188,14 @@ function RoleUserManagement() {
         }
       />
 
-      <div className="flex gap-6 items-start">
-        <div className="w-72 shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-4">
+      <div className="flex gap-6 items-stretch">
+        <div className="w-72 shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-4 shadow-[0_8px_32px_rgba(24,28,30,0.04)] min-h-[600px]">
           <div>
             <h3 className="font-headline font-semibold text-lg text-primary mb-3">
               {viewMode === 'USER' ? '사용자 목록' : '권한 그룹'}
             </h3>
           </div>
-          <div className="overflow-y-auto no-scrollbar max-h-[500px] flex flex-col gap-1">
+          <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col gap-1">
             {leftPanelData.map((item, index) => {
               const id = viewMode === 'USER' ? item.user_cd : item.grp_id;
               const displayName = viewMode === 'USER' ? item.user_nm : item.grp_nm;

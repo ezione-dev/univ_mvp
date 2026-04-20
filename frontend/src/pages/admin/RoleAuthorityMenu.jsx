@@ -213,8 +213,8 @@ function RoleAuthorityMenu() {
         </div>
       ) : null}
 
-      <div className="flex gap-6 items-start">
-        <div className="w-72 shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-4">
+      <div className="flex gap-6 items-stretch">
+        <div className="w-72 shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-4 shadow-[0_8px_32px_rgba(24,28,30,0.04)] min-h-[600px]">
           <div>
             <h3 className="font-headline font-semibold text-lg text-primary mb-3">권한 그룹</h3>
             <div className="relative mb-3">
@@ -222,7 +222,7 @@ function RoleAuthorityMenu() {
                 search
               </span>
               <input
-                className="w-full bg-surface-container-low text-sm text-on-surface py-2 pl-9 pr-3 rounded-md border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
+                className="w-full bg-surface-container-low text-sm text-on-surface py-2.5 pl-9 pr-3 rounded-md border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
                 placeholder="검색..."
                 type="text"
                 value={roleSearchTerm}
@@ -230,7 +230,7 @@ function RoleAuthorityMenu() {
               />
             </div>
           </div>
-          <div className="overflow-y-auto no-scrollbar max-h-[500px] flex flex-col gap-1">
+          <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col gap-1">
             {filteredRoles.map((role, index) => (
               <div
                 key={role.grp_id}
@@ -357,7 +357,7 @@ function RoleAuthorityMenu() {
                 search
               </span>
               <input
-                className="w-full bg-surface-container-low text-sm text-on-surface py-2 pl-9 pr-3 rounded-md border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
+                className="w-full bg-surface-container-low text-sm text-on-surface py-2.5 pl-9 pr-3 rounded-md border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
                 placeholder="검색..."
                 type="text"
                 value={menuSearchTerm}

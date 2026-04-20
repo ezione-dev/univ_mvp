@@ -154,7 +154,7 @@ export default function UserManagement() {
 
   if (!paginatedUsers.length && users.length === 0) {
     return (
-      <div className="px-10 pb-12 max-w-7xl mx-auto flex flex-col gap-8">
+      <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
         <PageHeader title="사용자 관리" description="시스템 사용자 목록 및 상세 정보를 관리합니다." />
         <div className="flex items-center justify-center h-64 text-on-surface-variant">로딩 중...</div>
       </div>
@@ -162,9 +162,9 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="px-10 pb-12 max-w-7xl mx-auto flex flex-col gap-8">
+    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
       <PageHeader title="사용자 관리" description="시스템 사용자 목록 및 상세 정보를 관리합니다." />
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 flex flex-col gap-6">
           <div className="bg-surface-container-lowest rounded-lg p-6 relative z-10 shadow-[0_8px_32px_rgba(24,28,30,0.04)]">
             <h2 className="text-lg font-headline font-semibold text-primary mb-4">사용자 검색</h2>
@@ -181,7 +181,7 @@ export default function UserManagement() {
                 />
               </div>
               <button
-                className="bg-primary-container text-on-primary-container px-4 py-2 rounded-md text-sm font-medium hover:bg-primary hover:text-white transition-colors"
+                className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md text-sm font-medium hover:bg-primary hover:text-white transition-colors"
                 onClick={loadUsers}
               >
                 검색
@@ -194,9 +194,9 @@ export default function UserManagement() {
               <table className="w-full text-left text-sm whitespace-nowrap">
                 <thead className="bg-surface-container-highest text-on-surface-variant font-medium">
                   <tr>
-                    <th className="px-6 py-4 font-semibold w-16">No</th>
-                    <th className="px-6 py-4 font-semibold">ID (Email)</th>
-                    <th className="px-6 py-4 font-semibold">Name</th>
+                    <th className="px-4 py-3 font-semibold w-16">No</th>
+                    <th className="px-4 py-3 font-semibold">ID (Email)</th>
+                    <th className="px-4 py-3 font-semibold">Name</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/10 text-on-surface">
@@ -209,9 +209,9 @@ export default function UserManagement() {
                         className={`hover:bg-surface-container-low/50 transition-colors cursor-pointer relative ${isSelected ? 'bg-secondary-fixed/30' : ''}`}
                         onClick={() => handleRowClick(user, idx)}
                       >
-                        <td className="px-6 py-4">{globalIdx + 1}</td>
-                        <td className={`px-6 py-4 font-medium ${isSelected ? 'text-secondary' : ''}`}>{user.user_id}</td>
-                        <td className="px-6 py-4">{user.user_nm}</td>
+                        <td className="px-4 py-3">{globalIdx + 1}</td>
+                        <td className={`px-4 py-3 font-medium ${isSelected ? 'text-secondary' : ''}`}>{user.user_id}</td>
+                        <td className="px-4 py-3">{user.user_nm}</td>
                         {isSelected && <td className="absolute left-0 top-0 bottom-0 w-1 bg-secondary" />}
                       </tr>
                     );
@@ -258,23 +258,23 @@ export default function UserManagement() {
               </div>
             ) : (
               <>
-                <div className="flex justify-between items-center mb-8 border-b border-outline-variant/10 pb-4">
+                <div className="flex justify-between items-center mb-6 border-b border-outline-variant/10 pb-4">
                   <h2 className="text-xl font-headline font-bold text-primary">사용자 상세 정보</h2>
                   <div className="flex gap-3">
                     <button
-                      className="px-4 py-2 rounded-md text-sm font-medium text-tertiary hover:bg-tertiary-container hover:text-on-tertiary-container transition-colors"
+                      className="px-6 py-2.5 rounded-md text-sm font-medium text-tertiary border border-tertiary/30 hover:bg-tertiary-container hover:text-on-tertiary-container transition-colors"
                       onClick={() => setShowResetPasswordConfirm(true)}
                     >
                       비밀번호 초기화
                     </button>
                     <button
-                      className="px-4 py-2 rounded-md text-sm font-medium text-error hover:bg-error-container hover:text-on-error-container transition-colors"
+                      className="px-6 py-2.5 rounded-md text-sm font-medium text-error border border-error/30 hover:bg-error-container hover:text-on-error-container transition-colors"
                       onClick={() => setShowDeleteConfirm(true)}
                     >
                       삭제
                     </button>
                     <button
-                      className="px-4 py-2 rounded-md text-sm font-medium bg-primary-container text-on-primary-container hover:bg-primary hover:text-white transition-colors"
+                      className="px-6 py-2.5 rounded-md text-sm font-medium bg-primary text-on-primary hover:bg-primary-container transition-colors"
                       onClick={handleSave}
                     >
                       저장

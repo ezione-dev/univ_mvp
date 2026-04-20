@@ -57,7 +57,7 @@ export default function AdminTable({
           search
         </span>
         <input
-          className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-surface-container-low text-sm text-on-surface border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
+          className="w-full pl-10 pr-4 py-2.5 rounded-t-md bg-surface-container-low text-sm text-on-surface border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
           placeholder={searchPlaceholder}
           type="text"
           value={localSearch}
