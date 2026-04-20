@@ -47,7 +47,8 @@ function MenuTreeNode({ node, level = 0, selectedId, onSelect, searchTerm }) {
   const hasChildren = node.children && node.children.length > 0;
   const mid = node.menu_id;
   const isSelected = selectedId === mid;
-  const isInactive = node.del_fg === "Y";
+  const isDeleted = node.del_fg === "Y";
+  const isDisabled = String(node.use_yn ?? "Y").toUpperCase() === "N";
   const isHighlighted =
     searchTerm &&
     (node.menu_nm || "").toLowerCase().includes(searchTerm.toLowerCase());
@@ -59,11 +60,13 @@ function MenuTreeNode({ node, level = 0, selectedId, onSelect, searchTerm }) {
         className={`flex items-center gap-2 py-2 px-2 rounded-md cursor-pointer transition-colors ${
           isSelected
             ? "bg-primary-container/10 text-error"
-            : isInactive
-              ? "opacity-50"
-              : isHighlighted
-                ? "bg-yellow-100 text-primary font-semibold"
-                : "hover:bg-surface-container text-on-surface"
+            : isDeleted
+              ? "opacity-40"
+              : isDisabled
+                ? "opacity-70"
+                : isHighlighted
+                  ? "bg-yellow-100 text-primary font-semibold"
+                  : "hover:bg-surface-container text-on-surface"
         }`}
         style={{ paddingLeft: level > 0 ? `${level * 12 + 8}px` : "8px" }}
         onClick={() => onSelect(node)}
@@ -89,9 +92,11 @@ function MenuTreeNode({ node, level = 0, selectedId, onSelect, searchTerm }) {
         >
           {node.menu_nm}
         </span>
-        {isInactive && (
+        {isDeleted ? (
           <span className="text-[10px] uppercase text-outline ml-1">del</span>
-        )}
+        ) : isDisabled ? (
+          <span className="text-[10px] uppercase text-outline ml-1">off</span>
+        ) : null}
       </div>
       {hasChildren && expanded && (
         <div className="flex flex-col ml-6 pl-2 border-l border-outline-variant/30 gap-1">
@@ -122,7 +127,7 @@ function MenuTree({
   loading,
 }) {
   return (
-    <aside className="w-full lg:w-[350px] shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-5 relative group">
+    <aside className="w-full lg:w-[350px] shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-5 relative group h-full min-h-0">
       <div className="absolute inset-0 rounded-lg shadow-[0_8px_32px_rgba(24,28,30,0.04)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       <div className="flex justify-between items-center mb-2">
         <h2 className="font-headline font-semibold text-lg text-primary">
@@ -160,7 +165,7 @@ function MenuTree({
           검색
         </button>
       </div>
-      <div className="overflow-y-auto no-scrollbar max-h-[600px] -mx-2 px-2 flex flex-col gap-1 text-sm mt-2">
+      <div className="overflow-y-auto no-scrollbar flex-1 min-h-0 -mx-2 px-2 flex flex-col gap-1 text-sm mt-2">
         {loading ? (
           <p className="text-on-surface-variant text-sm py-4">불러오는 중…</p>
         ) : roots.length === 0 ? (
@@ -203,7 +208,7 @@ function MenuDetailForm({
 }) {
   if (!node) {
     return (
-      <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)]">
+      <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)] min-h-0">
         <div className="h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-primary to-primary-container" />
         <div className="p-8 flex items-center justify-center h-full">
           <p className="text-on-surface-variant">왼쪽에서 메뉴를 선택하세요</p>
@@ -212,12 +217,15 @@ function MenuDetailForm({
     );
   }
 
-  const active = node.del_fg !== "Y";
+  const isDeleted = node.del_fg === "Y";
+  const savedEnabled = String(node.use_yn ?? "Y").toUpperCase() !== "N";
+  const isEnabled = Boolean(formData.useYn);
+  const isUseYnDirty = savedEnabled !== isEnabled;
 
   return (
-    <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)]">
+    <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)] min-h-0">
       <div className="h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-primary to-primary-container" />
-      <div className="p-8 flex flex-col gap-6 h-full overflow-y-auto">
+      <div className="p-8 flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto">
         <div className="flex justify-between items-start mb-2">
           <div>
             <span className="font-label text-xs tracking-wider text-error uppercase mb-1 block">
@@ -273,15 +281,15 @@ function MenuDetailForm({
             </h3>
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
-                active
-                  ? "bg-tertiary-fixed text-on-tertiary-fixed"
-                  : "bg-surface-container text-outline"
+                isDeleted
+                  ? "bg-surface-container text-outline"
+                  : "bg-tertiary-fixed text-on-tertiary-fixed"
               }`}
             >
               <span className="material-symbols-outlined text-[14px]">
-                {active ? "check_circle" : "block"}
+                {isDeleted ? "block" : "check_circle"}
               </span>
-              {active ? "ACTIVE" : "DELETED"}
+              {isDeleted ? "DELETED" : "ACTIVE"}
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -386,10 +394,10 @@ function MenuDetailForm({
             <div className="flex items-center gap-4">
               <div>
                 <div className="text-sm font-medium text-on-surface">
-                  사용여부 (del_fg)
+                  사용여부 (use_yn)
                 </div>
                 <div className="text-xs text-on-surface-variant">
-                  N=사용, Y=삭제(숨김)
+                  Y=사용, N=미사용 (목록에는 모두 표시)
                 </div>
               </div>
               <button
@@ -408,6 +416,25 @@ function MenuDetailForm({
                 />
               </button>
             </div>
+            <div className="flex items-center gap-3">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
+                  isEnabled
+                    ? "bg-tertiary-fixed text-on-tertiary-fixed"
+                    : "bg-surface-container text-outline"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[14px]">
+                  {isEnabled ? "toggle_on" : "toggle_off"}
+                </span>
+                {isEnabled ? "ENABLED" : "DISABLED"}
+              </span>
+              {isUseYnDirty && (
+                <span className="text-xs text-on-surface-variant">
+                  (미저장)
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-on-surface-variant">
@@ -425,7 +452,7 @@ function MenuDetailForm({
               onClick={onDelete}
               disabled={saving}
             >
-              삭제 (soft)
+              삭제
             </button>
             <button
               type="button"
@@ -477,7 +504,7 @@ function nodeToForm(node) {
       node.parent_menu_id === "0"
         ? ""
         : String(node.parent_menu_id),
-    useYn: node.del_fg !== "Y",
+    useYn: String(node.use_yn ?? "Y").toUpperCase() !== "N",
   };
 }
 
@@ -562,7 +589,7 @@ export default function MenuManagement() {
           formData.parentMenuId.trim() === ""
             ? null
             : formData.parentMenuId.trim(),
-        del_fg: formData.useYn ? "N" : "Y",
+        use_yn: formData.useYn ? "Y" : "N",
       });
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
@@ -579,7 +606,7 @@ export default function MenuManagement() {
     if (!selectedNode) return;
     if (
       !window.confirm(
-        `메뉴 "${selectedNode.menu_nm}" 을(를) 비활성화(del_fg=Y)할까요?`,
+        `메뉴 "${selectedNode.menu_nm}" 을(를) 삭제(del_fg=Y)할까요?`,
       )
     )
       return;
@@ -638,7 +665,7 @@ export default function MenuManagement() {
   };
 
   return (
-    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
+    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8 h-full min-h-0">
       <PageHeader
         title="메뉴 관리"
         description="시스템 탐색 계층 구조를 구성하고, 라우팅 경로를 정의하며, 교육기관 플랫폼 전체의 컴포넌트 가시성을 관리합니다."
@@ -648,7 +675,7 @@ export default function MenuManagement() {
           {error}
         </div>
       )}
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
+      <div className="flex flex-col lg:flex-row gap-8 items-stretch flex-1 min-h-0">
         <MenuTree
           roots={displayRoots}
           selectedId={selectedNode?.menu_id}
