@@ -357,6 +357,8 @@ function MenuDetailForm({
               <input
                 className="border-0 border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 bg-transparent text-on-surface font-mono text-sm"
                 type="number"
+                min="1"
+                max="4"
                 value={formData.menuLevel}
                 onChange={(e) =>
                   onChange({ ...formData, menuLevel: e.target.value })
@@ -573,6 +575,11 @@ export default function MenuManagement() {
     if (!selectedNode) return;
     if (!formData.menuCd?.trim() || !formData.menuName?.trim()) {
       alert("메뉴코드와 메뉴명은 필수입니다.");
+      return;
+    }
+    const lvl = parseOptionalInt(formData.menuLevel);
+    if (lvl !== null && (lvl < 1 || lvl > 4)) {
+      alert("메뉴 레벨은 1~4 사이여야 합니다.");
       return;
     }
     try {
