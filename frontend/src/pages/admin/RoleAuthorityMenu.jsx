@@ -23,6 +23,8 @@ function RoleAuthorityMenu() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
+  const isActiveYn = (v) => String(v ?? 'Y').toUpperCase() !== 'N';
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -33,9 +35,11 @@ function RoleAuthorityMenu() {
           getAdminMenuTree(),
           getAdminRoleMenuMap(),
         ]);
-        setRoles(Array.isArray(roleRows) ? roleRows : []);
+        const roleList = Array.isArray(roleRows) ? roleRows : [];
+        setRoles(roleList.filter((r) => isActiveYn(r?.use_yn)));
         const flat = menuTreeData?.menus_flat;
-        setAllMenus(Array.isArray(flat) ? flat : []);
+        const menuList = Array.isArray(flat) ? flat : [];
+        setAllMenus(menuList.filter((m) => isActiveYn(m?.use_yn)));
         const m = roleMenuMapData?.menu_role_ids ?? {};
         setMenuRoleIdsMap(typeof m === 'object' && m ? m : {});
       } catch (e) {
