@@ -127,7 +127,8 @@ function RoleUserManagement() {
     }
   };
 
-  const isDirty = JSON.stringify(assignedIds.sort()) !== JSON.stringify(initialAssignedIds.sort());
+  const isDirty =
+    JSON.stringify([...assignedIds].sort()) !== JSON.stringify([...initialAssignedIds].sort());
 
   if (loading) {
     return (
