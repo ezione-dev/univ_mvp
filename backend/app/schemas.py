@@ -457,6 +457,7 @@ class GroupResponse(BaseModel):
     grp_id: int
     grp_cd: str
     grp_nm: str
+    description: Optional[str] = None
 
 
 class AdminGroupItem(BaseModel):
@@ -467,3 +468,4 @@ class AdminGroupItem(BaseModel):
     grp_nm: str
     reg_dt: datetime
     del_fg: str
+    description: Optional[str] = None

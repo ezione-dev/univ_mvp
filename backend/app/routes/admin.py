@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -16,6 +16,7 @@ from app.services.admin import (
     create_group,
     patch_group,
     soft_delete_group,
+    _PATCH_UNSET,
 )
 from app.services.menu import treeify
 
@@ -56,11 +57,13 @@ class AdminMenuPatchBody(BaseModel):
 class AdminGroupCreateBody(BaseModel):
     grp_cd: str = Field(..., min_length=1)
     grp_nm: str = Field(..., min_length=1)
+    description: Optional[str] = None
 
 
 class AdminGroupPatchBody(BaseModel):
     grp_cd: Optional[str] = None
     grp_nm: Optional[str] = None
+    description: Optional[str] = None
     use_yn: Optional[bool] = None
 
 
@@ -76,7 +79,7 @@ async def post_admin_group(
     _: dict = Depends(require_sys_adm),
 ):
     try:
-        grp_id = await create_group(body.grp_cd, body.grp_nm)
+        grp_id = await create_group(body.grp_cd, body.grp_nm, body.description)
     except ValueError as e:
         if str(e) == "duplicate_grp_cd":
             raise HTTPException(
@@ -101,12 +104,22 @@ async def patch_admin_group(
         )
     use_yn = data.pop("use_yn", None)
     del_fg = "N" if use_yn is True else ("Y" if use_yn is False else None)
+
+    desc_kw: Any = _PATCH_UNSET
+    if "description" in data:
+        raw = data.pop("description")
+        if raw is None or (isinstance(raw, str) and not str(raw).strip()):
+            desc_kw = None
+        else:
+            desc_kw = str(raw).strip()
+
     try:
         await patch_group(
             grp_id,
             grp_cd=data.get("grp_cd"),
             grp_nm=data.get("grp_nm"),
             del_fg=del_fg,
+            description=desc_kw,
         )
     except ValueError as e:
         if str(e) == "duplicate_grp_cd":

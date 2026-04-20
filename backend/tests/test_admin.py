@@ -105,6 +105,7 @@ class TestListGroupsAdmin:
                         "grp_nm": "학생",
                         "reg_dt": pd.Timestamp("2026-01-01"),
                         "del_fg": "N",
+                        "description": "학생 역할",
                     }
                 ]
             )
@@ -270,6 +271,7 @@ class TestAdminGroupsRoute:
                         "grp_nm": "학생",
                         "reg_dt": pd.Timestamp("2026-01-01"),
                         "del_fg": "N",
+                        "description": None,
                     }
                 ]
             )

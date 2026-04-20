@@ -1,8 +1,11 @@
+import math
 from typing import Any, Optional
 
 import pandas as pd
 from app.database import fetch_df, get_pool
 from app.services.menu import _sanitize_menu_record
+
+_PATCH_UNSET = object()
 
 
 async def search_users(search: str, limit: int = 50) -> list[dict]:
@@ -158,14 +161,19 @@ async def toggle_role_menu(menu_id: int, grp_id: int, enabled: bool) -> None:
 
 async def list_groups_admin() -> list[dict]:
     query = """
-        SELECT grp_id, grp_cd, grp_nm, reg_dt, del_fg
+        SELECT grp_id, grp_cd, grp_nm, reg_dt, del_fg, description
         FROM ts_grp_info
         ORDER BY grp_id
     """
     df = await fetch_df(query, ())
     if df.empty:
         return []
-    return df.to_dict(orient="records")
+    rows = df.to_dict(orient="records")
+    for r in rows:
+        v = r.get("description")
+        if isinstance(v, float) and math.isnan(v):
+            r["description"] = None
+    return rows
 
 
 async def _active_grp_cd_exists(grp_cd: str, exclude_grp_id: Optional[int] = None) -> bool:
@@ -179,21 +187,29 @@ async def _active_grp_cd_exists(grp_cd: str, exclude_grp_id: Optional[int] = Non
     return not df.empty
 
 
-async def create_group(grp_cd: str, grp_nm: str) -> int:
+async def create_group(
+    grp_cd: str,
+    grp_nm: str,
+    description: Optional[str] = None,
+) -> int:
     cd = grp_cd.strip()
     nm = grp_nm.strip()
+    desc = None
+    if description is not None and str(description).strip():
+        desc = str(description).strip()
     if await _active_grp_cd_exists(cd):
         raise ValueError("duplicate_grp_cd")
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
             """
-            INSERT INTO ts_grp_info (grp_cd, grp_nm, del_fg)
-            VALUES ($1, $2, 'N')
+            INSERT INTO ts_grp_info (grp_cd, grp_nm, del_fg, description)
+            VALUES ($1, $2, 'N', $3)
             RETURNING grp_id
             """,
             cd,
             nm,
+            desc,
         )
         return int(row["grp_id"])
 
@@ -203,6 +219,7 @@ async def patch_group(
     grp_cd: Optional[str] = None,
     grp_nm: Optional[str] = None,
     del_fg: Optional[str] = None,
+    description: Any = _PATCH_UNSET,
 ) -> None:
     fields: list[str] = []
     values: list[Any] = []
@@ -226,6 +243,11 @@ async def patch_group(
         if fg not in ("Y", "N"):
             raise ValueError("invalid_del_fg")
         add("del_fg", fg)
+    if description is not _PATCH_UNSET:
+        if description is None or (isinstance(description, str) and not str(description).strip()):
+            add("description", None)
+        else:
+            add("description", str(description).strip())
 
     if not fields:
         return

@@ -11,6 +11,16 @@ import {
 const listColumns = [
   { key: 'grp_code', label: '그룹코드', sortable: true },
   { key: 'grp_nm', label: '그룹명', sortable: true },
+  {
+    key: 'description',
+    label: '설명',
+    sortable: false,
+    render: (val) => (
+      <span className="line-clamp-2 text-on-surface-variant max-w-[200px] inline-block align-top" title={val || ''}>
+        {val || '—'}
+      </span>
+    ),
+  },
 ];
 
 function formatRegDate(iso) {
@@ -25,6 +35,7 @@ function mapGroupFromApi(row) {
     id: Number(row.grp_id),
     grp_code: row.grp_cd,
     grp_nm: row.grp_nm,
+    description: row.description ?? '',
     reg_date: formatRegDate(row.reg_dt),
     use_yn: row.del_fg === 'N',
     reg_dt: row.reg_dt,
@@ -153,6 +164,16 @@ function GroupDetailForm({ group, isCreating, formData, onChange, onSave, onDele
               />
             </div>
           </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-on-surface-variant">설명 (description)</label>
+            <textarea
+              className="w-full px-4 py-3 rounded-lg bg-surface-container-low text-base text-on-surface resize-none border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all"
+              rows={3}
+              value={formData.description ?? ''}
+              onChange={(e) => onChange({ ...formData, description: e.target.value })}
+              placeholder="그룹 용도·권한 범위 등 상세 설명"
+            />
+          </div>
           <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-lg">
             <div>
               <p className="text-sm font-medium text-on-surface">사용 여부</p>
@@ -240,6 +261,7 @@ export default function GroupManagement() {
       id: null,
       grp_code: '',
       grp_nm: '',
+      description: '',
       reg_date: '-',
       use_yn: true,
       reg_dt: null,
@@ -264,6 +286,7 @@ export default function GroupManagement() {
         const { grp_id } = await createAdminGroup({
           grp_cd: formData.grp_code.trim(),
           grp_nm: formData.grp_nm.trim(),
+          description: formData.description?.trim() || null,
         });
         const mapped = await loadGroups();
         const created = mapped.find((g) => g.id === Number(grp_id));
@@ -276,6 +299,7 @@ export default function GroupManagement() {
         await patchAdminGroup(selectedGroup.id, {
           grp_cd: formData.grp_code.trim(),
           grp_nm: formData.grp_nm.trim(),
+          description: formData.description?.trim() || null,
           use_yn: formData.use_yn,
         });
         const mapped = await loadGroups();
@@ -313,7 +337,7 @@ export default function GroupManagement() {
     <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
       <PageHeader
         title="권한 그룹 관리"
-        description="시스템 권한 그룹(ts_grp_info)을 조회·등록·수정·논리삭제합니다. SYS_ADM 권한이 필요합니다."
+        description="시스템 권한 그룹을 생성하고, 권한 범위를 설정하며, 사용자별 접근 권한을 관리합니다."
       />
       {loadError && (
         <div className="rounded-lg border border-error/40 bg-error-container/30 text-on-error-container px-4 py-3 text-sm">
