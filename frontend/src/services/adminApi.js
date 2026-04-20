@@ -51,6 +51,11 @@ export const toggleRoleMenu = async (menuId, roleId, enabled) => {
   return response.data;
 };
 
+export const getAdminRoleMenuMap = async () => {
+  const response = await api.get('/api/admin/role-menu-map');
+  return response.data;
+};
+
 /** SYS_ADM 전용: 메뉴 트리 + 플랫 목록 */
 export const getAdminMenuTree = async () => {
   const response = await api.get('/api/admin/menus/tree');

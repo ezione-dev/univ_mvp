@@ -9,6 +9,7 @@ from app.services.admin import (
     update_user_role,
     toggle_role_menu,
     get_all_menus,
+    get_role_menu_map,
     create_menu,
     patch_menu,
     soft_delete_menu,
@@ -241,3 +242,14 @@ async def patch_role_menu(
 ):
     await toggle_role_menu(body.menu_id, body.role_id, body.enabled)
     return {"ok": True}
+
+
+@router.get("/admin/role-menu-map")
+async def get_admin_role_menu_map(_: dict = Depends(require_sys_adm)):
+    """
+    SYS_ADM: 메뉴별로 어떤 권한그룹(grp_id)이 매핑돼 있는지 조회.
+    Response: { "menu_role_ids": { "<menu_id>": [<grp_id>, ...], ... } }
+    """
+    menu_role_ids = await get_role_menu_map()
+    # JSON object keys must be strings; keep frontend parsing simple.
+    return {"menu_role_ids": {str(k): v for k, v in menu_role_ids.items()}}

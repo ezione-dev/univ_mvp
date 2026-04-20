@@ -171,6 +171,35 @@ async def toggle_role_menu(menu_id: int, grp_id: int, enabled: bool) -> None:
             )
 
 
+async def get_role_menu_map() -> dict[int, list[int]]:
+    """
+    Returns {menu_id: [grp_id, ...]} for SYS_ADM screens.
+    """
+    query = """
+        SELECT menu_id, ARRAY_AGG(grp_id ORDER BY grp_id) AS role_ids
+        FROM ts_grp_menu
+        GROUP BY menu_id
+    """
+    df = await fetch_df(query, ())
+    if df.empty:
+        return {}
+    out: dict[int, list[int]] = {}
+    for row in df.to_dict(orient="records"):
+        try:
+            menu_id = int(row.get("menu_id"))
+        except (TypeError, ValueError):
+            continue
+        role_ids = row.get("role_ids") or []
+        # asyncpg returns list already; normalize to int list defensively
+        cleaned: list[int] = []
+        for rid in role_ids:
+            try:
+                cleaned.append(int(rid))
+            except (TypeError, ValueError):
+                continue
+        out[menu_id] = cleaned
+    return out
+
 async def list_groups_admin() -> list[dict]:
     query = """
         SELECT grp_id, grp_cd, grp_nm, reg_dt, use_yn, del_fg, description
