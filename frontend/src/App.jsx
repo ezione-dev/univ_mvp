@@ -25,6 +25,7 @@ import GroupManagement from "./pages/admin/GroupManagement";
 import RoleAuthorityMenu from "./pages/admin/RoleAuthorityMenu";
 import RoleUserManagement from "./pages/admin/RoleUserManagement";
 import UserManagement from "./pages/admin/UserManagement";
+import ChartGallery from "./pages/admin/ChartGallery";
 
 function App() {
   return (
@@ -150,6 +151,7 @@ function App() {
         <Route path="groups" element={<GroupManagement />} />
         <Route path="role-authority-menu" element={<RoleAuthorityMenu />} />
         <Route path="role-users" element={<RoleUserManagement />} />
+        <Route path="chart-gallery" element={<ChartGallery />} />
       </Route>
       <Route path="/signup" element={<SignupPage />} />
       <Route path="*" element={<NotFoundPage />} />
