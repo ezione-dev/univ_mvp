@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RequireSysAdmRoute from "./components/RequireSysAdmRoute";
-import DashboardLayout from "./layouts/DashboardLayout";
 import MainLayout from "./layouts/MainLayout";
 import DashboardPage from "./pages/DashboardPage";
 import MainPage from "./pages/MainPage";
@@ -19,7 +18,6 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import PublicRoute from "./components/PublicRoute";
 import RoleMenuMatrix from "./pages/admin/RoleMenuMatrix";
-import UserRoleManager from "./pages/admin/UserRoleManager";
 import MenuManagement from "./pages/admin/MenuManagement";
 import GroupManagement from "./pages/admin/GroupManagement";
 import RoleAuthorityMenu from "./pages/admin/RoleAuthorityMenu";
@@ -144,7 +142,6 @@ function App() {
           </RequireSysAdmRoute>
         }
       >
-        <Route index element={<MenuManagement />} />
         <Route path="role-menu" element={<RoleMenuMatrix />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="menus" element={<MenuManagement />} />
