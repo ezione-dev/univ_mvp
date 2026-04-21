@@ -255,7 +255,7 @@ function buildNightingaleRoseOption(data: any, config: UniversalChartProps['conf
 }
 
 function buildScatterOption(data: any, config: UniversalChartProps['config']) {
-  const scatterData = data.values || data.data || [];
+  const scatterData = Array.isArray(data) ? data : (data.values || data.data || []);
 
   return {
     ...COMMON_THEME,
@@ -281,7 +281,8 @@ function buildScatterOption(data: any, config: UniversalChartProps['config']) {
 }
 
 function buildBubbleOption(data: any, config: UniversalChartProps['config']) {
-  const bubbleData = (data.values || data.data || []).map((d: number[]) => [d[0], d[1], d[2] || Math.random() * 50 + 10]);
+  const rawData = Array.isArray(data) ? data : (data.values || data.data || []);
+  const bubbleData = rawData.map((d: number[]) => [d[0], d[1], d[2] || Math.random() * 50 + 10]);
 
   return {
     ...COMMON_THEME,
@@ -347,7 +348,11 @@ function buildHeatmapOption(data: any, config: UniversalChartProps['config']) {
 }
 
 function buildCalendarHeatmapOption(data: any, config: UniversalChartProps['config']) {
-  const calendarData = data.values || data.data || [];
+  const calendarData = Array.isArray(data) ? data : (data.values || data.data || []);
+
+  const maxValue = calendarData.length > 0
+    ? Math.max(...calendarData.map((d: any) => d[1] || 0))
+    : 100;
 
   return {
     ...COMMON_THEME,
@@ -369,7 +374,7 @@ function buildCalendarHeatmapOption(data: any, config: UniversalChartProps['conf
       top: 10,
       left: 'center',
       min: 0,
-      max: Math.max(...calendarData.map((d: any) => d[1] || 0)),
+      max: maxValue,
       inRange: { color: ['#ebedf0', '#9ec8e5', '#4a96c6', '#d94e5d'] },
     },
     series: [{
