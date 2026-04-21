@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import PageHeader from "../../components/common/PageHeader";
+import AdminSearchBar from "../../components/common/AdminSearchBar";
+import { ADMIN_PAGE_CONTAINER_CLASS } from "../../constants/adminLayout";
 import {
   getAdminMenuTree,
   createAdminMenu,
@@ -127,8 +129,7 @@ function MenuTree({
   loading,
 }) {
   return (
-    <aside className="w-full lg:w-[350px] shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-5 relative group h-full min-h-0">
-      <div className="absolute inset-0 rounded-lg shadow-[0_8px_32px_rgba(24,28,30,0.04)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+    <aside className="w-full lg:w-[350px] shrink-0 bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-5 relative min-h-[600px] shadow-[0_8px_32px_rgba(24,28,30,0.04)]">
       <div className="flex justify-between items-center mb-2">
         <h2 className="font-headline font-semibold text-lg text-primary">
           시스템 계층 구조
@@ -144,27 +145,12 @@ function MenuTree({
           </span>
         </button>
       </div>
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">
-            search
-          </span>
-          <input
-            className="w-full bg-surface-container-low text-sm text-on-surface py-2 pl-9 pr-3 rounded-md border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
-            placeholder="메뉴 항목 검색..."
-            type="text"
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-        </div>
-        <button
-          type="button"
-          className="bg-secondary text-on-secondary px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-container transition-colors"
-          onClick={() => onSearchChange(searchTerm)}
-        >
-          검색
-        </button>
-      </div>
+      <AdminSearchBar
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
+        placeholder="메뉴 항목 검색..."
+        showSubmitButton={false}
+      />
       <div className="overflow-y-auto no-scrollbar flex-1 min-h-0 -mx-2 px-2 flex flex-col gap-1 text-sm mt-2">
         {loading ? (
           <p className="text-on-surface-variant text-sm py-4">불러오는 중…</p>
@@ -208,7 +194,7 @@ function MenuDetailForm({
 }) {
   if (!node) {
     return (
-      <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)] min-h-0">
+      <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.04)] min-h-[600px]">
         <div className="h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-primary to-primary-container" />
         <div className="p-8 flex items-center justify-center h-full">
           <p className="text-on-surface-variant">왼쪽에서 메뉴를 선택하세요</p>
@@ -223,7 +209,7 @@ function MenuDetailForm({
   const isUseYnDirty = savedEnabled !== isEnabled;
 
   return (
-    <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.02)] min-h-0">
+    <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.04)] min-h-0">
       <div className="h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-primary to-primary-container" />
       <div className="p-8 flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto">
         <div className="flex justify-between items-start mb-2">
@@ -275,8 +261,8 @@ function MenuDetailForm({
           </div>
         </div>
         <div className="border border-outline-variant/50 rounded-xl p-6 flex flex-col gap-8 bg-surface-container-lowest shadow-sm">
-          <div className="flex justify-between items-center border-b border-outline-variant/30 pb-4">
-            <h3 className="text-xl font-headline font-semibold text-primary">
+          <div className="flex justify-between items-center border-b border-outline-variant/10 pb-4">
+            <h3 className="text-lg font-headline font-semibold text-primary">
               Node Configuration
             </h3>
             <span
@@ -292,9 +278,9 @@ function MenuDetailForm({
               {isDeleted ? "DELETED" : "ACTIVE"}
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-on-surface-variant">
+              <label className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 메뉴코드 (menu_cd)
               </label>
               <input
@@ -307,7 +293,7 @@ function MenuDetailForm({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-on-surface-variant">
+              <label className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 메뉴명 (menu_nm)
               </label>
               <input
@@ -320,9 +306,9 @@ function MenuDetailForm({
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-on-surface-variant">
+              <label className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 상위 메뉴 ID (parent_menu_id)
               </label>
               <input
@@ -336,7 +322,7 @@ function MenuDetailForm({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-on-surface-variant">
+              <label className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 정렬 (sort_order)
               </label>
               <input
@@ -349,9 +335,9 @@ function MenuDetailForm({
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-on-surface-variant">
+              <label className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
                 레벨 (menu_level)
               </label>
               <input
@@ -445,7 +431,7 @@ function MenuDetailForm({
               저장되지 않습니다. 문서 `docs/admin-menu-management.md` 참고.
             </p>
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/30 mt-2">
+          <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/10 mt-2">
             <button
               type="button"
               className="px-6 py-2.5 rounded-md border border-error/50 text-error font-medium hover:bg-error/5 transition-colors text-sm"
@@ -665,7 +651,7 @@ export default function MenuManagement() {
   };
 
   return (
-    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8 h-full min-h-0">
+    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader
         title="메뉴 관리"
         description="시스템 탐색 계층 구조를 구성하고, 라우팅 경로를 정의하며, 교육기관 플랫폼 전체의 컴포넌트 가시성을 관리합니다."
@@ -675,7 +661,7 @@ export default function MenuManagement() {
           {error}
         </div>
       )}
-      <div className="flex flex-col lg:flex-row gap-8 items-stretch flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row gap-6 min-h-[600px]">
         <MenuTree
           roots={displayRoots}
           selectedId={selectedNode?.menu_id}
