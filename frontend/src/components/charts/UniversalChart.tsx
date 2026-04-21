@@ -114,7 +114,7 @@ function buildAreaOption(data: any, config: UniversalChartProps['config']) {
   });
 }
 
-function buildStackedBarOption(data: any, config: UniversalChartProps['config']) {
+function buildStackedColumnOption(data: any, config: UniversalChartProps['config']) {
   const categories = data.categories || data.xAxis?.data || [];
   const series = data.series || [];
 
@@ -140,6 +140,36 @@ function buildStackedBarOption(data: any, config: UniversalChartProps['config'])
       name: s.name || `Series ${i + 1}`,
       stack: 'total',
       itemStyle: { borderRadius: [0, 0, 0, 0] },
+    })),
+  };
+}
+
+function buildStackedHorizontalBarOption(data: any, config: UniversalChartProps['config']) {
+  const categories = data.categories || data.yAxis?.data || [];
+  const series = data.series || [];
+
+  return {
+    ...COMMON_THEME,
+    ...buildCommonOption(config),
+    xAxis: {
+      type: 'value',
+      name: config.xAxisName || '',
+      nameLocation: 'middle',
+      nameGap: 30,
+    },
+    yAxis: {
+      type: 'category',
+      data: categories,
+      name: config.yAxisName || '',
+      nameLocation: 'middle',
+      nameGap: 40,
+    },
+    series: series.map((s: any, i: number) => ({
+      type: 'bar',
+      data: s.data,
+      name: s.name || `Series ${i + 1}`,
+      stack: 'total',
+      itemStyle: { borderRadius: [0, 4, 4, 0] },
     })),
   };
 }
@@ -394,8 +424,12 @@ function buildTreemapOption(data: any, config: UniversalChartProps['config']) {
     series: [{
       type: 'treemap',
       data: treemapData,
-      label: { show: true, formatter: '{b}', fontSize: 12 },
-      breadcrumb: { show: false },
+      label: { show: true, formatter: '{b}' },
+      visualMin: 0,
+      visualMax: 100,
+      leafDepth: 2,
+      childrenVisibleDepth: 2,
+      breadcrumb: { show: true },
     }],
   };
 }
@@ -406,8 +440,11 @@ function buildRadarOption(data: any, config: UniversalChartProps['config']) {
 
   return {
     ...COMMON_THEME,
-    tooltip: {},
     ...buildCommonOption(config),
+    tooltip: {
+      ...COMMON_THEME.tooltip,
+      trigger: 'axis',
+    },
     radar: {
       indicator,
       center: ['50%', '55%'],
@@ -493,8 +530,13 @@ function buildWaterfallOption(data: any, config: UniversalChartProps['config']) 
   const positive = data.positive || [];
   const negative = data.negative || [];
 
-  const total = positive.map((p: number, i: number) => p + (negative[i] || 0));
-  const subtotals: (number | '-')[] = Array(categories.length).fill('-');
+  let cumulative = 0;
+  const subtotals = categories.map((_: any, i: number) => {
+    if (i === 0) return 0;
+    const prev = (positive[i - 1] || 0) + (negative[i - 1] || 0);
+    cumulative += prev;
+    return cumulative;
+  });
 
   return {
     ...COMMON_THEME,
@@ -515,23 +557,24 @@ function buildWaterfallOption(data: any, config: UniversalChartProps['config']) 
     series: [
       {
         type: 'bar',
-        data: subtotals.map((v, i) => ({
-          value: v === '-' ? '-' : total[i],
-          itemStyle: { color: 'transparent', borderWidth: 0 },
-        })),
+        data: subtotals,
+        itemStyle: { color: 'transparent', borderWidth: 0 },
         barWidth: '50%',
+        stack: 'total',
       },
       {
         type: 'bar',
-        data: positive.map((v: number) => v > 0 ? v : 0),
-        name: 'Increase',
+        data: positive,
+        name: '증가',
         itemStyle: { color: '#4a96c6', borderRadius: [0, 0, 0, 0] },
+        stack: 'total',
       },
       {
         type: 'bar',
-        data: negative.map((v: number) => v < 0 ? v : 0),
-        name: 'Decrease',
+        data: negative.map((v: number) => Math.abs(v)),
+        name: '감소',
         itemStyle: { color: '#d94e5d', borderRadius: [0, 0, 0, 0] },
+        stack: 'total',
       },
     ],
   };
@@ -590,35 +633,54 @@ function buildPopulationPyramidOption(data: any, config: UniversalChartProps['co
 }
 
 function buildStreamgraphOption(data: any, config: UniversalChartProps['config']) {
-  const categories = data.categories || data.xAxis?.data || [];
+  const categories = data.categories || [];
   const series = data.series || [];
 
+  const themeRiverData = series.flatMap((s: any) =>
+    (s.data || []).map((value: number, idx: number) => [categories[idx] || idx, value, s.name || `Series ${idx}`])
+  );
+
   return {
-    ...COMMON_THEME,
-    ...buildCommonOption(config),
-    xAxis: {
-      type: 'category',
-      data: categories,
-      name: config.xAxisName || '',
-      nameLocation: 'middle',
-      nameGap: 30,
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'line',
+        lineStyle: { color: 'rgba(0,0,0,0.2)', width: 1, type: 'solid' }
+      }
     },
-    yAxis: { type: 'value', show: false },
-    series: series.map((s: any, i: number) => ({
-      type: 'line',
-      data: s.data,
-      name: s.name || `Series ${i + 1}`,
-      stack: 'total',
-      smooth: true,
-      areaStyle: { opacity: 0.6 },
-      lineStyle: { width: 0 },
-    })),
+    legend: {
+      show: true,
+      bottom: 0,
+    },
+    singleAxis: {
+      type: 'time',
+      top: 50,
+      bottom: 50,
+      axisTick: {},
+      axisLabel: {},
+      axisPointer: {
+        animation: true,
+        label: { show: true }
+      },
+      splitLine: {
+        show: true,
+        lineStyle: { type: 'dashed', opacity: 0.2 }
+      }
+    },
+    series: [{
+      type: 'themeRiver',
+      data: themeRiverData,
+      label: { show: false },
+      emphasis: {
+        itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0, 0, 0, 0.8)' }
+      },
+    }],
   };
 }
 
 function buildHistogramOption(data: any, config: UniversalChartProps['config']) {
   const categories = data.categories || data.xAxis?.data || [];
-  const series = data.series || [{ data: data.values || [] }];
+  const values = data.values || [];
 
   return {
     ...COMMON_THEME,
@@ -636,22 +698,21 @@ function buildHistogramOption(data: any, config: UniversalChartProps['config']) 
       nameLocation: 'middle',
       nameGap: 40,
     },
-    series: series.map((s: any, i: number) => ({
+    series: [{
       type: 'bar',
-      data: s.data,
-      name: s.name || `Series ${i + 1}`,
-      barCategoryGap: '0%',
-      itemStyle: { borderRadius: [2, 2, 0, 0] },
-    })),
+      data: values,
+      barCategoryGap: '10%',
+      itemStyle: { borderRadius: [0, 0, 0, 0] },
+    }],
   };
 }
 
 const chartBuilders: Record<string, (data: any, config: UniversalChartProps['config']) => any> = {
   column: buildBarOption,
-  stacked_bar: buildStackedBarOption,
+  stacked_bar: buildStackedHorizontalBarOption,
   horizontal_bar: buildHorizontalBarOption,
-  line_multi: buildLineOption,
-  stacked_column: buildStackedBarOption,
+  line_multi: (data, config) => buildLineOption(data, config, { symbol: 'none' }),
+  stacked_column: buildStackedColumnOption,
   line_dots: (data, config) => buildLineOption(data, config, { symbol: 'circle', symbolSize: 8 }),
   area: buildAreaOption,
   area_stacked: buildStackedAreaOption,

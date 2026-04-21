@@ -138,7 +138,7 @@ export default function ChartConfigModal({
           </button>
           <button
             onClick={handleSave}
-            className="rounded-md bg-[#006_one] px-4 py-2 text-sm font-medium text-white hover:bg-[#005_one]"
+            className="rounded bg-[#002c5a] px-4 py-2 text-sm font-medium text-white hover:bg-[#001b42] shadow-sm"
           >
             적용
           </button>

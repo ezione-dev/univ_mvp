@@ -10,7 +10,7 @@ export interface ChartMetadata {
 
 export const chartMetadata: ChartMetadata[] = [
   { type: 'column', name: '세로 막대형', icon: 'bar_chart', description: '카테고리별 수치를 세로 막대로 표현하는 기본 차트', category: 'bar' },
-  { type: 'stacked_bar', name: '누적 세로 막대형', icon: 'stacked_bar_chart', description: '여러 데이터 계열의 누적된 세로 막대 차트', category: 'bar' },
+  { type: 'stacked_bar', name: '누적 가로 막대형', icon: 'stacked_bar_chart', description: '여러 데이터 계열의 누적된 가로 막대 차트', category: 'bar' },
   { type: 'horizontal_bar', name: '가로 막대형', icon: 'horizontal_bar_chart', description: '카테고리별 수치를 가로 막대로 표현하는 차트', category: 'bar' },
   { type: 'line_multi', name: '다중 선형', icon: 'show_chart', description: '여러 데이터 계열을 선으로 표현하는 차트', category: 'line' },
   { type: 'stacked_column', name: '누적 세로 막대형', icon: 'view_column', description: '여러 데이터 계열의 누적된 세로 막대 차트', category: 'bar' },

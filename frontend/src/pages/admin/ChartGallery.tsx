@@ -6,6 +6,7 @@ import { chartMetadata } from '../../components/charts/chartMetadata';
 import { ChartConfig, chartConfigs } from '../../configs/charts/index';
 import chartMockData, {
   BarColumnData,
+  StackedBarColumnData,
   LineAreaData,
   PieDonutRoseDataItem,
   ScatterBubbleData,
@@ -18,12 +19,15 @@ import chartMockData, {
   WaterfallData,
   PopulationPyramidData,
 } from '../../data/chartMockData';
+import { streamgraphData } from '../../data/chartMockData';
 
-type ChartMockDataKey = 'barColumn' | 'lineArea' | 'pieDonutRose' | 'scatterBubble' | 'heatmapGrid' | 'radar' | 'candlestick' | 'treemap' | 'gauge' | 'calendarHeatmap' | 'waterfall' | 'populationPyramid';
+type ChartMockDataKey = 'barColumn' | 'stackedBarColumn' | 'lineArea' | 'streamgraph' | 'pieDonutRose' | 'scatterBubble' | 'heatmapGrid' | 'radar' | 'candlestick' | 'treemap' | 'gauge' | 'calendarHeatmap' | 'waterfall' | 'populationPyramid' | 'histogram';
 
 type ChartMockDataValue =
   | BarColumnData
+  | StackedBarColumnData
   | LineAreaData
+  | typeof streamgraphData
   | PieDonutRoseDataItem[]
   | ScatterBubbleData
   | HeatmapGridData
@@ -33,20 +37,21 @@ type ChartMockDataValue =
   | GaugeData
   | CalendarHeatmapData
   | WaterfallData
-  | PopulationPyramidData;
+  | PopulationPyramidData
+  | BarColumnData;
 
 type ChartMockData = Record<ChartMockDataKey, ChartMockDataValue>;
 
 const typeToDataKey: Record<string, ChartMockDataKey | undefined> = {
   column: 'barColumn',
-  stacked_bar: 'barColumn',
+  stacked_bar: 'stackedBarColumn',
   horizontal_bar: 'barColumn',
   line_multi: 'lineArea',
-  stacked_column: 'barColumn',
+  stacked_column: 'stackedBarColumn',
   line_dots: 'lineArea',
   area: 'lineArea',
   area_stacked: 'lineArea',
-  streamgraph: 'lineArea',
+  streamgraph: 'streamgraph',
   scatter: 'scatterBubble',
   bubble: 'scatterBubble',
   heatmap_grid: 'heatmapGrid',
@@ -58,7 +63,7 @@ const typeToDataKey: Record<string, ChartMockDataKey | undefined> = {
   donut: 'pieDonutRose',
   nightingale_rose: 'pieDonutRose',
   radar: 'radar',
-  histogram: 'barColumn',
+  histogram: 'histogram',
 };
 
 export interface ChartGalleryChartConfig {
