@@ -70,6 +70,28 @@ def _sanitize_menu_record(record: dict) -> dict:
     return result
 
 
+async def get_nav_menus_service(user_cd: int) -> dict:
+    query = """
+        SELECT DISTINCT m.menu_id, m.menu_cd, m.menu_nm, m.parent_menu_id,
+                        m.menu_level, m.menu_path, m.screen_id, m.sort_order, m.use_yn, m.del_fg
+        FROM ts_grp_user gu
+        JOIN ts_grp_menu gm ON gu.grp_id = gm.grp_id
+        JOIN ts_menu_info m ON gm.menu_id = m.menu_id
+        WHERE gu.user_cd = $1 AND m.del_fg = 'N' AND m.use_yn = 'Y'
+        ORDER BY m.sort_order NULLS LAST, m.menu_id
+    """
+    df = await fetch_df(query, (user_cd,))
+
+    if df.empty:
+        flat_menus = []
+    else:
+        flat_menus = [
+            _sanitize_menu_record(row) for row in df.to_dict(orient="records")
+        ]
+
+    return {"menu_tree": treeify(flat_menus)}
+
+
 async def get_user_menus(user_cd: int) -> dict:
     query = """
         SELECT DISTINCT m.menu_id, m.menu_nm, m.parent_menu_id, m.sort_order

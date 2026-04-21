@@ -127,28 +127,14 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {!import.meta.env.PROD && (
-        <Route
-          path="/dashboard/legacy"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DashboardPage />} />
-        </Route>
-      )}
-      {!import.meta.env.PROD && (
-        <Route
-          path="/insights"
-          element={
-            <ProtectedRoute>
-              <QueryPage />
-            </ProtectedRoute>
-          }
-        />
-      )}
+      <Route
+        path="/insights"
+        element={
+          <ProtectedRoute>
+            <QueryPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin"
         element={

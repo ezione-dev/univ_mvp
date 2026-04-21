@@ -170,14 +170,15 @@ async def patch_menu(menu_id: int, updates: dict[str, Any]) -> None:
         values.append(val)
         idx += 1
 
+    if "parent_menu_id" in updates:
+        new_parent_id = _norm_parent_for_db(updates.get("parent_menu_id"))
+        add("parent_menu_id", new_parent_id)
+    if "menu_level" in updates and updates["menu_level"] is not None:
+        add("menu_level", int(updates["menu_level"]))
     if "menu_cd" in updates and updates["menu_cd"] is not None:
         add("menu_cd", str(updates["menu_cd"]).strip())
     if "menu_nm" in updates and updates["menu_nm"] is not None:
         add("menu_nm", str(updates["menu_nm"]).strip())
-    if "parent_menu_id" in updates:
-        add("parent_menu_id", _norm_parent_for_db(updates.get("parent_menu_id")))
-    if "menu_level" in updates:
-        add("menu_level", updates["menu_level"])
     if "menu_path" in updates:
         mp = updates["menu_path"]
         if mp is None or (isinstance(mp, str) and not mp.strip()):
