@@ -2,7 +2,7 @@ export interface DefaultSeriesConfig {
   type?: string;
   stack?: string;
   smooth?: boolean;
-  areaStyle?: object | null;
+  areaStyle?: { color?: string; opacity?: number } | null;
   symbol?: string;
   symbolSize?: number;
 }
