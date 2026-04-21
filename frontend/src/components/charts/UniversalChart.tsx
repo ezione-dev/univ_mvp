@@ -307,9 +307,9 @@ function buildBubbleOption(data: any, config: UniversalChartProps['config']) {
 }
 
 function buildHeatmapOption(data: any, config: UniversalChartProps['config']) {
-  const xData = data.xAxis?.data || [];
-  const yData = data.yAxis?.data || [];
-  const heatmapData = data.values || data.data || [];
+  const xData = data.xAxis?.data || data.xData || [];
+  const yData = data.yAxis?.data || data.yData || [];
+  const heatmapData = Array.isArray(data) ? data : (data.values || data.data || []);
 
   return {
     ...COMMON_THEME,
@@ -334,7 +334,7 @@ function buildHeatmapOption(data: any, config: UniversalChartProps['config']) {
       right: 'right',
       top: 'center',
       min: 0,
-      max: Math.max(...heatmapData.map((d: number[]) => d[2] || 0)),
+      max: heatmapData.length > 0 ? Math.max(...heatmapData.map((d: number[]) => d[2] || 0)) : 100,
       inRange: { color: ['#50a3ba', '#eac736', '#d94e5d'] },
     },
     series: [{
