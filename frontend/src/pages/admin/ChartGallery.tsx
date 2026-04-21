@@ -4,10 +4,40 @@ import ChartGalleryChartTile from '../../components/charts/ChartGalleryChartTile
 import ChartConfigModal from '../../components/charts/ChartConfigModal';
 import { chartMetadata } from '../../components/charts/chartMetadata';
 import { ChartConfig, chartConfigs } from '../../configs/charts/index';
-import chartMockData from '../../data/chartMockData';
-import UniversalChart from '../../components/charts/UniversalChart';
+import chartMockData, {
+  BarColumnData,
+  LineAreaData,
+  PieDonutRoseDataItem,
+  ScatterBubbleData,
+  HeatmapGridData,
+  RadarData,
+  CandlestickData,
+  TreemapDataItem,
+  GaugeData,
+  CalendarHeatmapData,
+  WaterfallData,
+  PopulationPyramidData,
+} from '../../data/chartMockData';
 
-const typeToDataKey: Record<string, string> = {
+type ChartMockDataKey = 'barColumn' | 'lineArea' | 'pieDonutRose' | 'scatterBubble' | 'heatmapGrid' | 'radar' | 'candlestick' | 'treemap' | 'gauge' | 'calendarHeatmap' | 'waterfall' | 'populationPyramid';
+
+type ChartMockDataValue =
+  | BarColumnData
+  | LineAreaData
+  | PieDonutRoseDataItem[]
+  | ScatterBubbleData
+  | HeatmapGridData
+  | RadarData
+  | CandlestickData
+  | TreemapDataItem[]
+  | GaugeData
+  | CalendarHeatmapData
+  | WaterfallData
+  | PopulationPyramidData;
+
+type ChartMockData = Record<ChartMockDataKey, ChartMockDataValue>;
+
+const typeToDataKey: Record<string, ChartMockDataKey | undefined> = {
   column: 'barColumn',
   stacked_bar: 'barColumn',
   horizontal_bar: 'barColumn',
@@ -53,7 +83,7 @@ export default function ChartGallery() {
     return chartMetadata.map((metadata) => {
       const config = localChartConfigs.find((c) => c.chartType === metadata.type);
       const dataKey = typeToDataKey[metadata.type];
-      const data = dataKey ? (chartMockData as any)[dataKey] : {};
+      const data = dataKey ? chartMockData[dataKey] : {};
       return {
         ...metadata,
         config: config
@@ -61,6 +91,7 @@ export default function ChartGallery() {
               title: config.title,
               xAxisName: config.xAxisName,
               yAxisName: config.yAxisName,
+              titlePosition: config.titlePosition,
               legendPosition: config.legendPosition,
             }
           : {},
@@ -92,7 +123,7 @@ export default function ChartGallery() {
       title: selectedChart.config.title || '',
       xAxisName: selectedChart.config.xAxisName || '',
       yAxisName: selectedChart.config.yAxisName || '',
-      titlePosition: 'center',
+      titlePosition: selectedChart.config.titlePosition || 'center',
       legendPosition: selectedChart.config.legendPosition || 'bottom',
     };
   }, [selectedChart]);
@@ -111,6 +142,7 @@ export default function ChartGallery() {
               title: config.title,
               xAxisName: config.xAxisName,
               yAxisName: config.yAxisName,
+              titlePosition: config.titlePosition,
               legendPosition: config.legendPosition,
             }
           : c
