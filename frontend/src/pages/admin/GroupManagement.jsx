@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import PageHeader from '../../components/common/PageHeader';
+import { ADMIN_PAGE_CONTAINER_CLASS } from '../../constants/adminLayout';
 import AdminTable from '../../components/common/AdminTable';
 import {
   getAdminGroups,
@@ -49,7 +50,7 @@ function mapGroupFromApi(row) {
 
 function GroupListTable({ groups, selectedGroup, isCreating, onSelect, onNew }) {
   return (
-    <div className="flex flex-col bg-surface-container-lowest rounded-lg p-6 h-full min-h-[600px] shadow-[0_8px_32px_rgba(24,28,30,0.04)]">
+    <div className="flex flex-col bg-surface-container-lowest rounded-lg p-6 h-full min-h-0 shadow-[0_8px_32px_rgba(24,28,30,0.04)]">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-headline font-semibold text-primary">권한 그룹 목록</h2>
         <div className="flex items-center gap-2">
@@ -272,6 +273,25 @@ export default function GroupManagement() {
     loadGroups();
   }, [loadGroups]);
 
+  if (loading && !groups.length) {
+    return (
+      <div className={ADMIN_PAGE_CONTAINER_CLASS}>
+        <PageHeader
+          title="권한 그룹 관리"
+          description="시스템 권한 그룹을 생성하고, 권한 범위를 설정하며, 사용자별 접근 권한을 관리합니다."
+        />
+        {loadError && (
+          <div className="rounded-lg border border-error/40 bg-error-container/30 text-on-error-container px-4 py-3 text-sm">
+            {loadError}
+          </div>
+        )}
+        <div className="flex items-center justify-center h-64">
+          <span className="text-on-surface-variant text-sm">불러오는 중…</span>
+        </div>
+      </div>
+    );
+  }
+
   const handleSelectGroup = (group) => {
     setIsCreating(false);
     setSelectedGroup(group);
@@ -362,7 +382,7 @@ export default function GroupManagement() {
   };
 
   return (
-    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
+    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader
         title="권한 그룹 관리"
         description="시스템 권한 그룹을 생성하고, 권한 범위를 설정하며, 사용자별 접근 권한을 관리합니다."
@@ -372,11 +392,8 @@ export default function GroupManagement() {
           {loadError}
         </div>
       )}
-      {loading && !groups.length ? (
-        <p className="text-on-surface-variant text-sm">불러오는 중…</p>
-      ) : null}
-      <div className="flex flex-col lg:flex-row gap-6 w-full min-h-[600px]">
-        <div className="w-full lg:w-[350px] shrink-0 flex flex-col">
+      <div className="flex flex-col lg:flex-row gap-6 w-full flex-1 min-h-0">
+        <div className="w-full lg:w-[350px] shrink-0 flex flex-col min-h-0">
           <GroupListTable
             groups={groups}
             selectedGroup={selectedGroup}
@@ -385,7 +402,7 @@ export default function GroupManagement() {
             onNew={handleNewGroup}
           />
         </div>
-        <div className="w-full lg:flex-1 flex flex-col">
+        <div className="w-full lg:flex-1 flex flex-col min-h-0">
           <GroupDetailForm
             group={selectedGroup}
             isCreating={isCreating}

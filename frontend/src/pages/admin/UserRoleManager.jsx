@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import PageHeader from "../../components/common/PageHeader";
+import { ADMIN_PAGE_CONTAINER_CLASS } from "../../constants/adminLayout";
 import api from "../../services/api";
 import { getAdminGroups } from "../../services/adminApi";
 
@@ -53,7 +54,7 @@ export default function UserRoleManager() {
   };
 
   return (
-    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
+    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader
         title="사용자 역할 관리"
         description="사용자를 검색하여 권한 그룹을 직접 변경합니다."

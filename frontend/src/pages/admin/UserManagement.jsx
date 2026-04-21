@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PageHeader from '../../components/common/PageHeader';
+import { ADMIN_PAGE_CONTAINER_CLASS } from '../../constants/adminLayout';
 import { getUsers, updateUser, deleteUser, resetUserPassword } from '../../services/adminApi';
 
 const PHONE_EMPTY = { p1: '', p2: '', p3: '' };
@@ -154,7 +155,7 @@ export default function UserManagement() {
 
   if (!paginatedUsers.length && users.length === 0) {
     return (
-      <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
+      <div className={ADMIN_PAGE_CONTAINER_CLASS}>
         <PageHeader title="사용자 관리" description="시스템 사용자 목록 및 상세 정보를 관리합니다." />
         <div className="flex items-center justify-center h-64 text-on-surface-variant">로딩 중...</div>
       </div>
@@ -162,7 +163,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
+    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader title="사용자 관리" description="시스템 사용자 목록 및 상세 정보를 관리합니다." />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 flex flex-col gap-6">

@@ -1,20 +1,15 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 
 export default function AdminTable({
   columns,
   data,
   onSelect,
-  searchTerm,
   searchPlaceholder = '검색...',
   selectedId,
   showRowNumber = true,
 }) {
-  const [localSearch, setLocalSearch] = useState(searchTerm || '');
+  const [localSearch, setLocalSearch] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-
-  useEffect(() => {
-    setLocalSearch(searchTerm || '');
-  }, [searchTerm]);
 
   const filteredData = useMemo(() => {
     if (!localSearch.trim()) return data;

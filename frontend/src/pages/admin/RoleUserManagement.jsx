@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import PageHeader from '../../components/common/PageHeader';
+import { ADMIN_PAGE_CONTAINER_CLASS } from '../../constants/adminLayout';
 import { getRoleUserMappings, replaceUserGroups, replaceGroupUsers } from '../../services/api';
 
 function RoleUserManagement() {
@@ -132,7 +133,7 @@ function RoleUserManagement() {
 
   if (loading) {
     return (
-      <div className="px-10 pb-12 max-w-[1920px] mx-auto flex flex-col gap-8">
+      <div className={ADMIN_PAGE_CONTAINER_CLASS}>
         <div className="flex items-center justify-center h-64">
           <span className="text-on-surface-variant">데이터를 불러오는 중...</span>
         </div>
@@ -141,7 +142,7 @@ function RoleUserManagement() {
   }
 
   return (
-    <div className="px-10 pb-12 max-w-[1920px] mx-auto flex flex-col gap-8">
+    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader
         title="권한 그룹별 사용자 관리"
         description="권한 그룹에 사용자를 배정하고 관리합니다."

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import PageHeader from '../../components/common/PageHeader';
+import { ADMIN_PAGE_CONTAINER_CLASS } from '../../constants/adminLayout';
 import {
   getAdminGroups,
   getAdminMenuTree,
@@ -176,7 +177,7 @@ function RoleAuthorityMenu() {
     JSON.stringify([...initialAssignedMenuIds].sort());
 
   return (
-    <div className="px-10 pb-12 max-w-[1920px] mx-auto flex flex-col gap-8">
+    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader
         title="권한별 메뉴 관리"
         description="권한 그룹별로 접근 가능한 메뉴를 배정하고 관리합니다."

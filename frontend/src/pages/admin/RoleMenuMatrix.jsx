@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PageHeader from '../../components/common/PageHeader';
+import { ADMIN_PAGE_CONTAINER_CLASS } from '../../constants/adminLayout';
 import { getRoles, getMenus, toggleRoleMenu } from '../../services/adminApi';
 
 export default function RoleMenuMatrix() {
@@ -73,7 +74,7 @@ export default function RoleMenuMatrix() {
 
   if (loading) {
     return (
-      <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
+      <div className={ADMIN_PAGE_CONTAINER_CLASS}>
         <div className="flex items-center justify-center h-64 text-on-surface-variant">
           불러오는 중…
         </div>
@@ -82,7 +83,7 @@ export default function RoleMenuMatrix() {
   }
 
   return (
-    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8">
+    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader
         title="역할-메뉴 권한 매트릭스"
         description={`총 ${menus.length}개 메뉴 × ${roles.length}개 역할 — 체크박스를 클릭해 권한을 즉시 저장합니다.`}

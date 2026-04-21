@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import PageHeader from "../../components/common/PageHeader";
+import { ADMIN_PAGE_CONTAINER_CLASS } from "../../constants/adminLayout";
 import {
   getAdminMenuTree,
   createAdminMenu,
@@ -664,7 +665,7 @@ export default function MenuManagement() {
   };
 
   return (
-    <div className="px-10 pb-12 max-w-[1600px] mx-auto flex flex-col gap-8 h-full min-h-0">
+    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader
         title="메뉴 관리"
         description="시스템 탐색 계층 구조를 구성하고, 라우팅 경로를 정의하며, 교육기관 플랫폼 전체의 컴포넌트 가시성을 관리합니다."
