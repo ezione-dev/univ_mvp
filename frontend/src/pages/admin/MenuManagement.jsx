@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import PageHeader from "../../components/common/PageHeader";
+import AdminSearchBar from "../../components/common/AdminSearchBar";
 import { ADMIN_PAGE_CONTAINER_CLASS } from "../../constants/adminLayout";
 import {
   getAdminMenuTree,
@@ -144,27 +145,12 @@ function MenuTree({
           </span>
         </button>
       </div>
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">
-            search
-          </span>
-          <input
-            className="w-full bg-surface-container-low text-sm text-on-surface py-2.5 pl-9 pr-3 rounded-md border-b-2 border-transparent focus:bg-surface-container-lowest focus:border-secondary focus:outline-none transition-all placeholder:text-on-surface-variant/70"
-            placeholder="메뉴 항목 검색..."
-            type="text"
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-        </div>
-        <button
-          type="button"
-          className="bg-secondary text-on-secondary px-6 py-2.5 rounded-md text-sm font-medium hover:bg-primary-container transition-colors"
-          onClick={() => onSearchChange(searchTerm)}
-        >
-          검색
-        </button>
-      </div>
+      <AdminSearchBar
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
+        placeholder="메뉴 항목 검색..."
+        showSubmitButton={false}
+      />
       <div className="overflow-y-auto no-scrollbar flex-1 min-h-0 -mx-2 px-2 flex flex-col gap-1 text-sm mt-2">
         {loading ? (
           <p className="text-on-surface-variant text-sm py-4">불러오는 중…</p>

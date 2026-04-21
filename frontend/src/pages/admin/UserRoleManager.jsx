@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import PageHeader from "../../components/common/PageHeader";
+import AdminSearchBar from "../../components/common/AdminSearchBar";
 import { ADMIN_PAGE_CONTAINER_CLASS } from "../../constants/adminLayout";
 import api from "../../services/api";
 import { getAdminGroups } from "../../services/adminApi";
@@ -29,7 +30,10 @@ export default function UserRoleManager() {
   };
 
   const searchUsers = async () => {
-    if (!searchTerm.trim()) return;
+    if (!searchTerm.trim()) {
+      showToast("검색어를 입력해 주세요.", "info");
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.get(`/api/admin/users?search=${searchTerm}`);
@@ -62,28 +66,14 @@ export default function UserRoleManager() {
 
       <div className="bg-surface-container-lowest rounded-lg p-6 shadow-[0_8px_32px_rgba(24,28,30,0.04)]">
         <h2 className="text-lg font-headline font-semibold text-primary mb-4">사용자 검색</h2>
-        <div className="flex gap-2">
-          <div className="relative flex-1 max-w-md">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">
-              search
-            </span>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && searchUsers()}
-              placeholder="이름 또는 이메일로 검색"
-              className="w-full pl-9 pr-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface placeholder:text-outline"
-            />
-          </div>
-          <button
-            onClick={searchUsers}
-            disabled={loading}
-            className="px-6 py-2.5 rounded-md bg-primary text-on-primary text-sm font-medium hover:bg-primary-container transition-colors disabled:opacity-50"
-          >
-            {loading ? "검색 중…" : "검색"}
-          </button>
-        </div>
+        <AdminSearchBar
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onSubmit={searchUsers}
+          placeholder="이름 또는 이메일로 검색"
+          submitLoading={loading}
+          inputWrapperClassName="max-w-md"
+        />
       </div>
 
       {users.length > 0 && (
@@ -126,7 +116,7 @@ export default function UserRoleManager() {
                       <select
                         value={user.grp_id || ""}
                         onChange={e => updateUserRole(user.user_cd, Number(e.target.value))}
-                        className="w-full px-3 py-2 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface"
+                        className="w-full px-3 py-2 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface"
                       >
                         <option value="">선택안함</option>
                         {roles.map(r => (
@@ -150,8 +140,18 @@ export default function UserRoleManager() {
       )}
 
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 ${toast.type === 'error' ? 'bg-error text-on-error' : 'bg-tertiary-fixed text-on-tertiary-fixed'} px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-[expandIn_0.3s_ease-out]`}>
-          <span className="material-symbols-outlined text-[20px]">{toast.type === 'error' ? 'error' : 'check_circle'}</span>
+        <div
+          className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-[expandIn_0.3s_ease-out] ${
+            toast.type === 'error'
+              ? 'bg-error text-on-error'
+              : toast.type === 'info'
+                ? 'bg-secondary-container text-on-secondary-container'
+                : 'bg-tertiary-fixed text-on-tertiary-fixed'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            {toast.type === 'error' ? 'error' : toast.type === 'info' ? 'info' : 'check_circle'}
+          </span>
           <span className="font-medium">{toast.message}</span>
         </div>
       )}

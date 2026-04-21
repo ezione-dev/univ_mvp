@@ -103,11 +103,13 @@ export default function RoleMenuMatrix() {
                 <th className="px-4 py-3 text-left font-semibold text-on-surface-variant min-w-[200px] sticky left-0 bg-surface-container-highest z-10">
                   메뉴
                 </th>
-                {roles.map(role => {
+                {roles.map((role, roleIndex) => {
                   const roleId = getRoleId(role);
+                  const columnKey =
+                    roleId !== undefined ? `role-${roleId}` : `role-col-${roleIndex}`;
                   return (
                     <th
-                      key={roleId ?? role?.grp_nm ?? role?.name ?? JSON.stringify(role)}
+                      key={columnKey}
                       className="px-4 py-3 text-center font-semibold text-on-surface-variant min-w-[120px]"
                     >
                       <div className="text-xs font-medium text-on-surface uppercase tracking-wider">
@@ -133,12 +135,14 @@ export default function RoleMenuMatrix() {
                     <div className="font-medium text-on-surface">{menu.menu_nm}</div>
                     <div className="text-xs text-on-surface-variant font-mono mt-0.5">{menu.menu_path}</div>
                   </td>
-                  {roles.map(role => {
+                  {roles.map((role, roleIndex) => {
                     const roleId = getRoleId(role);
                     const checked = roleId !== undefined ? (roleMenuMap[menu.menu_id]?.[roleId] || false) : false;
+                    const columnKey =
+                      roleId !== undefined ? `role-${roleId}` : `role-col-${roleIndex}`;
                     return (
                       <td
-                        key={roleId ?? role?.grp_nm ?? role?.name ?? JSON.stringify(role)}
+                        key={columnKey}
                         className="px-4 py-3 text-center"
                       >
                         <input

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PageHeader from '../../components/common/PageHeader';
+import AdminSearchBar from '../../components/common/AdminSearchBar';
 import { ADMIN_PAGE_CONTAINER_CLASS } from '../../constants/adminLayout';
 import { getUsers, updateUser, deleteUser, resetUserPassword } from '../../services/adminApi';
 
@@ -169,25 +170,12 @@ export default function UserManagement() {
         <div className="lg:col-span-5 flex flex-col gap-6">
           <div className="bg-surface-container-lowest rounded-lg p-6 relative z-10 shadow-[0_8px_32px_rgba(24,28,30,0.04)]">
             <h2 className="text-lg font-headline font-semibold text-primary mb-4">사용자 검색</h2>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
-                <input
-                  className="w-full pl-9 pr-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface placeholder:text-outline"
-                  placeholder="이름 또는 이메일로 검색"
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && loadUsers()}
-                />
-              </div>
-              <button
-                className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md text-sm font-medium hover:bg-primary hover:text-white transition-colors"
-                onClick={loadUsers}
-              >
-                검색
-              </button>
-            </div>
+            <AdminSearchBar
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onSubmit={loadUsers}
+              placeholder="이름 또는 이메일로 검색"
+            />
           </div>
 
           <div className="bg-surface-container-lowest rounded-lg overflow-hidden relative z-10 shadow-[0_8px_32px_rgba(24,28,30,0.04)] flex-1 flex flex-col">
@@ -287,7 +275,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">No</label>
                       <input
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent rounded-t-md text-sm text-outline outline-none cursor-not-allowed"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent rounded-lg text-sm text-outline outline-none cursor-not-allowed"
                         readOnly
                         type="text"
                         value={selectedUser.user_cd}
@@ -296,7 +284,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">ID (Email)</label>
                       <input
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent rounded-t-md text-sm text-outline outline-none cursor-not-allowed"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent rounded-lg text-sm text-outline outline-none cursor-not-allowed"
                         readOnly
                         type="text"
                         value={selectedUser.user_id}
@@ -305,7 +293,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">이름 (Name)</label>
                       <input
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface"
                         type="text"
                         value={formData?.user_nm || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, user_nm: e.target.value }))}
@@ -314,7 +302,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">대학 코드 (Univ Code)</label>
                       <input
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface"
                         type="text"
                         value={formData?.univ_cd || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, univ_cd: e.target.value }))}
@@ -323,7 +311,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5 md:col-span-2">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">부서명 (Department)</label>
                       <input
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface"
                         type="text"
                         value={formData?.dept_nm || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, dept_nm: e.target.value }))}
@@ -332,7 +320,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">직급 (Position)</label>
                       <input
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface"
                         type="text"
                         value={formData?.grade_nm || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, grade_nm: e.target.value }))}
@@ -341,7 +329,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">직책 (Job Title)</label>
                       <input
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface"
                         type="text"
                         value={formData?.pos_nm || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, pos_nm: e.target.value }))}
@@ -351,7 +339,7 @@ export default function UserManagement() {
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">휴대전화 (Mobile)</label>
                       <div className="flex items-center gap-2">
                         <input
-                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
+                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
                           type="tel"
                           maxLength={4}
                           value={formData?.mobile.p1 || ''}
@@ -359,7 +347,7 @@ export default function UserManagement() {
                         />
                         <span className="text-on-surface-variant">-</span>
                         <input
-                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
+                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
                           type="tel"
                           maxLength={4}
                           value={formData?.mobile.p2 || ''}
@@ -367,7 +355,7 @@ export default function UserManagement() {
                         />
                         <span className="text-on-surface-variant">-</span>
                         <input
-                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
+                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
                           type="tel"
                           maxLength={4}
                           value={formData?.mobile.p3 || ''}
@@ -379,7 +367,7 @@ export default function UserManagement() {
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">사무실 번호 (Office)</label>
                       <div className="flex items-center gap-2">
                         <input
-                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
+                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
                           type="tel"
                           maxLength={4}
                           value={formData?.office.p1 || ''}
@@ -387,7 +375,7 @@ export default function UserManagement() {
                         />
                         <span className="text-on-surface-variant">-</span>
                         <input
-                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
+                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
                           type="tel"
                           maxLength={4}
                           value={formData?.office.p2 || ''}
@@ -395,7 +383,7 @@ export default function UserManagement() {
                         />
                         <span className="text-on-surface-variant">-</span>
                         <input
-                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
+                          className="w-16 px-3 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface text-center"
                           type="tel"
                           maxLength={4}
                           value={formData?.office.p3 || ''}
@@ -406,7 +394,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">이동통신사 (Mobile Carrier)</label>
                       <select
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-t-md text-sm transition-all focus:ring-0 outline-none text-on-surface"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent focus:border-secondary focus:bg-surface-container-lowest rounded-lg text-sm transition-all focus:ring-0 outline-none text-on-surface"
                         value={formData?.mobile_co_cd || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, mobile_co_cd: e.target.value }))}
                       >
@@ -418,7 +406,7 @@ export default function UserManagement() {
                     <div className="space-y-1.5">
                       <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wider">등록일 (Reg Date)</label>
                       <input
-                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent rounded-t-md text-sm text-outline outline-none cursor-not-allowed"
+                        className="w-full px-4 py-2.5 bg-surface-container-low border-b-2 border-transparent rounded-lg text-sm text-outline outline-none cursor-not-allowed"
                         readOnly
                         type="text"
                         value={selectedUser.reg_dt || '-'}
