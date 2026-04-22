@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 export interface ChartConfigModalProps {
@@ -35,7 +35,13 @@ export default function ChartConfigModal({
     titlePosition: chartConfig.titlePosition ?? 'center',
   });
 
-  const supportsXYAxisName = !['treemap', 'radar'].includes(localConfig.chartType);
+  const supportsXYAxisName = ![
+    'treemap',
+    'radar',
+    'pie',
+    'donut',
+    'nightingale_rose',
+  ].includes(localConfig.chartType);
 
   useEffect(() => {
     if (isOpen) {
