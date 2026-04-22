@@ -26,4 +26,9 @@ export const ADMIN_MENUS: MenuItem[] = [
     menu_nm: '권한 그룹별 사용자 관리',
     path: '/admin/role-users',
   },
+  {
+    menu_id: 950,
+    menu_nm: '차트 갤러리',
+    path: '/admin/chart-gallery',
+  },
 ];

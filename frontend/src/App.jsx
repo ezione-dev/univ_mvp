@@ -1,8 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RequireSysAdmRoute from "./components/RequireSysAdmRoute";
-import DashboardLayout from "./layouts/DashboardLayout";
 import MainLayout from "./layouts/MainLayout";
+
 import MainPage from "./pages/MainPage";
 import AdmissionPage from "./pages/AdmissionPage";
 import StudentCareerPage from "./pages/StudentCareerPage";
@@ -18,12 +18,12 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import PublicRoute from "./components/PublicRoute";
 import RoleMenuMatrix from "./pages/admin/RoleMenuMatrix";
-import UserRoleManager from "./pages/admin/UserRoleManager";
 import MenuManagement from "./pages/admin/MenuManagement";
 import GroupManagement from "./pages/admin/GroupManagement";
 import RoleAuthorityMenu from "./pages/admin/RoleAuthorityMenu";
 import RoleUserManagement from "./pages/admin/RoleUserManagement";
 import UserManagement from "./pages/admin/UserManagement";
+import ChartGallery from "./pages/admin/ChartGallery";
 
 function App() {
   return (
@@ -142,13 +142,13 @@ function App() {
           </RequireSysAdmRoute>
         }
       >
-        <Route index element={<MenuManagement />} />
         <Route path="role-menu" element={<RoleMenuMatrix />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="menus" element={<MenuManagement />} />
         <Route path="groups" element={<GroupManagement />} />
         <Route path="role-authority-menu" element={<RoleAuthorityMenu />} />
         <Route path="role-users" element={<RoleUserManagement />} />
+        <Route path="chart-gallery" element={<ChartGallery />} />
       </Route>
       <Route path="/signup" element={<SignupPage />} />
       <Route path="*" element={<NotFoundPage />} />
