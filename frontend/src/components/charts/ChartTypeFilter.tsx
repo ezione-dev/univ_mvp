@@ -1,4 +1,12 @@
-export type ChartFilterType = 'all' | 'bar' | 'line' | 'pie' | 'scatter' | 'heatmap' | 'special';
+import * as React from "react";
+export type ChartFilterType =
+  | "all"
+  | "bar"
+  | "line"
+  | "pie"
+  | "scatter"
+  | "heatmap"
+  | "special";
 
 interface ChartTypeFilterProps {
   selectedFilter: ChartFilterType;
@@ -6,21 +14,28 @@ interface ChartTypeFilterProps {
 }
 
 const FILTERS: { type: ChartFilterType; label: string }[] = [
-  { type: 'all', label: '전체' },
-  { type: 'bar', label: 'Bar' },
-  { type: 'line', label: 'Line' },
-  { type: 'pie', label: 'Pie' },
-  { type: 'scatter', label: 'Scatter' },
-  { type: 'heatmap', label: 'Heatmap' },
-  { type: 'special', label: '기타' },
+  { type: "all", label: "전체" },
+  { type: "bar", label: "Bar" },
+  { type: "line", label: "Line" },
+  { type: "pie", label: "Pie" },
+  { type: "scatter", label: "Scatter" },
+  { type: "heatmap", label: "Heatmap" },
+  { type: "special", label: "기타" },
 ];
 
 const baseBtn =
-  'rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-surface';
+  "rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
-export default function ChartTypeFilter({ selectedFilter, onFilterChange }: ChartTypeFilterProps) {
+export default function ChartTypeFilter({
+  selectedFilter,
+  onFilterChange,
+}: ChartTypeFilterProps) {
   return (
-    <div className="flex flex-wrap gap-2" role="toolbar" aria-label="차트 종류 필터">
+    <div
+      className="flex flex-wrap gap-2"
+      role="toolbar"
+      aria-label="차트 종류 필터"
+    >
       {FILTERS.map(({ type, label }) => {
         const isActive = selectedFilter === type;
         return (
