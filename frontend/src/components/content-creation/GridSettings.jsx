@@ -89,8 +89,8 @@ export default function GridSettings({ value, onChange, visible }) {
                   <option value="right">우측 정렬</option>
                 </select>
               </div>
-              <div className="flex flex-col w-full justify-end">
-                <label className="ds-label">금액 여부</label>
+              <div className="flex flex-col shrink-0">
+                <label className="ds-label">금액</label>
                 <div className="flex items-center h-[48px]">
                   <input
                     type="checkbox"
@@ -99,9 +99,6 @@ export default function GridSettings({ value, onChange, visible }) {
                     onChange={(e) => handleColumnChange(index, 'isAmount', e.target.checked)}
                     className="w-5 h-5 rounded border-outline-variant text-secondary focus:ring-2 focus:ring-secondary/20 cursor-pointer"
                   />
-                  <label htmlFor={`isAmount-${index}`} className="ml-2 text-sm text-on-surface-variant cursor-pointer">
-                    금액
-                  </label>
                 </div>
               </div>
               <button
