@@ -17,7 +17,7 @@ export default function CardSettings({ value, onChange, visible }) {
         <div className="flex flex-col">
           <label className="ds-label">카드 제목</label>
           <input
-            className="ds-input"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
             type="text"
             value={value.cardTitle}
             onChange={(e) => handleChange('cardTitle', e.target.value)}
@@ -27,7 +27,7 @@ export default function CardSettings({ value, onChange, visible }) {
         <div className="flex flex-col">
           <label className="ds-label">제목 위치</label>
           <select
-            className="ds-input"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
             value={value.titlePosition}
             onChange={(e) => handleChange('titlePosition', e.target.value)}
           >

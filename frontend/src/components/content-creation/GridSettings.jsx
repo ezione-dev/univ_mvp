@@ -33,7 +33,7 @@ export default function GridSettings({ value, onChange, visible }) {
         <div className="flex flex-col">
           <label className="ds-label">섹션 제목</label>
           <input
-            className="ds-input"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
             type="text"
             value={value.sectionTitle}
             onChange={(e) => handleChange('sectionTitle', e.target.value)}
@@ -60,7 +60,7 @@ export default function GridSettings({ value, onChange, visible }) {
               <div className="flex flex-col w-full">
                 <label className="ds-label">컬럼 표시명</label>
                 <input
-                  className="ds-input bg-surface-container-lowest"
+                  className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
                   type="text"
                   value={column.displayName}
                   onChange={(e) => handleColumnChange(index, 'displayName', e.target.value)}
@@ -70,7 +70,7 @@ export default function GridSettings({ value, onChange, visible }) {
               <div className="flex flex-col w-full">
                 <label className="ds-label">데이터 키</label>
                 <input
-                  className="ds-input bg-surface-container-lowest"
+                  className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
                   type="text"
                   value={column.dataKey}
                   onChange={(e) => handleColumnChange(index, 'dataKey', e.target.value)}
@@ -80,7 +80,7 @@ export default function GridSettings({ value, onChange, visible }) {
               <div className="flex flex-col w-full">
                 <label className="ds-label">정렬</label>
                 <select
-                  className="ds-input bg-surface-container-lowest"
+                  className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
                   value={column.alignment}
                   onChange={(e) => handleColumnChange(index, 'alignment', e.target.value)}
                 >

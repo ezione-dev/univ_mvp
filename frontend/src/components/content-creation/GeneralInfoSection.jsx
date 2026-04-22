@@ -13,7 +13,7 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
         <div className="flex flex-col">
           <label className="ds-label">컨텐츠 ID</label>
           <input
-            className="ds-input"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
             type="text"
             value={value.contentId || ''}
             onChange={(e) => handleChange('contentId', e.target.value)}
@@ -24,7 +24,7 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
         <div className="flex flex-col">
           <label className="ds-label">컨텐츠 타입</label>
           <select
-            className="ds-input cursor-pointer appearance-none"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
             value={contentType}
             onChange={(e) => onContentTypeChange(e.target.value)}
           >
@@ -37,7 +37,7 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
         <div className="flex flex-col">
           <label className="ds-label">컨텐츠명</label>
           <input
-            className="ds-input"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
             type="text"
             value={value.contentName || ''}
             onChange={(e) => handleChange('contentName', e.target.value)}
@@ -47,7 +47,7 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
         <div className="flex flex-col">
           <label className="ds-label">제작자</label>
           <input
-            className="ds-input"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
             type="text"
             value={value.creator || ''}
             onChange={(e) => handleChange('creator', e.target.value)}
@@ -57,7 +57,7 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
         <div className="flex flex-col">
           <label className="ds-label">제작일시</label>
           <input
-            className="ds-input"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
             type="datetime-local"
             value={value.createdAt || ''}
             onChange={(e) => handleChange('createdAt', e.target.value)}
@@ -66,7 +66,7 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
         <div className="flex flex-col">
           <label className="ds-label">삭제여부</label>
           <select
-            className="ds-input cursor-pointer appearance-none"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
             value={value.isDeleted || 'N'}
             onChange={(e) => handleChange('isDeleted', e.target.value)}
           >
@@ -77,7 +77,7 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
         <div className="flex flex-col">
           <label className="ds-label">생성일시</label>
           <input
-            className="ds-input"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
             type="datetime-local"
             value={value.generatedAt || ''}
             onChange={(e) => handleChange('generatedAt', e.target.value)}
@@ -86,7 +86,7 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
         <div className="flex flex-col md:col-span-2">
           <label className="ds-label">기타메모</label>
           <textarea
-            className="ds-input min-h-[100px] resize-none"
+            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all resize-none min-h-[100px]"
             value={value.memo || ''}
             onChange={(e) => handleChange('memo', e.target.value)}
             placeholder="기타 메모"

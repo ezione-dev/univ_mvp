@@ -51,7 +51,7 @@ export default function ChartSettings({ value, onChange, visible }) {
           <div className="flex flex-col">
             <label className="ds-label">X축 데이터 매핑</label>
             <select
-              className="ds-input cursor-pointer appearance-none"
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
               value={value.xAxis}
               onChange={(e) => handleChange('xAxis', e.target.value)}
             >
@@ -64,7 +64,7 @@ export default function ChartSettings({ value, onChange, visible }) {
           <div className="flex flex-col">
             <label className="ds-label">Y축 데이터 매핑</label>
             <select
-              className="ds-input cursor-pointer appearance-none"
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
               value={value.yAxis}
               onChange={(e) => handleChange('yAxis', e.target.value)}
             >
@@ -76,7 +76,7 @@ export default function ChartSettings({ value, onChange, visible }) {
           <div className="flex flex-col">
             <label className="ds-label">범례 위치</label>
             <select
-              className="ds-input cursor-pointer appearance-none"
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
               value={value.legendPosition}
               onChange={(e) => handleChange('legendPosition', e.target.value)}
             >
