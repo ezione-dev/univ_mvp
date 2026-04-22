@@ -163,7 +163,7 @@ export default function ChartGallery() {
   return (
     <div className="max-w-[1600px] mx-auto w-full flex flex-col gap-6 min-h-0">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-[#2d3133]">차트 갤러리</h1>
+        <h1 className="font-headline text-2xl font-semibold text-on-surface">차트 갤러리</h1>
       </div>
 
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -173,7 +173,7 @@ export default function ChartGallery() {
           placeholder="차트 검색..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-md border border-[#e5e8eb] px-4 py-2 text-sm text-[#2d3133] placeholder-[#a1a7b0] focus:border-secondary focus:ring-secondary md:w-64"
+          className="w-full rounded-md border border-outline-variant bg-surface-container-lowest px-4 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 md:w-64"
         />
       </div>
 
@@ -192,7 +192,7 @@ export default function ChartGallery() {
       </div>
 
       {filteredCharts.length === 0 && (
-        <div className="py-12 text-center text-[#737781]">
+        <div className="py-12 text-center text-on-surface-variant">
           검색 결과가 없습니다.
         </div>
       )}

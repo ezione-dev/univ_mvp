@@ -20,7 +20,16 @@ interface PieDonutRoseDataItem {
 
 type ScatterBubbleData = [number, number, number][];
 
-type HeatmapGridData = [number, number, number][];
+export type HeatmapGridRow = [number, number, number];
+
+/** 배열 단독 또는 축 라벨을 포함한 객체 — 갤러리에서 축 이름·눈금이 보이도록 사용 */
+export type HeatmapGridData =
+  | HeatmapGridRow[]
+  | {
+      values: HeatmapGridRow[];
+      xAxis?: { data: string[] };
+      yAxis?: { data: string[] };
+    };
 
 interface RadarData {
   indicator: { name: string; max: number }[];
@@ -109,17 +118,21 @@ export const scatterBubbleData: ScatterBubbleData = [
   [15, 45, 85],
 ];
 
-export const heatmapGridData: HeatmapGridData = [
-  [0, 0, 5],
-  [0, 1, 10],
-  [0, 2, 15],
-  [1, 0, 8],
-  [1, 1, 12],
-  [1, 2, 7],
-  [2, 0, 3],
-  [2, 1, 6],
-  [2, 2, 9],
-];
+export const heatmapGridData: HeatmapGridData = {
+  xAxis: { data: ['월', '화', '수'] },
+  yAxis: { data: ['오전', '점심', '저녁'] },
+  values: [
+    [0, 0, 5],
+    [0, 1, 10],
+    [0, 2, 15],
+    [1, 0, 8],
+    [1, 1, 12],
+    [1, 2, 7],
+    [2, 0, 3],
+    [2, 1, 6],
+    [2, 2, 9],
+  ],
+};
 
 export const radarData: RadarData = {
   indicator: [
