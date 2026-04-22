@@ -227,6 +227,11 @@ export const getUserMenus = async () => {
   return response.data;
 };
 
+export const getNavMenus = async () => {
+  const response = await api.get('/api/menus/nav');
+  return response.data.menu_tree || [];
+};
+
 export const getRoleUserMappings = async () => {
   const response = await api.get('/api/admin/role-users/mappings');
   return response.data;

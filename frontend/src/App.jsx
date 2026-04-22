@@ -3,7 +3,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import RequireSysAdmRoute from "./components/RequireSysAdmRoute";
 import DashboardLayout from "./layouts/DashboardLayout";
 import MainLayout from "./layouts/MainLayout";
-import DashboardPage from "./pages/DashboardPage";
 import MainPage from "./pages/MainPage";
 import AdmissionPage from "./pages/AdmissionPage";
 import StudentCareerPage from "./pages/StudentCareerPage";
@@ -127,28 +126,14 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {!import.meta.env.PROD && (
-        <Route
-          path="/dashboard/legacy"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DashboardPage />} />
-        </Route>
-      )}
-      {!import.meta.env.PROD && (
-        <Route
-          path="/insights"
-          element={
-            <ProtectedRoute>
-              <QueryPage />
-            </ProtectedRoute>
-          }
-        />
-      )}
+      <Route
+        path="/insights"
+        element={
+          <ProtectedRoute>
+            <QueryPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin"
         element={

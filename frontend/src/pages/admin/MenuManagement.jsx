@@ -192,6 +192,17 @@ function MenuDetailForm({
   onDelete,
   saving,
 }) {
+  const [levelHelpOpen, setLevelHelpOpen] = useState(false);
+
+  useEffect(() => {
+    if (!levelHelpOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") setLevelHelpOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [levelHelpOpen]);
+
   if (!node) {
     return (
       <div className="flex-1 bg-surface-container-lowest rounded-lg flex flex-col relative overflow-hidden shadow-[0_8px_32px_rgba(24,28,30,0.04)] min-h-[600px]">
@@ -336,13 +347,59 @@ function MenuDetailForm({
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">
-                레벨 (menu_level)
-              </label>
+            <div className="flex min-w-0 flex-col gap-2 md:col-span-2">
+              <div className="flex items-center gap-1">
+                <label
+                  htmlFor="menu-level-input"
+                  className="text-xs font-medium text-on-surface-variant uppercase tracking-wider"
+                >
+                  레벨 (menu_level)
+                </label>
+                <button
+                  type="button"
+                  id="menu-level-help-trigger"
+                  aria-expanded={levelHelpOpen}
+                  aria-controls="menu-level-help-panel"
+                  className="-m-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container-lowest"
+                  onClick={() => setLevelHelpOpen((o) => !o)}
+                >
+                  <span
+                    className="material-symbols-outlined text-[18px]"
+                    aria-hidden
+                  >
+                    info
+                  </span>
+                  <span className="sr-only">
+                    왼쪽 메뉴 들여쓰기 안내 {levelHelpOpen ? "접기" : "펼치기"}
+                  </span>
+                </button>
+              </div>
+              {levelHelpOpen ? (
+                <div
+                  id="menu-level-help-panel"
+                  role="region"
+                  aria-labelledby="menu-level-help-trigger"
+                  className="w-full rounded-lg border border-outline-variant/40 bg-surface-container-low/90 px-3 py-2 text-[11px] leading-relaxed text-on-surface-variant sm:px-4 sm:py-2.5 sm:text-xs"
+                >
+                  <span className="font-medium text-on-surface">
+                    메인 화면 왼쪽 메뉴
+                  </span>
+                  <span className="text-on-surface-variant/80"> — </span>
+                  숫자는 메뉴 깊이를 나타냅니다. 1·2단계는 같은 줄에서
+                  시작하고, 3단계부터는 한 단계 깊어질 때마다 안쪽으로 한 칸씩
+                  더 들여 보입니다. (맨 아래 하위 메뉴일수록 더 안쪽)
+                </div>
+              ) : null}
               <input
-                className="border-0 border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 bg-transparent text-on-surface font-mono text-sm"
+                id="menu-level-input"
+                className="w-full max-w-[8rem] border-0 border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 bg-transparent text-on-surface font-mono text-sm"
                 type="number"
+                min="1"
+                max="4"
+                inputMode="numeric"
+                aria-describedby={
+                  levelHelpOpen ? "menu-level-help-panel" : undefined
+                }
                 value={formData.menuLevel}
                 onChange={(e) =>
                   onChange({ ...formData, menuLevel: e.target.value })
@@ -561,6 +618,11 @@ export default function MenuManagement() {
       alert("메뉴코드와 메뉴명은 필수입니다.");
       return;
     }
+    const lvl = parseOptionalInt(formData.menuLevel);
+    if (lvl !== null && (lvl < 1 || lvl > 4)) {
+      alert("메뉴 레벨은 1~4 사이여야 합니다.");
+      return;
+    }
     try {
       setSaving(true);
       setError(null);
@@ -673,6 +735,7 @@ export default function MenuManagement() {
           loading={loading}
         />
         <MenuDetailForm
+          key={selectedNode?.menu_id ?? "none"}
           node={selectedNode}
           formData={formData}
           onChange={setFormData}

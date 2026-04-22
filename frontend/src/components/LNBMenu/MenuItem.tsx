@@ -2,30 +2,32 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import MaterialIcon from '../MaterialIcon';
 
-export default function MenuItem({ menu, isAdmin = false }) {
+export default function MenuItem({ menu, isAdmin = false, onSelect }) {
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
-  const [wasJustToggled, setWasJustToggled] = useState(false);
-  const hasChildren = menu.children && menu.children.length > 0;
-  const hasPath = !!menu.path;
-  const isActive = hasPath && location.pathname === menu.path;
+  const menuPath = menu.menu_path || menu.path;
+  const children = menu.children || [];
+  const hasChildren = children.length > 0;
+  const hasPath = !!menuPath;
+  const isActive = hasPath && location.pathname === menuPath;
 
   useEffect(() => {
     if (hasChildren && hasPath) {
-      const isParentOfActive = menu.children?.some(
-        (child) => location.pathname === child.path
+      const isParentOfActive = children.some(
+        (child) => location.pathname === (child.menu_path || child.path)
       );
       if (isParentOfActive && !expanded) {
         setExpanded(true);
-        setWasJustToggled(true);
       }
     }
-  }, [location.pathname, hasChildren, hasPath, menu.children, expanded]);
+  }, [location.pathname, hasChildren, hasPath, children, expanded]);
 
   const handleClick = () => {
+    if (hasPath) {
+      onSelect?.(menu);
+    }
     if (hasChildren) {
       setExpanded(!expanded);
-      setWasJustToggled(false);
     }
   };
 
@@ -34,21 +36,28 @@ export default function MenuItem({ menu, isAdmin = false }) {
       className="mt-1 space-y-0.5"
       style={{ animation: 'expandIn 0.15s ease-out' }}
     >
-      {menu.children.map((child) => (
-        <MenuItem key={child.menu_id} menu={child} isAdmin={isAdmin} />
+      {children.map((child) => (
+        <MenuItem key={child.menu_id} menu={child} isAdmin={isAdmin} onSelect={onSelect} />
       ))}
     </div>
   );
+
+  // DB menu_level: 1=루트 … 동적 `pl-${n}`는 Tailwind JIT에 잡히지 않을 수 있고,
+  // 레벨3→pl-3은 px-3(12px)과 같아 들여쓰기가 안 보이기도 함 → px 기준 추가만큼만 왼쪽 패딩.
+  const lvl = Number(menu.menu_level);
+  const menuLevel = Number.isFinite(lvl) ? lvl : 0;
+  const extraIndentPx = menuLevel > 2 ? (menuLevel - 2) * 10 : 0;
 
   const content = (
     <div
       onClick={handleClick}
       className={[
-        'group relative flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-all duration-150',
+        'group relative flex items-center gap-2.5 py-2 pr-3 rounded-lg cursor-pointer transition-all duration-150',
         isActive && hasPath
           ? 'bg-white shadow-sm'
           : 'hover:bg-white/60',
       ].join(' ')}
+      style={{ paddingLeft: `${12 + extraIndentPx}px` }}
       role={hasChildren ? 'button' : undefined}
       aria-expanded={hasChildren ? expanded : undefined}
     >
@@ -66,7 +75,7 @@ export default function MenuItem({ menu, isAdmin = false }) {
             : isAdmin
               ? 'text-[#2d3133]'
               : 'text-[#181c1e]',
-          !isActive && !isActive && 'group-hover:text-[#002c5a]',
+          !isActive && 'group-hover:text-[#002c5a]',
         ].join(' ')}
       >
         {menu.menu_nm}
@@ -86,9 +95,9 @@ export default function MenuItem({ menu, isAdmin = false }) {
   if (hasPath && !hasChildren) {
     return (
       <Link
-        to={menu.path}
+        to={menuPath}
         className="block"
-        onClick={() => setWasJustToggled(false)}
+        onClick={() => onSelect?.(menu)}
       >
         {content}
       </Link>

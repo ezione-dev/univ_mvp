@@ -26,15 +26,4 @@ export const ADMIN_MENUS: MenuItem[] = [
     menu_nm: '권한 그룹별 사용자 관리',
     path: '/admin/role-users',
   },
-  {
-    menu_id: 901,
-    menu_nm: '테스트',
-    children: [
-      {
-        menu_id: 911,
-        menu_nm: '역할별 메뉴관리',
-        path: '/admin/role-menu',
-      },
-    ],
-  },
 ];
