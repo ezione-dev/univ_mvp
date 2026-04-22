@@ -3,6 +3,22 @@ export default function CardSettings({ value, onChange, visible }) {
     onChange({ ...value, [field]: fieldValue });
   };
 
+  const handleItemChange = (index, field, fieldValue) => {
+    const newItems = [...(value.items || [])];
+    newItems[index] = { ...newItems[index], [field]: fieldValue };
+    onChange({ ...value, items: newItems });
+  };
+
+  const addItem = () => {
+    const newItems = [...(value.items || []), { itemTitle: '', isAmount: false }];
+    onChange({ ...value, items: newItems });
+  };
+
+  const removeItem = (index) => {
+    const newItems = value.items.filter((_, i) => i !== index);
+    onChange({ ...value, items: newItems });
+  };
+
   if (!visible) return null;
 
   return (
@@ -13,66 +29,79 @@ export default function CardSettings({ value, onChange, visible }) {
           <h2 className="font-headline text-xl font-bold text-primary">카드 설정</h2>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex flex-col">
-          <label className="ds-label">카드 제목</label>
-          <input
-            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
-            type="text"
-            value={value.cardTitle}
-            onChange={(e) => handleChange('cardTitle', e.target.value)}
-            placeholder="카드 제목을 입력하세요"
-          />
+      <div className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col">
+            <label className="ds-label">카드 제목</label>
+            <input
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
+              type="text"
+              value={value.cardTitle || ''}
+              onChange={(e) => handleChange('cardTitle', e.target.value)}
+              placeholder="카드 제목을 입력하세요"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="ds-label">제목 위치</label>
+            <select
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
+              value={value.titlePosition || 'left-top'}
+              onChange={(e) => handleChange('titlePosition', e.target.value)}
+            >
+              <option value="left-top">좌측 상단</option>
+              <option value="center">중앙</option>
+              <option value="right-top">우측 상단</option>
+            </select>
+          </div>
         </div>
-        <div className="flex flex-col">
-          <label className="ds-label">제목 위치</label>
-          <select
-            className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
-            value={value.titlePosition}
-            onChange={(e) => handleChange('titlePosition', e.target.value)}
-          >
-            <option value="left-top">좌측 상단</option>
-            <option value="center">중앙</option>
-            <option value="right-top">우측 상단</option>
-          </select>
-        </div>
-        <div className="flex flex-col md:col-span-2">
-          <label className="ds-label flex items-center justify-between">
-            <span>콘텐츠 항목 수</span>
-            <span className="text-xs text-on-surface-variant normal-case">표시할 데이터 개수</span>
-          </label>
-          <div className="flex items-center gap-4 mt-1">
-            <div className="flex items-center bg-surface-container-low rounded-lg border border-outline-variant/30 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => handleChange('itemCount', Math.max(1, (value.itemCount || 1) - 1))}
-                className="px-3 py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
-              >
-                <span className="material-symbols-outlined text-sm">remove</span>
-              </button>
-              <input
-                className="w-16 bg-transparent border-none text-center text-sm font-medium focus:ring-0 p-0"
-                type="number"
-                min="1"
-                value={value.itemCount}
-                onChange={(e) => handleChange('itemCount', parseInt(e.target.value) || 1)}
-              />
-              <button
-                type="button"
-                onClick={() => handleChange('itemCount', (value.itemCount || 1) + 1)}
-                className="px-3 py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
-              >
-                <span className="material-symbols-outlined text-sm">add</span>
-              </button>
-            </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <label className="ds-label mb-0">카드 내용</label>
             <button
               type="button"
-              className="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-lg text-sm font-medium hover:bg-secondary-fixed transition-colors flex items-center gap-2"
+              onClick={addItem}
+              className="text-xs flex items-center gap-1 text-secondary hover:text-primary transition-colors font-medium"
             >
-              <span className="material-symbols-outlined text-[16px]">add_circle</span>
-              항목 설정 추가
+              <span className="material-symbols-outlined text-[14px]">add</span>
+              항목 추가
             </button>
           </div>
+          {(value.items || []).map((item, index) => (
+            <div
+              key={index}
+              className="flex flex-col md:flex-row gap-4 p-4 bg-surface-container-low rounded-lg border border-outline-variant/20 items-start md:items-end"
+            >
+              <div className="flex flex-col w-full">
+                <label className="ds-label">항목 제목</label>
+                <input
+                  className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
+                  type="text"
+                  value={item.itemTitle || ''}
+                  onChange={(e) => handleItemChange(index, 'itemTitle', e.target.value)}
+                  placeholder="항목 제목"
+                />
+              </div>
+              <div className="flex flex-col shrink-0">
+                <label className="ds-label">금액</label>
+                <div className="flex items-center h-[48px]">
+                  <input
+                    type="checkbox"
+                    id={`isAmount-${index}`}
+                    checked={item.isAmount || false}
+                    onChange={(e) => handleItemChange(index, 'isAmount', e.target.checked)}
+                    className="w-5 h-5 rounded border-outline-variant text-secondary focus:ring-2 focus:ring-secondary/20 cursor-pointer"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => removeItem(index)}
+                className="p-2.5 text-on-surface-variant hover:text-error transition-colors rounded-lg hover:bg-error-container/50 self-end mb-[2px]"
+              >
+                <span className="material-symbols-outlined text-xl">delete</span>
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </section>

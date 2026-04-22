@@ -20,7 +20,7 @@ export function ContentsCreate() {
   const [contentType, setContentType] = useState('chart');
   const [chartData, setChartData] = useState({ chartTitle: '', chartTitlePosition: 'top', chartType: 'bar', xAxis: '', yAxis: '', legendPosition: 'right' });
   const [gridData, setGridData] = useState({ sectionTitle: '', columns: [] });
-  const [cardData, setCardData] = useState({ cardTitle: '', titlePosition: 'left-top', itemCount: 1 });
+  const [cardData, setCardData] = useState({ cardTitle: '', titlePosition: 'left-top', items: [] });
   const [sqlData, setSqlData] = useState({ sql: '' });
 
   const handleSave = () => {
@@ -40,7 +40,7 @@ export function ContentsCreate() {
     setContentType('chart');
     setChartData({ chartTitle: '', chartTitlePosition: 'top', chartType: 'bar', xAxis: '', yAxis: '', legendPosition: 'right' });
     setGridData({ sectionTitle: '', columns: [] });
-    setCardData({ cardTitle: '', titlePosition: 'left-top', itemCount: 1 });
+    setCardData({ cardTitle: '', titlePosition: 'left-top', items: [] });
     setSqlData({ sql: '' });
   };
 
