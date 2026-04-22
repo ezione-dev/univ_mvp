@@ -10,7 +10,7 @@ export default function CardSettings({ value, onChange, visible }) {
   };
 
   const addItem = () => {
-    const newItems = [...(value.items || []), { itemTitle: '', isAmount: false }];
+    const newItems = [...(value.items || []), { label: '', content: '', color: '#002c5a' }];
     onChange({ ...value, items: newItems });
   };
 
@@ -72,24 +72,34 @@ export default function CardSettings({ value, onChange, visible }) {
               className="flex flex-col md:flex-row gap-4 p-4 bg-surface-container-low rounded-lg border border-outline-variant/20 items-start md:items-end"
             >
               <div className="flex flex-col w-full">
-                <label className="ds-label">항목 제목</label>
+                <label className="ds-label">라벨</label>
                 <input
                   className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
                   type="text"
-                  value={item.itemTitle || ''}
-                  onChange={(e) => handleItemChange(index, 'itemTitle', e.target.value)}
-                  placeholder="항목 제목"
+                  value={item.label || ''}
+                  onChange={(e) => handleItemChange(index, 'label', e.target.value)}
+                  placeholder="라벨"
+                />
+              </div>
+              <div className="flex flex-col w-full">
+                <label className="ds-label">내용</label>
+                <input
+                  className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
+                  type="text"
+                  value={item.content || ''}
+                  onChange={(e) => handleItemChange(index, 'content', e.target.value)}
+                  placeholder="내용"
                 />
               </div>
               <div className="flex flex-col shrink-0">
-                <label className="ds-label">금액</label>
-                <div className="flex items-center h-[48px]">
+                <label className="ds-label">색상</label>
+                <div className="flex items-center h-[48px] gap-2">
                   <input
-                    type="checkbox"
-                    id={`isAmount-${index}`}
-                    checked={item.isAmount || false}
-                    onChange={(e) => handleItemChange(index, 'isAmount', e.target.checked)}
-                    className="w-5 h-5 rounded border-outline-variant text-secondary focus:ring-2 focus:ring-secondary/20 cursor-pointer"
+                    type="color"
+                    id={`color-${index}`}
+                    value={item.color || '#002c5a'}
+                    onChange={(e) => handleItemChange(index, 'color', e.target.value)}
+                    className="w-10 h-10 rounded border border-outline-variant cursor-pointer"
                   />
                 </div>
               </div>
