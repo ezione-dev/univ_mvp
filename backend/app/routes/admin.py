@@ -46,7 +46,7 @@ class AdminMenuCreateBody(BaseModel):
     menu_cd: str = Field(..., min_length=1)
     menu_nm: str = Field(..., min_length=1)
     parent_menu_id: Optional[str | int] = None
-    menu_level: Optional[int] = None
+    menu_level: Optional[int] = Field(default=None, ge=1, le=4)
     menu_path: Optional[str] = None
     screen_id: Optional[str] = None
     sort_order: Optional[int] = None
@@ -56,7 +56,7 @@ class AdminMenuPatchBody(BaseModel):
     menu_cd: Optional[str] = None
     menu_nm: Optional[str] = None
     parent_menu_id: Optional[str | int] = None
-    menu_level: Optional[int] = None
+    menu_level: Optional[int] = Field(default=None, ge=1, le=4)
     menu_path: Optional[str] = None
     screen_id: Optional[str] = None
     sort_order: Optional[int] = None

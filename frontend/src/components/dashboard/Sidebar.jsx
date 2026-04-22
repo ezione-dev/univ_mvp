@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MaterialIcon from '../MaterialIcon';
-import { getNavMenus } from '../../services/api';
+import { useNavMenuStore } from '../../stores/navMenuStore';
 
 const SidebarMenuItem = React.memo(function SidebarMenuItem({ menu, level, activeMenuId, onSelect }) {
   const [expanded, setExpanded] = useState(level === 0);
@@ -88,29 +88,13 @@ const SidebarMenuItem = React.memo(function SidebarMenuItem({ menu, level, activ
 export default function Sidebar({ open, onClose }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [navMenus, setNavMenus] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { navMenus, loading, fetchNavMenus } = useNavMenuStore();
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const data = await getNavMenus();
-        if (cancelled) return;
-        if (Array.isArray(data)) {
-          setNavMenus(data);
-        } else {
-          setNavMenus([]);
-        }
-      } catch {
-        if (!cancelled) setNavMenus([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, []);
+    if (navMenus.length === 0) {
+      fetchNavMenus();
+    }
+  }, [navMenus.length, fetchNavMenus]);
 
   const level1Menus = useMemo(
     () => navMenus.filter((m) => m.parent_menu_id === null),

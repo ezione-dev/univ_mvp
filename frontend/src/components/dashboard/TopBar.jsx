@@ -1,41 +1,19 @@
-import { useRef, useState, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MaterialIcon from '../MaterialIcon';
-import { getNavMenus } from '../../services/api';
+import { useNavMenuStore } from '../../stores/navMenuStore';
 
 export default function TopBar({ onMenuClick }) {
   const scrollRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const [navMenus, setNavMenus] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { navMenus, loading, fetchNavMenus } = useNavMenuStore();
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const data = await getNavMenus();
-        if (cancelled) return;
-        if (Array.isArray(data)) {
-          setNavMenus(data);
-        } else {
-          setNavMenus([]);
-        }
-      } catch {
-        if (!cancelled) {
-          setNavMenus([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (navMenus.length === 0) {
+      fetchNavMenus();
+    }
+  }, [navMenus.length, fetchNavMenus]);
 
   const level1Menus = useMemo(
     () => navMenus.filter((menu) => menu.parent_menu_id === null),
