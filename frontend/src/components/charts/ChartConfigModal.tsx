@@ -74,7 +74,7 @@ export default function ChartConfigModal({
               type="text"
               value={localConfig.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-[#006_one] focus:outline-none focus:ring-1 focus:ring-[#006_one]"
+              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-secondary focus:ring-secondary"
             />
           </div>
 
@@ -84,7 +84,7 @@ export default function ChartConfigModal({
               type="text"
               value={localConfig.xAxisName}
               onChange={(e) => handleChange('xAxisName', e.target.value)}
-              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-[#006_one] focus:outline-none focus:ring-1 focus:ring-[#006_one]"
+              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-secondary focus:ring-secondary"
             />
           </div>
 
@@ -94,7 +94,7 @@ export default function ChartConfigModal({
               type="text"
               value={localConfig.yAxisName}
               onChange={(e) => handleChange('yAxisName', e.target.value)}
-              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-[#006_one] focus:outline-none focus:ring-1 focus:ring-[#006_one]"
+              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-secondary focus:ring-secondary"
             />
           </div>
 
@@ -103,7 +103,7 @@ export default function ChartConfigModal({
             <select
               value={localConfig.titlePosition}
               onChange={(e) => handleChange('titlePosition', e.target.value as TitlePosition)}
-              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-[#006_one] focus:outline-none focus:ring-1 focus:ring-[#006_one]"
+              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-secondary focus:ring-secondary"
             >
               {TITLE_POSITIONS.map((pos) => (
                 <option key={pos} value={pos}>
@@ -118,7 +118,7 @@ export default function ChartConfigModal({
             <select
               value={localConfig.legendPosition}
               onChange={(e) => handleChange('legendPosition', e.target.value as typeof localConfig.legendPosition)}
-              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-[#006_one] focus:outline-none focus:ring-1 focus:ring-[#006_one]"
+              className="col-span-3 rounded-md border border-[#e5e8eb] px-3 py-2 text-sm text-[#2d3133] focus:border-secondary focus:ring-secondary"
             >
               {LEGEND_POSITIONS.map((pos) => (
                 <option key={pos} value={pos}>
