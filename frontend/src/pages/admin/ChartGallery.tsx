@@ -173,7 +173,7 @@ export default function ChartGallery() {
           placeholder="차트 검색..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-md border border-[#e5e8eb] px-4 py-2 text-sm text-[#2d3133] placeholder-[#a1a7b0] focus:border-[#006_one] focus:outline-none focus:ring-1 focus:ring-[#006_one] md:w-64"
+          className="w-full rounded-md border border-[#e5e8eb] px-4 py-2 text-sm text-[#2d3133] placeholder-[#a1a7b0] focus:border-secondary focus:ring-secondary md:w-64"
         />
       </div>
 
