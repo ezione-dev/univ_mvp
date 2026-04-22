@@ -11,13 +11,18 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
         <div className="flex flex-col">
-          <label className="ds-label">콘텐츠 ID</label>
-          <div className="bg-surface px-4 py-3 rounded-lg text-on-surface-variant font-mono text-sm border border-outline-variant/30">
-            CNT-2023-089-A
-          </div>
+          <label className="ds-label">컨텐츠 ID</label>
+          <input
+            className="ds-input"
+            type="text"
+            value={value.contentId || ''}
+            onChange={(e) => handleChange('contentId', e.target.value)}
+            placeholder="자동 생성"
+            readOnly={!value.isNew}
+          />
         </div>
         <div className="flex flex-col">
-          <label className="ds-label">콘텐츠 유형</label>
+          <label className="ds-label">컨텐츠 타입</label>
           <select
             className="ds-input cursor-pointer appearance-none"
             value={contentType}
@@ -30,35 +35,62 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
           </select>
         </div>
         <div className="flex flex-col">
-          <label className="ds-label" htmlFor="title">제목 (Title)</label>
+          <label className="ds-label">컨텐츠명</label>
           <input
-            id="title"
-            type="text"
-            value={value.title}
-            onChange={(e) => handleChange('title', e.target.value)}
-            placeholder="대시보드에 표시될 메인 타이틀"
             className="ds-input"
+            type="text"
+            value={value.contentName || ''}
+            onChange={(e) => handleChange('contentName', e.target.value)}
+            placeholder="컨텐츠명을 입력하세요"
           />
         </div>
         <div className="flex flex-col">
-          <label className="ds-label" htmlFor="subtitle">부제목 (Subtitle)</label>
+          <label className="ds-label">제작자</label>
           <input
-            id="subtitle"
-            type="text"
-            value={value.subtitle}
-            onChange={(e) => handleChange('subtitle', e.target.value)}
-            placeholder="제목을 보조하는 추가 설명"
             className="ds-input"
+            type="text"
+            value={value.creator || ''}
+            onChange={(e) => handleChange('creator', e.target.value)}
+            placeholder="제작자"
           />
         </div>
-        <div className="flex flex-col md:col-span-2">
-          <label className="ds-label" htmlFor="memo">내부 메모 (Memo)</label>
-          <textarea
-            id="memo"
-            value={value.memo}
+        <div className="flex flex-col">
+          <label className="ds-label">제작일시</label>
+          <input
+            className="ds-input"
+            type="datetime-local"
+            value={value.createdAt || ''}
+            onChange={(e) => handleChange('createdAt', e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="ds-label">삭제여부</label>
+          <select
+            className="ds-input cursor-pointer appearance-none"
+            value={value.isDeleted || 'N'}
+            onChange={(e) => handleChange('isDeleted', e.target.value)}
+          >
+            <option value="N">사용</option>
+            <option value="Y">삭제</option>
+          </select>
+        </div>
+        <div className="flex flex-col">
+          <label className="ds-label">생성일시</label>
+          <input
+            className="ds-input"
+            type="datetime-local"
+            value={value.generatedAt || ''}
+            onChange={(e) => handleChange('generatedAt', e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="ds-label">기타메모</label>
+          <input
+            className="ds-input"
+            type="text"
+            value={value.memo || ''}
             onChange={(e) => handleChange('memo', e.target.value)}
-            placeholder="관리자용 메모를 입력하세요..."
-            className="ds-input min-h-[100px] resize-none"
+            placeholder="기타 메모"
           />
         </div>
       </div>

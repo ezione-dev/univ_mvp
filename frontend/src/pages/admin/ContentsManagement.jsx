@@ -8,7 +8,15 @@ import CardSettings from '../../components/content-creation/CardSettings';
 import SqlSettings from '../../components/content-creation/SqlSettings';
 
 export function ContentsCreate() {
-  const [generalInfo, setGeneralInfo] = useState({ title: '', subtitle: '', memo: '' });
+  const [generalInfo, setGeneralInfo] = useState({
+    contentId: '',
+    contentName: '',
+    creator: '',
+    createdAt: '',
+    isDeleted: 'N',
+    generatedAt: '',
+    memo: ''
+  });
   const [contentType, setContentType] = useState('chart');
   const [chartData, setChartData] = useState({ chartType: 'bar', xAxis: '', yAxis: '', legendPosition: 'top' });
   const [gridData, setGridData] = useState({ sectionTitle: '', columns: [] });
@@ -37,7 +45,7 @@ export function ContentsCreate() {
   };
 
   const handleCancel = () => {
-    setGeneralInfo({ title: '', subtitle: '', memo: '' });
+    setGeneralInfo({ contentId: '', contentName: '', creator: '', createdAt: '', isDeleted: 'N', generatedAt: '', memo: '' });
     setContentType('chart');
     setChartData({ chartType: 'bar', xAxis: '', yAxis: '', legendPosition: 'top' });
     setGridData({ sectionTitle: '', columns: [] });
@@ -68,7 +76,7 @@ export function ContentsCreate() {
           </div>
         }
       />
-      <main className="max-w-[1400px] mx-auto flex flex-col gap-8">
+      <main className="w-full max-w-[1400px] mx-auto flex flex-col gap-8">
         <GeneralInfoSection
           value={generalInfo}
           onChange={setGeneralInfo}

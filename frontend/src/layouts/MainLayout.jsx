@@ -7,8 +7,8 @@ export default function MainLayout({ children }) {
   const isAdminArea = pathname.startsWith('/admin');
 
   const mainClassName = [
-    'flex-1 w-full max-w-[1920px] mx-auto h-full overflow-y-auto',
-    isAdminArea && 'px-8 pt-8 pb-12 lg:px-12 box-border',
+    'flex-1 w-full max-w-[1920px] mx-auto h-full',
+    isAdminArea ? 'overflow-y-scroll px-8 pt-8 pb-12 lg:px-12 box-border' : 'overflow-y-auto',
   ]
     .filter(Boolean)
     .join(' ');
