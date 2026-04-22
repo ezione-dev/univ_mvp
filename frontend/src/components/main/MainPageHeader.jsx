@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
-import { getNavMenus } from '../../services/api';
+import { useNavMenuStore } from '../../stores/navMenuStore';
 
 function profileInitials(user) {
   if (!user) return '?';
@@ -37,23 +38,14 @@ export default function MainPageHeader() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const [avatarFailed, setAvatarFailed] = useState(false);
-  const [navMenus, setNavMenus] = useState([]);
+  const { navMenus, fetchNavMenus } = useNavMenuStore();
   const avatarUrl = user?.avatar_url || user?.photo_url;
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const data = await getNavMenus();
-        if (cancelled) return;
-        setNavMenus(Array.isArray(data) ? data : []);
-      } catch {
-        if (!cancelled) setNavMenus([]);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, []);
+    if (navMenus.length === 0) {
+      fetchNavMenus();
+    }
+  }, [navMenus.length, fetchNavMenus]);
 
   useEffect(() => {
     setAvatarFailed(false);

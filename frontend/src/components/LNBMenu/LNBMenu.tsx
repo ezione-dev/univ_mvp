@@ -1,17 +1,23 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import MenuItem from './MenuItem';
-import { getNavMenus } from '../../services/api';
+import { useNavMenuStore } from '../../stores/navMenuStore';
 import MaterialIcon from '../MaterialIcon';
 
 /** pathname에 맞는 1레벨 메뉴 (여러 개 매칭 시 가장 긴 menu_path — /admin vs / 등 충돌 방지) */
 function pickLevel1ForPath(level1Menus, pathname) {
-  const matches = level1Menus.filter(
-    (m) => m.menu_path && pathname.startsWith(String(m.menu_path))
+  const withPath = level1Menus.filter(
+    (m) => typeof m.menu_path === 'string' && m.menu_path.length > 0
+  );
+  if (!withPath.length) return null;
+
+  const matches = withPath.filter((m) =>
+    pathname.startsWith(m.menu_path)
   );
   if (!matches.length) return null;
+
   return matches.reduce((best, m) =>
-    String(m.menu_path).length > String(best.menu_path).length ? m : best
+    m.menu_path.length > best.menu_path.length ? m : best
   );
 }
 
@@ -34,25 +40,13 @@ function LnbMenuEmptyState({ title, hint }) {
 
 export default function LNBMenu() {
   const location = useLocation();
-  const [navMenus, setNavMenus] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { navMenus, loading, fetchNavMenus } = useNavMenuStore();
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const data = await getNavMenus();
-        if (cancelled) return;
-        setNavMenus(Array.isArray(data) ? data : []);
-      } catch {
-        if (!cancelled) setNavMenus([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, []);
+    if (navMenus.length === 0) {
+      fetchNavMenus();
+    }
+  }, [navMenus.length, fetchNavMenus]);
 
   const level1Menus = useMemo(
     () => navMenus.filter(menu => menu.parent_menu_id === null),
