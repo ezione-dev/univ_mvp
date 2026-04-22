@@ -35,6 +35,8 @@ export default function ChartConfigModal({
     titlePosition: chartConfig.titlePosition ?? 'center',
   });
 
+  const supportsXYAxisName = !['treemap', 'radar'].includes(localConfig.chartType);
+
   useEffect(() => {
     if (isOpen) {
       setLocalConfig(chartConfig);
@@ -42,7 +44,10 @@ export default function ChartConfigModal({
   }, [isOpen, chartConfig]);
 
   const handleSave = () => {
-    onSave(localConfig);
+    const nextConfig = supportsXYAxisName
+      ? localConfig
+      : { ...localConfig, xAxisName: '', yAxisName: '' };
+    onSave(nextConfig);
     onClose();
   };
 
@@ -97,7 +102,8 @@ export default function ChartConfigModal({
               type="text"
               value={localConfig.xAxisName}
               onChange={(e) => handleChange('xAxisName', e.target.value)}
-              className={inputClassName}
+              className={`${inputClassName} ${supportsXYAxisName ? '' : 'cursor-not-allowed opacity-60'}`}
+              disabled={!supportsXYAxisName}
             />
           </div>
 
@@ -107,9 +113,16 @@ export default function ChartConfigModal({
               type="text"
               value={localConfig.yAxisName}
               onChange={(e) => handleChange('yAxisName', e.target.value)}
-              className={inputClassName}
+              className={`${inputClassName} ${supportsXYAxisName ? '' : 'cursor-not-allowed opacity-60'}`}
+              disabled={!supportsXYAxisName}
             />
           </div>
+
+          {!supportsXYAxisName && (
+            <p className="-mt-2 text-xs text-on-surface-variant">
+              이 차트 타입에서는 X/Y축 이름 설정을 지원하지 않습니다.
+            </p>
+          )}
 
           <div className="grid grid-cols-4 items-center gap-3">
             <label className="text-sm text-on-surface-variant">타이틀 위치</label>
