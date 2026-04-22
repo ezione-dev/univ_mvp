@@ -24,23 +24,14 @@ export function ContentsCreate() {
   const [sqlData, setSqlData] = useState({ sql: '' });
 
   const handleSave = () => {
-    let result;
-    switch (contentType) {
-      case 'chart':
-        result = { general: generalInfo, contentType: 'chart', data: chartData };
-        break;
-      case 'grid':
-        result = { general: generalInfo, contentType: 'grid', data: gridData };
-        break;
-      case 'card':
-        result = { general: generalInfo, contentType: 'card', data: cardData };
-        break;
-      case 'sql':
-        result = { general: generalInfo, contentType: 'sql', data: sqlData };
-        break;
-      default:
-        result = { general: generalInfo, contentType };
-    }
+    const result = {
+      ...generalInfo,
+      contentType,
+      data: (contentType === 'chart' && chartData) ||
+           (contentType === 'grid' && gridData) ||
+           (contentType === 'card' && cardData) ||
+           (contentType === 'sql' && sqlData)
+    };
     console.log(result);
   };
 

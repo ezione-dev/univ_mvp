@@ -83,11 +83,10 @@ export default function GeneralInfoSection({ value, onChange, contentType, onCon
             onChange={(e) => handleChange('generatedAt', e.target.value)}
           />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col md:col-span-2">
           <label className="ds-label">기타메모</label>
-          <input
-            className="ds-input"
-            type="text"
+          <textarea
+            className="ds-input min-h-[100px] resize-none"
             value={value.memo || ''}
             onChange={(e) => handleChange('memo', e.target.value)}
             placeholder="기타 메모"
