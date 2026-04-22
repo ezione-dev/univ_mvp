@@ -403,7 +403,7 @@ function buildScatterOption(data: any, config: UniversalChartProps['config']) {
 
 function buildBubbleOption(data: any, config: UniversalChartProps['config']) {
   const rawData = Array.isArray(data) ? data : (data.values || data.data || []);
-  const bubbleData = rawData.map((d: number[]) => [d[0], d[1], d[2] || Math.random() * 50 + 10]);
+  const bubbleData = rawData.map((d: number[]) => [d[0], d[1], d[2] ?? Math.random() * 50 + 10]);
 
   return {
     ...COMMON_THEME,
@@ -811,7 +811,7 @@ function buildGaugeOption(data: any, config: UniversalChartProps['config']) {
       radius: '90%',
       min: 0,
       max: 100,
-      value,
+      data: [{ value }],
       splitNumber: 8,
       axisLine: {
         lineStyle: {
