@@ -67,7 +67,7 @@ export function ContentsCreate() {
           </div>
         }
       />
-      <main className="w-full max-w-[1400px] mx-auto flex flex-col gap-8">
+      <main className="w-full max-w-[1400px] mx-auto flex flex-col gap-8 pb-12">
         <GeneralInfoSection
           value={generalInfo}
           onChange={setGeneralInfo}

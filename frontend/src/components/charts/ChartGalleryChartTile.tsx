@@ -11,6 +11,7 @@ export interface ChartGalleryChartTileProps {
     xAxisName?: string;
     yAxisName?: string;
     legendPosition?: 'top' | 'bottom' | 'left' | 'right';
+    titlePosition?: 'left' | 'center' | 'right';
   };
   onChartClick?: (chartId: string) => void;
   isLoading?: boolean;
