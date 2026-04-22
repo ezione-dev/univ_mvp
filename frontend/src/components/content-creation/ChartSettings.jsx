@@ -19,9 +19,34 @@ export default function ChartSettings({ value, onChange, visible }) {
         <span className="material-symbols-outlined text-secondary">bar_chart</span>
         <h2 className="font-headline text-xl font-bold text-primary">차트 설정</h2>
       </div>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col">
+            <label className="ds-label">차트 제목</label>
+            <input
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
+              type="text"
+              value={value.chartTitle || ''}
+              onChange={(e) => handleChange('chartTitle', e.target.value)}
+              placeholder="차트 제목을 입력하세요"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="ds-label">차트 제목 위치</label>
+            <select
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
+              value={value.chartTitlePosition || 'top'}
+              onChange={(e) => handleChange('chartTitlePosition', e.target.value)}
+            >
+              <option value="top">상단</option>
+              <option value="bottom">하단</option>
+              <option value="left">좌측</option>
+              <option value="right">우측</option>
+            </select>
+          </div>
+        </div>
         <div>
-          <label className="ds-label mb-3 block">차트 유형 선택</label>
+          <label className="ds-label mb-3 block">차트 유형</label>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {chartTypes.map((type) => (
               <div
@@ -49,41 +74,36 @@ export default function ChartSettings({ value, onChange, visible }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="flex flex-col">
-            <label className="ds-label">X축 데이터 매핑</label>
-            <select
-              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
-              value={value.xAxis}
+            <label className="ds-label">X축 컬럼명</label>
+            <input
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
+              type="text"
+              value={value.xAxis || ''}
               onChange={(e) => handleChange('xAxis', e.target.value)}
-            >
-              <option value="">선택하세요</option>
-              <option value="base_year">base_year (기준연도)</option>
-              <option value="department_nm">department_nm (학과명)</option>
-              <option value="college_nm">college_nm (단과대명)</option>
-            </select>
+              placeholder="X축 컬럼명"
+            />
           </div>
           <div className="flex flex-col">
-            <label className="ds-label">Y축 데이터 매핑</label>
-            <select
-              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
-              value={value.yAxis}
+            <label className="ds-label">Y축 컬럼명</label>
+            <input
+              className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
+              type="text"
+              value={value.yAxis || ''}
               onChange={(e) => handleChange('yAxis', e.target.value)}
-            >
-              <option value="">선택하세요</option>
-              <option value="tuition_revenue">tuition_revenue (등록금 수익)</option>
-              <option value="student_count">student_count (학생 수)</option>
-            </select>
+              placeholder="Y축 컬럼명"
+            />
           </div>
           <div className="flex flex-col">
             <label className="ds-label">범례 위치</label>
             <select
               className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all cursor-pointer appearance-none"
-              value={value.legendPosition}
+              value={value.legendPosition || 'right'}
               onChange={(e) => handleChange('legendPosition', e.target.value)}
             >
-              <option value="top">상단 (Top)</option>
-              <option value="right">우측 (Right)</option>
-              <option value="bottom">하단 (Bottom)</option>
-              <option value="hidden">숨김 (Hidden)</option>
+              <option value="top">상단</option>
+              <option value="right">우측</option>
+              <option value="bottom">하단</option>
+              <option value="hidden">숨김</option>
             </select>
           </div>
         </div>

@@ -18,7 +18,7 @@ export function ContentsCreate() {
     memo: ''
   });
   const [contentType, setContentType] = useState('chart');
-  const [chartData, setChartData] = useState({ chartType: 'bar', xAxis: '', yAxis: '', legendPosition: 'top' });
+  const [chartData, setChartData] = useState({ chartTitle: '', chartTitlePosition: 'top', chartType: 'bar', xAxis: '', yAxis: '', legendPosition: 'right' });
   const [gridData, setGridData] = useState({ sectionTitle: '', columns: [] });
   const [cardData, setCardData] = useState({ cardTitle: '', titlePosition: 'left-top', itemCount: 1 });
   const [sqlData, setSqlData] = useState({ sql: '' });
@@ -38,7 +38,7 @@ export function ContentsCreate() {
   const handleCancel = () => {
     setGeneralInfo({ contentId: '', contentName: '', creator: '', createdAt: '', isDeleted: 'N', generatedAt: '', memo: '' });
     setContentType('chart');
-    setChartData({ chartType: 'bar', xAxis: '', yAxis: '', legendPosition: 'top' });
+    setChartData({ chartTitle: '', chartTitlePosition: 'top', chartType: 'bar', xAxis: '', yAxis: '', legendPosition: 'right' });
     setGridData({ sectionTitle: '', columns: [] });
     setCardData({ cardTitle: '', titlePosition: 'left-top', itemCount: 1 });
     setSqlData({ sql: '' });
