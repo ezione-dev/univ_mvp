@@ -6,6 +6,9 @@ import ChartSettings from '../../components/content-creation/ChartSettings';
 import GridSettings from '../../components/content-creation/GridSettings';
 import CardSettings from '../../components/content-creation/CardSettings';
 import SqlSettings from '../../components/content-creation/SqlSettings';
+import ContentsTable from '../../components/content-list/ContentsTable';
+import ContentsDetail from '../../components/content-list/ContentsDetail';
+import { mockContents } from '../../data/mockContents';
 
 export function ContentsCreate() {
   const [generalInfo, setGeneralInfo] = useState({
@@ -28,9 +31,9 @@ export function ContentsCreate() {
       ...generalInfo,
       contentType,
       data: (contentType === 'chart' && chartData) ||
-           (contentType === 'grid' && gridData) ||
-           (contentType === 'card' && cardData) ||
-           (contentType === 'sql' && sqlData)
+        (contentType === 'grid' && gridData) ||
+        (contentType === 'card' && cardData) ||
+        (contentType === 'sql' && sqlData)
     };
     console.log(result);
   };
@@ -84,55 +87,32 @@ export function ContentsCreate() {
 }
 
 export function ContentsList() {
+  const [selectedId, setSelectedId] = useState(
+    mockContents.length > 0 ? mockContents[0].contentId : null
+  );
+
+  const selectedContent = mockContents.find((c) => c.contentId === selectedId) || null;
+
   return (
     <div className={ADMIN_PAGE_CONTAINER_CLASS}>
       <PageHeader
         title="컨텐츠 목록"
         description="생성된 AI 쿼리, 차트·테이블·카드 설정을 확인하고 관리합니다."
       />
-      <div className="flex-1 flex items-center justify-center min-h-[480px]">
-        <div className="flex flex-col items-center gap-6 text-center max-w-md">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-surface-container-low to-surface-container-high border border-outline-variant/30 flex items-center justify-center shadow-[0_8px_32px_rgba(24,28,30,0.06)]">
-              <span className="material-symbols-outlined text-5xl text-primary/60">construction</span>
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
-              <span className="material-symbols-outlined text-sm text-on-primary">construction</span>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h2 className="font-headline font-bold text-2xl text-primary tracking-tight">준비 중입니다</h2>
-            <p className="text-on-surface-variant text-sm leading-relaxed">컨텐츠 목록 조회 기능을 곧 제공할 예정입니다.</p>
-          </div>
+      <main className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12 items-start">
+        {/* 좌측: 목록 테이블 (7/12) */}
+        <div className="lg:col-span-7">
+          <ContentsTable
+            contents={mockContents}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
         </div>
-      </div>
-    </div>
-  );
-}
-
-export default function ContentsPlaceholder() {
-  return (
-    <div className={ADMIN_PAGE_CONTAINER_CLASS}>
-      <PageHeader
-        title="컨텐츠 관리"
-        description="AI 쿼리, 차트·테이블·카드 설정을 생성·조회하고 조합합니다."
-      />
-      <div className="flex-1 flex items-center justify-center min-h-[480px]">
-        <div className="flex flex-col items-center gap-6 text-center max-w-md">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-surface-container-low to-surface-container-high border border-outline-variant/30 flex items-center justify-center shadow-[0_8px_32px_rgba(24,28,30,0.06)]">
-              <span className="material-symbols-outlined text-5xl text-primary/60">construction</span>
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
-              <span className="material-symbols-outlined text-sm text-on-primary">construction</span>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h2 className="font-headline font-bold text-2xl text-primary tracking-tight">준비 중입니다</h2>
-            <p className="text-on-surface-variant text-sm leading-relaxed">컨텐츠 관리 기능을 곧 제공할 예정입니다.</p>
-          </div>
+        {/* 우측: 상세 패널 (5/12) */}
+        <div className="lg:col-span-5">
+          <ContentsDetail content={selectedContent} />
         </div>
-      </div>
+      </main>
     </div>
   );
 }
