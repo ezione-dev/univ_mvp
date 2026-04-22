@@ -19,6 +19,7 @@ import SignupPage from "./pages/SignupPage";
 import PublicRoute from "./components/PublicRoute";
 import RoleMenuMatrix from "./pages/admin/RoleMenuMatrix";
 import MenuManagement from "./pages/admin/MenuManagement";
+import { ContentsList, ContentsCreate } from "./pages/admin/ContentsManagement";
 import GroupManagement from "./pages/admin/GroupManagement";
 import RoleAuthorityMenu from "./pages/admin/RoleAuthorityMenu";
 import RoleUserManagement from "./pages/admin/RoleUserManagement";
@@ -145,6 +146,8 @@ function App() {
         <Route path="role-menu" element={<RoleMenuMatrix />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="menus" element={<MenuManagement />} />
+        <Route path="contents" element={<ContentsList />} />
+        <Route path="contents/create" element={<ContentsCreate />} />
         <Route path="groups" element={<GroupManagement />} />
         <Route path="role-authority-menu" element={<RoleAuthorityMenu />} />
         <Route path="role-users" element={<RoleUserManagement />} />

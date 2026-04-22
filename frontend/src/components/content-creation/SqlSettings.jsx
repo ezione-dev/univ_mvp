@@ -1,9 +1,18 @@
+const DEMO_SQL = `SELECT 
+    base_year,
+    department_nm,
+    tuition_revenue
+FROM fact_tuition_revenue
+ORDER BY base_year DESC`;
+
 export default function SqlSettings({ value, onChange, visible }) {
   const handleChange = (field, fieldValue) => {
     onChange({ ...value, [field]: fieldValue });
   };
 
   if (!visible) return null;
+
+  const displaySql = value.sql || DEMO_SQL;
 
   return (
     <section className="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
@@ -25,7 +34,7 @@ export default function SqlSettings({ value, onChange, visible }) {
         </label>
         <textarea
           id="sqlQuery"
-          value={value.sql || ""}
+          value={displaySql}
           onChange={(e) => handleChange("sql", e.target.value)}
           readOnly
           rows={8}
