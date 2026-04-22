@@ -22,7 +22,7 @@ export default function GridSettings({ value, onChange, visible }) {
   if (!visible) return null;
 
   return (
-    <section className="bg-surface-container-lowest rounded-xl p-8 shadow-ambient flex flex-col gap-6">
+    <section className="bg-surface-container-lowest rounded-xl p-8 shadow-ambient flex flex-col gap-6 w-full">
       <div className="flex items-center justify-between border-b border-surface-container-high pb-4">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-secondary">grid_on</span>

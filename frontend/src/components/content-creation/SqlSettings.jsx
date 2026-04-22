@@ -23,7 +23,7 @@ export default function SqlSettings({ value, onChange, visible }) {
   const displaySql = value.sql || DEMO_SQL;
 
   return (
-    <section className="bg-surface-container-lowest rounded-xl p-8 shadow-ambient flex flex-col gap-6">
+    <section className="bg-surface-container-lowest rounded-xl p-8 shadow-ambient flex flex-col gap-6 w-full">
       <div className="flex items-center gap-3 border-b border-surface-container-high pb-4">
         <span className="material-symbols-outlined text-secondary">database</span>
         <h2 className="font-headline text-xl font-bold text-primary">데이터 조회 상세</h2>

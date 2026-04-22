@@ -161,7 +161,7 @@ export default function ChartGallery() {
   };
 
   return (
-    <div className="p-6">
+    <div className="max-w-[1600px] mx-auto w-full flex flex-col gap-6 min-h-0">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-[#2d3133]">차트 갤러리</h1>
       </div>
