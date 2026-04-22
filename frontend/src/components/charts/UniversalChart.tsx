@@ -1,5 +1,4 @@
 import ReactECharts from 'echarts-for-react';
-import * as echarts from 'echarts/core';
 
 export interface UniversalChartProps {
   chartType: string;
@@ -9,6 +8,7 @@ export interface UniversalChartProps {
     xAxisName?: string;
     yAxisName?: string;
     legendPosition?: 'top' | 'bottom' | 'left' | 'right';
+    titlePosition?: 'left' | 'center' | 'right';
   };
 }
 
@@ -22,34 +22,82 @@ const COMMON_THEME = {
   animationEasing: 'cubicOut' as const,
 };
 
+function buildLegendOption(legendPos: NonNullable<UniversalChartProps['config']['legendPosition']>) {
+  const orient = legendPos === 'top' || legendPos === 'bottom' ? 'horizontal' : 'vertical';
+
+  if (legendPos === 'top') return { top: 10, left: 'center', orient };
+  if (legendPos === 'bottom') return { bottom: 8, left: 'center', orient };
+  /** 왼쪽 세로 범례는 고정 폭으로 두고, 그리드 `left`와 맞물려 Y축 이름과 겹치지 않게 함 */
+  if (legendPos === 'left') return { left: 6, top: 'middle', orient, width: 88, padding: [4, 4, 4, 0] };
+  return { right: 6, top: 'middle', orient, width: 88, padding: [4, 0, 4, 4] }; // right
+}
+
+/** 타일(~300px)에서도 범례·축 이름·축 눈금이 겹치지 않도록 픽셀 기준으로 여백 계산 */
+function buildDefaultGrid(config: UniversalChartProps['config']) {
+  const legendPos = config.legendPosition || 'bottom';
+  const hasTitle = Boolean(config.title);
+  const hasXName = Boolean(config.xAxisName?.trim());
+  const hasYName = Boolean(config.yAxisName?.trim());
+
+  let top = hasTitle ? 50 : 38;
+  if (legendPos === 'top') top += 44;
+
+  let bottom = 14;
+  if (legendPos === 'bottom') {
+    bottom = 52;
+    if (hasXName) bottom += 28;
+    bottom += 12;
+  } else if (hasXName) {
+    bottom = 36;
+  }
+
+  let left = 12;
+  /** 범례(left)·Y축 이름·(containLabel) Y눈금이 같은 왼쪽 띠를 쓰므로 여백을 넉넉히 */
+  if (legendPos === 'left') {
+    left = 6 + 88 + 10;
+    if (hasYName) left += 40;
+  } else if (hasYName) {
+    left += 20;
+  }
+
+  let right = 12;
+  if (legendPos === 'right') {
+    right = 6 + 88 + 10;
+  }
+
+  return {
+    left,
+    right,
+    top,
+    bottom,
+    containLabel: true,
+  };
+}
+
 function buildCommonOption(config: UniversalChartProps['config']) {
   const legendPos = config.legendPosition || 'bottom';
-  const legendOrient = legendPos === 'top' || legendPos === 'bottom' ? 'horizontal' : 'vertical';
+  const titlePos = config.titlePosition || 'center';
 
   return {
     title: config.title ? {
       text: config.title,
-      left: 'center',
+      left: titlePos,
       top: 10,
       textStyle: { fontSize: 16, fontWeight: 600 },
     } : undefined,
     legend: {
       show: true,
-      position: legendPos,
-      orient: legendOrient,
+      ...buildLegendOption(legendPos),
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: legendPos === 'bottom' ? '10%' : '3%',
-      containLabel: true,
-    },
+    grid: buildDefaultGrid(config),
   };
 }
 
 function buildBarOption(data: any, config: UniversalChartProps['config']) {
   const categories = data.categories || data.xAxis?.data || [];
   const series = data.series || [{ data: data.values || [] }];
+  const xName = config.xAxisName?.trim() || '';
+  const yName = config.yAxisName?.trim() || '';
 
   return {
     ...COMMON_THEME,
@@ -57,16 +105,19 @@ function buildBarOption(data: any, config: UniversalChartProps['config']) {
     xAxis: {
       type: 'category',
       data: categories,
-      name: config.xAxisName || '',
+      name: xName || undefined,
       nameLocation: 'middle',
-      nameGap: 30,
-      axisLabel: { fontSize: 11 },
+      nameGap: xName ? 36 : 28,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563', margin: 6 },
     },
     yAxis: {
       type: 'value',
-      name: config.yAxisName || '',
+      name: yName || undefined,
       nameLocation: 'middle',
       nameGap: 40,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563' },
     },
     series: series.map((s: any, i: number) => ({
       type: 'bar',
@@ -80,6 +131,8 @@ function buildBarOption(data: any, config: UniversalChartProps['config']) {
 function buildLineOption(data: any, config: UniversalChartProps['config'], options: any = {}) {
   const categories = data.categories || data.xAxis?.data || [];
   const series = data.series || (data.values ? [{ data: data.values }] : []);
+  const xName = config.xAxisName?.trim() || '';
+  const yName = config.yAxisName?.trim() || '';
 
   return {
     ...COMMON_THEME,
@@ -87,15 +140,19 @@ function buildLineOption(data: any, config: UniversalChartProps['config'], optio
     xAxis: {
       type: 'category',
       data: categories,
-      name: config.xAxisName || '',
+      name: xName || undefined,
       nameLocation: 'middle',
-      nameGap: 30,
+      nameGap: xName ? 36 : 28,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563', margin: 6 },
     },
     yAxis: {
       type: 'value',
-      name: config.yAxisName || '',
+      name: yName || undefined,
       nameLocation: 'middle',
       nameGap: 40,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563' },
     },
     series: series.map((s: any, i: number) => ({
       type: 'line',
@@ -117,6 +174,8 @@ function buildAreaOption(data: any, config: UniversalChartProps['config']) {
 function buildStackedColumnOption(data: any, config: UniversalChartProps['config']) {
   const categories = data.categories || data.xAxis?.data || [];
   const series = data.series || [];
+  const xName = config.xAxisName?.trim() || '';
+  const yName = config.yAxisName?.trim() || '';
 
   return {
     ...COMMON_THEME,
@@ -124,15 +183,19 @@ function buildStackedColumnOption(data: any, config: UniversalChartProps['config
     xAxis: {
       type: 'category',
       data: categories,
-      name: config.xAxisName || '',
+      name: xName || undefined,
       nameLocation: 'middle',
-      nameGap: 30,
+      nameGap: xName ? 36 : 28,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563', margin: 6 },
     },
     yAxis: {
       type: 'value',
-      name: config.yAxisName || '',
+      name: yName || undefined,
       nameLocation: 'middle',
       nameGap: 40,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563' },
     },
     series: series.map((s: any, i: number) => ({
       type: 'bar',
@@ -177,6 +240,8 @@ function buildStackedHorizontalBarOption(data: any, config: UniversalChartProps[
 function buildStackedAreaOption(data: any, config: UniversalChartProps['config']) {
   const categories = data.categories || data.xAxis?.data || [];
   const series = data.series || [];
+  const xName = config.xAxisName?.trim() || '';
+  const yName = config.yAxisName?.trim() || '';
 
   return {
     ...COMMON_THEME,
@@ -184,15 +249,19 @@ function buildStackedAreaOption(data: any, config: UniversalChartProps['config']
     xAxis: {
       type: 'category',
       data: categories,
-      name: config.xAxisName || '',
+      name: xName || undefined,
       nameLocation: 'middle',
-      nameGap: 30,
+      nameGap: xName ? 36 : 28,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563', margin: 6 },
     },
     yAxis: {
       type: 'value',
-      name: config.yAxisName || '',
+      name: yName || undefined,
       nameLocation: 'middle',
       nameGap: 40,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563' },
     },
     series: series.map((s: any, i: number) => ({
       type: 'line',
@@ -538,21 +607,28 @@ function buildWaterfallOption(data: any, config: UniversalChartProps['config']) 
     return cumulative;
   });
 
+  const xName = config.xAxisName?.trim() || '';
+  const yName = config.yAxisName?.trim() || '';
+
   return {
     ...COMMON_THEME,
     ...buildCommonOption(config),
     xAxis: {
       type: 'category',
       data: categories,
-      name: config.xAxisName || '',
+      name: xName || undefined,
       nameLocation: 'middle',
-      nameGap: 30,
+      nameGap: xName ? 36 : 28,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563', margin: 6 },
     },
     yAxis: {
       type: 'value',
-      name: config.yAxisName || '',
+      name: yName || undefined,
       nameLocation: 'middle',
       nameGap: 40,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563' },
     },
     series: [
       {
@@ -582,51 +658,113 @@ function buildWaterfallOption(data: any, config: UniversalChartProps['config']) 
 
 function buildPopulationPyramidOption(data: any, config: UniversalChartProps['config']) {
   const ageGroups = data.ageGroups || [];
-  const left = data.left || [];
-  const right = data.right || [];
+  const left = (data.left || []).map((v: number) => Number(v) || 0);
+  const right = (data.right || []).map((v: number) => Number(v) || 0);
+  const legendPos = config.legendPosition || 'bottom';
+  const xName = config.xAxisName?.trim() || '';
+  const yName = config.yAxisName?.trim() || '';
+
+  const maxVal = Math.max(1, ...left, ...right);
+  const axisMax = Math.ceil(maxVal * 1.1);
+
+  const hasTitle = Boolean(config.title);
+  const gridTop = legendPos === 'top' ? (hasTitle ? 88 : 64) : hasTitle ? 52 : 36;
+  const gridBottom = legendPos === 'bottom' ? 52 : 28;
+  const gridSide = legendPos === 'left' ? '14%' : legendPos === 'right' ? '14%' : '2%';
+
+  const axisNameStyle = { fontSize: 11, fontWeight: 500 as const, color: '#374151' };
+  const axisLabelStyle = { fontSize: 10, color: '#4b5563' };
 
   return {
     ...COMMON_THEME,
-    ...buildCommonOption(config),
+    title: config.title
+      ? {
+          text: config.title,
+          left: config.titlePosition || 'center',
+          top: 10,
+          textStyle: { fontSize: 16, fontWeight: 600 },
+        }
+      : undefined,
+    legend: {
+      show: true,
+      ...buildLegendOption(legendPos),
+    },
+    grid: [
+      { left: gridSide, right: '52%', top: gridTop, bottom: gridBottom, containLabel: true },
+      { left: '52%', right: gridSide, top: gridTop, bottom: gridBottom, containLabel: true },
+    ],
     xAxis: [
       {
         type: 'value',
-        name: config.xAxisName || '',
+        gridIndex: 0,
+        inverse: true,
+        min: 0,
+        max: axisMax,
+        name: xName || undefined,
         nameLocation: 'middle',
-        nameGap: 30,
-        axisLabel: { fontSize: 10 },
+        nameGap: 24,
+        nameTextStyle: axisNameStyle,
+        axisLabel: {
+          ...axisLabelStyle,
+          formatter: (v: number) => String(Math.abs(Math.round(v))),
+        },
+        splitLine: { show: true, lineStyle: { color: '#e5e7eb', type: 'dashed' as const } },
+        axisLine: { lineStyle: { color: '#9ca3af' } },
       },
       {
         type: 'value',
-        name: config.xAxisName || '',
+        gridIndex: 1,
+        min: 0,
+        max: axisMax,
+        name: xName || undefined,
         nameLocation: 'middle',
-        nameGap: 30,
-        axisLabel: { fontSize: 10 },
+        nameGap: 24,
+        nameTextStyle: axisNameStyle,
+        axisLabel: axisLabelStyle,
+        splitLine: { show: true, lineStyle: { color: '#e5e7eb', type: 'dashed' as const } },
+        axisLine: { lineStyle: { color: '#9ca3af' } },
       },
     ],
-    yAxis: {
-      type: 'category',
-      data: ageGroups,
-      name: config.yAxisName || '',
-      nameLocation: 'middle',
-      nameGap: 40,
-    },
+    yAxis: [
+      {
+        type: 'category',
+        gridIndex: 0,
+        data: ageGroups,
+        position: 'right',
+        name: yName || undefined,
+        nameLocation: 'middle',
+        nameGap: 36,
+        nameTextStyle: axisNameStyle,
+        axisLabel: { ...axisLabelStyle, fontSize: 11, align: 'left' as const },
+        axisTick: { alignWithLabel: true },
+        axisLine: { show: true, lineStyle: { color: '#d1d5db' } },
+      },
+      {
+        type: 'category',
+        gridIndex: 1,
+        data: ageGroups,
+        position: 'left',
+        axisLabel: { show: false },
+        axisTick: { show: false },
+        axisLine: { show: false },
+      },
+    ],
     series: [
       {
         type: 'bar',
-        data: left.map((v: number) => -v),
+        data: left,
         name: 'Male',
-        stack: 'total',
         xAxisIndex: 0,
-        itemStyle: { color: '#4a96c6', borderRadius: [0, 0, 0, 0] },
+        yAxisIndex: 0,
+        itemStyle: { color: '#4a96c6', borderRadius: [0, 2, 2, 0] },
       },
       {
         type: 'bar',
         data: right,
         name: 'Female',
-        stack: 'total',
         xAxisIndex: 1,
-        itemStyle: { color: '#d94e5d', borderRadius: [0, 0, 0, 0] },
+        yAxisIndex: 1,
+        itemStyle: { color: '#d94e5d', borderRadius: [2, 0, 0, 2] },
       },
     ],
   };
@@ -681,6 +819,8 @@ function buildStreamgraphOption(data: any, config: UniversalChartProps['config']
 function buildHistogramOption(data: any, config: UniversalChartProps['config']) {
   const categories = data.categories || data.xAxis?.data || [];
   const values = data.values || [];
+  const xName = config.xAxisName?.trim() || '';
+  const yName = config.yAxisName?.trim() || '';
 
   return {
     ...COMMON_THEME,
@@ -688,15 +828,19 @@ function buildHistogramOption(data: any, config: UniversalChartProps['config']) 
     xAxis: {
       type: 'category',
       data: categories,
-      name: config.xAxisName || '',
+      name: xName || undefined,
       nameLocation: 'middle',
-      nameGap: 30,
+      nameGap: xName ? 36 : 28,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563', margin: 6 },
     },
     yAxis: {
       type: 'value',
-      name: config.yAxisName || '',
+      name: yName || undefined,
       nameLocation: 'middle',
       nameGap: 40,
+      nameTextStyle: { fontSize: 12, color: '#374151' },
+      axisLabel: { fontSize: 11, color: '#4b5563' },
     },
     series: [{
       type: 'bar',
