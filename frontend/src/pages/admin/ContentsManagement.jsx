@@ -8,7 +8,10 @@ import CardSettings from '../../components/content-creation/CardSettings';
 import SqlSettings from '../../components/content-creation/SqlSettings';
 import ContentsTable from '../../components/content-list/ContentsTable';
 import ContentsDetail from '../../components/content-list/ContentsDetail';
-import { createAdminContents, getAdminContentsList } from '../../services/adminApi';
+import ContentsCreateModal from '../../components/content-creation/ContentsCreateModal';
+import ContentsEditModal from '../../components/content-creation/ContentsEditModal';
+import Modal from '../../components/common/Modal';
+import { createAdminContents, deleteAdminContents, getAdminContentsList } from '../../services/adminApi';
 
 export function ContentsCreate() {
   const [generalInfo, setGeneralInfo] = useState({
@@ -130,15 +133,26 @@ export function ContentsList() {
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const load = async () => {
+    const load = async (nextSelectedId = null) => {
       setLoading(true);
       try {
         const list = await getAdminContentsList({ include_deleted: false });
         setContents(Array.isArray(list) ? list : []);
         if (Array.isArray(list) && list.length > 0) {
-          setSelectedId(list[0].contentId);
+          const fallbackId = list[0].contentId;
+          const candidate = nextSelectedId || selectedId || fallbackId;
+          const exists = list.some((c) => c.contentId === candidate);
+          setSelectedId(exists ? candidate : fallbackId);
+        } else {
+          setSelectedId(null);
         }
       } catch (err) {
         console.error('컨텐츠 목록 로드 실패:', err);
@@ -158,6 +172,18 @@ export function ContentsList() {
       <PageHeader
         title="컨텐츠 목록"
         description="생성된 AI 쿼리, 차트·테이블·카드 설정을 확인하고 관리합니다."
+        actions={
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary font-medium rounded-lg hover:bg-primary/90 shadow-sm transition-all"
+            >
+              <span className="material-symbols-outlined text-lg">add</span>
+              컨텐츠 생성
+            </button>
+          </div>
+        }
       />
       <main className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12 items-start">
         {/* 좌측: 목록 테이블 (7/12) */}
@@ -170,9 +196,117 @@ export function ContentsList() {
         </div>
         {/* 우측: 상세 패널 (5/12) */}
         <div className="lg:col-span-5">
-          <ContentsDetail content={loading ? null : selectedContent} />
+          <ContentsDetail
+            content={loading ? null : selectedContent}
+            onEdit={(c) => {
+              if (!c) return;
+              setEditTarget(c);
+              setIsEditOpen(true);
+            }}
+            onDelete={(c) => {
+              if (!c) return;
+              setDeleteTarget(c);
+              setIsDeleteOpen(true);
+            }}
+          />
         </div>
       </main>
+
+      <ContentsCreateModal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onSaved={async () => {
+          try {
+            const list = await getAdminContentsList({ include_deleted: false });
+            setContents(Array.isArray(list) ? list : []);
+            if (Array.isArray(list) && list.length > 0) {
+              setSelectedId(list[0].contentId);
+            }
+          } catch (err) {
+            console.error('컨텐츠 목록 재조회 실패:', err);
+          }
+        }}
+      />
+
+      <ContentsEditModal
+        isOpen={isEditOpen}
+        content={editTarget}
+        onClose={() => {
+          setIsEditOpen(false);
+          setEditTarget(null);
+        }}
+        onSaved={async () => {
+          try {
+            const list = await getAdminContentsList({ include_deleted: false });
+            setContents(Array.isArray(list) ? list : []);
+            if (editTarget?.contentId && Array.isArray(list)) {
+              const exists = list.some((c) => c.contentId === editTarget.contentId);
+              if (exists) setSelectedId(editTarget.contentId);
+            }
+          } catch (err) {
+            console.error('컨텐츠 목록 재조회 실패:', err);
+          }
+        }}
+      />
+
+      <Modal
+        isOpen={isDeleteOpen}
+        title="컨텐츠 삭제"
+        description={deleteTarget?.contentName ? `“${deleteTarget.contentName}”을(를) 삭제할까요?` : '선택된 컨텐츠를 삭제할까요?'}
+        variant="dialog"
+        onClose={() => {
+          if (deleting) return;
+          setIsDeleteOpen(false);
+          setDeleteTarget(null);
+        }}
+        footer={
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (deleting) return;
+                setIsDeleteOpen(false);
+                setDeleteTarget(null);
+              }}
+              className="rounded-md border border-outline bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-on-surface shadow-sm hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={async () => {
+                const id = deleteTarget?.cnts_id;
+                if (id === null || id === undefined) return;
+                setDeleting(true);
+                try {
+                  await deleteAdminContents(id);
+                  setIsDeleteOpen(false);
+                  setDeleteTarget(null);
+                  const list = await getAdminContentsList({ include_deleted: false });
+                  setContents(Array.isArray(list) ? list : []);
+                  if (Array.isArray(list) && list.length > 0) {
+                    setSelectedId(list[0].contentId);
+                  } else {
+                    setSelectedId(null);
+                  }
+                } catch (err) {
+                  console.error('컨텐츠 삭제 실패:', err);
+                } finally {
+                  setDeleting(false);
+                }
+              }}
+              className="rounded-md bg-error px-4 py-2 text-sm font-semibold text-on-error shadow-sm hover:brightness-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2"
+            >
+              {deleting ? '삭제 중...' : '삭제'}
+            </button>
+          </div>
+        }
+      >
+        <div className="text-sm text-on-surface-variant">
+          삭제된 컨텐츠는 목록에서 숨김 처리됩니다. (논리삭제)
+        </div>
+      </Modal>
     </div>
   );
 }

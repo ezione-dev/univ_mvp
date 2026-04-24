@@ -164,7 +164,7 @@ function SqlDetail({ data }) {
 }
 
 /* ────────────── 메인 상세 컴포넌트 ────────────── */
-export default function ContentsDetail({ content }) {
+export default function ContentsDetail({ content, onEdit, onDelete }) {
   const [openPanel, setOpenPanel] = useState(null);
 
   // 선택된 컨텐츠가 바뀌면 해당 타입 패널을 자동 확장
@@ -218,8 +218,26 @@ export default function ContentsDetail({ content }) {
   return (
     <div className="bg-surface-container-lowest rounded-xl p-8 shadow-ambient h-full flex flex-col overflow-y-auto">
       {/* 헤더 */}
-      <div className="border-b border-[#e0e3e6] pb-6 mb-6 shrink-0">
+      <div className="border-b border-[#e0e3e6] pb-6 mb-6 shrink-0 flex items-start justify-between gap-4">
         <h2 className="font-headline text-[22px] font-bold text-[#003875]">콘텐츠 상세 정보</h2>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onEdit?.(content)}
+            className="inline-flex items-center gap-2 rounded-lg border border-outline bg-surface-container-lowest px-3.5 py-2 text-sm font-semibold text-on-surface shadow-sm hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <span className="material-symbols-outlined text-[18px]">edit</span>
+            수정
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete?.(content)}
+            className="inline-flex items-center gap-2 rounded-lg border border-error/40 bg-error/10 px-3.5 py-2 text-sm font-semibold text-error shadow-sm hover:bg-error/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2"
+          >
+            <span className="material-symbols-outlined text-[18px]">delete</span>
+            삭제
+          </button>
+        </div>
       </div>
 
       {/* 일반정보 */}
