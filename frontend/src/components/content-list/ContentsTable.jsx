@@ -28,8 +28,8 @@ export default function ContentsTable({ contents, selectedId, onSelect }) {
             {contents.map((item, index) => {
               const typeInfo = CONTENT_TYPE_MAP[item.contentType] || CONTENT_TYPE_MAP.sql;
               const isActive = item.contentId === selectedId;
-              const formattedDate = item.generatedAt
-                ? item.generatedAt.replace('T', '\n').slice(0, 16).replace('T', ' ')
+              const formattedDate = (item.createdAt || item.generatedAt)
+                ? (item.createdAt || item.generatedAt).replace('T', '\n').slice(0, 16).replace('T', ' ')
                 : '-';
 
               return (
