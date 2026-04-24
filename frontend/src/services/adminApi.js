@@ -94,6 +94,16 @@ export const resetUserPassword = async (userCd, newPassword) => {
   return response.data;
 };
 
+export const getTemplateList = async () => {
+  const response = await api.get('/api/admin/screen-templates');
+  return response.data;
+};
+
+export const getTemplateSlots = async (templateId) => {
+  const response = await api.get(`/api/admin/screen-templates/${templateId}/slots`);
+  return response.data;
+};
+
 // --- Contents (Admin) ---
 
 export const createAdminContents = async (payload) => {
