@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import GeneralInfoSection from './GeneralInfoSection';
 import ChartSettings from './ChartSettings';
 import GridSettings from './GridSettings';
 import CardSettings from './CardSettings';
 import SqlSettings from './SqlSettings';
-import { createAdminContents } from '../../services/adminApi';
+import { createAdminContents, patchAdminContents } from '../../services/adminApi';
 
 const INITIAL_GENERAL_INFO = {
   contentId: '',
@@ -33,7 +33,29 @@ const INITIAL_CARD_DATA = {
 };
 const INITIAL_SQL_DATA = { sql: '' };
 
-export default function ContentsCreateForm({ onSaved, onCancel }) {
+function normalizeInitialContent(content) {
+  if (!content) return null;
+  return {
+    generalInfo: {
+      contentId: content.contentId ?? '',
+      contentName: content.contentName ?? '',
+      creator: content.creator ?? '',
+      createdAt: content.createdAt ?? '',
+      isDeleted: content.isDeleted ?? 'N',
+      generatedAt: content.generatedAt ?? '',
+      memo: content.memo ?? '',
+    },
+    contentType: content.contentType ?? 'chart',
+    data: content.data ?? {},
+  };
+}
+
+export default function ContentsCreateForm({
+  mode = 'create',
+  initialContent = null,
+  onSaved,
+  onCancel,
+}) {
   const [generalInfo, setGeneralInfo] = useState(INITIAL_GENERAL_INFO);
   const [contentType, setContentType] = useState('chart');
   const [chartData, setChartData] = useState(INITIAL_CHART_DATA);
@@ -42,6 +64,23 @@ export default function ContentsCreateForm({ onSaved, onCancel }) {
   const [sqlData, setSqlData] = useState(INITIAL_SQL_DATA);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+
+  const normalized = useMemo(() => normalizeInitialContent(initialContent), [initialContent]);
+
+  useEffect(() => {
+    if (mode !== 'edit') return;
+    if (!normalized) return;
+
+    setGeneralInfo(normalized.generalInfo);
+    setContentType(normalized.contentType);
+
+    // 타입별 초기값 주입(없는 필드는 기존 초기값으로 fallback)
+    const data = normalized.data || {};
+    setChartData({ ...INITIAL_CHART_DATA, ...(normalized.contentType === 'chart' ? data : {}) });
+    setGridData({ ...INITIAL_GRID_DATA, ...(normalized.contentType === 'grid' ? data : {}) });
+    setCardData({ ...INITIAL_CARD_DATA, ...(normalized.contentType === 'card' ? data : {}) });
+    setSqlData({ ...INITIAL_SQL_DATA, ...(normalized.contentType === 'sql' ? data : {}) });
+  }, [mode, normalized]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -78,10 +117,18 @@ export default function ContentsCreateForm({ onSaved, onCancel }) {
 
     setSaving(true);
     try {
-      const res = await createAdminContents(payload);
-      showToast('저장되었습니다.');
-      resetAll();
-      onSaved?.(res);
+      if (mode === 'edit') {
+        const id = normalized?.generalInfo?.contentId;
+        if (!id) throw new Error('컨텐츠 수정: contentId가 없습니다.');
+        const res = await patchAdminContents(id, payload);
+        showToast('수정되었습니다.');
+        onSaved?.(res);
+      } else {
+        const res = await createAdminContents(payload);
+        showToast('저장되었습니다.');
+        resetAll();
+        onSaved?.(res);
+      }
     } catch (err) {
       console.error('컨텐츠 저장 실패:', err);
       const msg = err?.response?.data?.detail || '저장에 실패했습니다.';
@@ -92,7 +139,7 @@ export default function ContentsCreateForm({ onSaved, onCancel }) {
   };
 
   const handleCancel = () => {
-    resetAll();
+    if (mode !== 'edit') resetAll();
     onCancel?.();
   };
 
@@ -128,7 +175,7 @@ export default function ContentsCreateForm({ onSaved, onCancel }) {
           className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary font-medium rounded-lg hover:bg-primary/90 shadow-sm transition-all disabled:opacity-60"
         >
           <span className="material-symbols-outlined text-lg">check</span>
-          {saving ? '저장 중...' : '저장'}
+          {saving ? (mode === 'edit' ? '수정 중...' : '저장 중...') : mode === 'edit' ? '수정' : '저장'}
         </button>
       </div>
 
