@@ -276,8 +276,8 @@ export function ContentsList() {
               type="button"
               disabled={deleting}
               onClick={async () => {
-                const id = deleteTarget?.contentId;
-                if (!id) return;
+                const id = deleteTarget?.cnts_id;
+                if (id === null || id === undefined) return;
                 setDeleting(true);
                 try {
                   await deleteAdminContents(id);

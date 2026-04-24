@@ -38,6 +38,7 @@ function normalizeInitialContent(content) {
   return {
     generalInfo: {
       contentId: content.contentId ?? '',
+      cnts_id: content.cnts_id ?? null,
       contentName: content.contentName ?? '',
       creator: content.creator ?? '',
       createdAt: content.createdAt ?? '',
@@ -118,8 +119,8 @@ export default function ContentsCreateForm({
     setSaving(true);
     try {
       if (mode === 'edit') {
-        const id = normalized?.generalInfo?.contentId;
-        if (!id) throw new Error('컨텐츠 수정: contentId가 없습니다.');
+        const id = normalized?.generalInfo?.cnts_id;
+        if (id === null || id === undefined) throw new Error('컨텐츠 수정: cnts_id가 없습니다.');
         const res = await patchAdminContents(id, payload);
         showToast('수정되었습니다.');
         onSaved?.(res);
