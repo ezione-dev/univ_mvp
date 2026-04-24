@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import Modal from '../common/Modal';
 
 export interface ChartConfigModalProps {
   isOpen: boolean;
@@ -64,34 +64,33 @@ export default function ChartConfigModal({
     setLocalConfig((prev) => ({ ...prev, [key]: value }));
   };
 
-  if (!isOpen) return null;
-
-  const modal = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden />
-      <div
-        className="relative w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-lowest shadow-xl"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="chart-config-modal-title"
-      >
-        <div className="flex items-center justify-between border-b border-outline-variant px-5 py-4">
-          <h2 id="chart-config-modal-title" className="font-headline text-base font-semibold text-on-surface">
-            차트 설정
-          </h2>
+  return (
+    <Modal
+      isOpen={isOpen}
+      title="차트 설정"
+      variant="dialog"
+      zIndexClassName="z-[100]"
+      onClose={() => onClose()}
+      footer={
+        <div className="flex flex-wrap justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-            aria-label="닫기"
+            className="rounded-md border border-outline bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-on-surface shadow-sm hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            취소
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-on-secondary shadow-sm hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container-lowest"
+          >
+            적용
           </button>
         </div>
-
-        <div className="max-h-[min(70vh,32rem)] space-y-4 overflow-y-auto px-5 py-4">
+      }
+    >
+      <div className="space-y-4">
           <div className="grid grid-cols-4 items-center gap-3">
             <label className="text-sm text-on-surface-variant">차트 제목</label>
             <input
@@ -160,26 +159,6 @@ export default function ChartConfigModal({
             </select>
           </div>
         </div>
-
-        <div className="flex flex-wrap justify-end gap-2 border-t border-outline-variant bg-surface-container-low px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md border border-outline bg-surface-container-lowest px-4 py-2 text-sm font-semibold text-on-surface shadow-sm hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          >
-            취소
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-on-secondary shadow-sm hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container-lowest"
-          >
-            적용
-          </button>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
-
-  return createPortal(modal, document.body);
 }

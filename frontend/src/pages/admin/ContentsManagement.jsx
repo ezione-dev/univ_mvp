@@ -8,6 +8,7 @@ import CardSettings from '../../components/content-creation/CardSettings';
 import SqlSettings from '../../components/content-creation/SqlSettings';
 import ContentsTable from '../../components/content-list/ContentsTable';
 import ContentsDetail from '../../components/content-list/ContentsDetail';
+import ContentsCreateModal from '../../components/content-creation/ContentsCreateModal';
 import { createAdminContents, getAdminContentsList } from '../../services/adminApi';
 
 export function ContentsCreate() {
@@ -130,6 +131,7 @@ export function ContentsList() {
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -158,6 +160,18 @@ export function ContentsList() {
       <PageHeader
         title="컨텐츠 목록"
         description="생성된 AI 쿼리, 차트·테이블·카드 설정을 확인하고 관리합니다."
+        actions={
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsCreateOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary font-medium rounded-lg hover:bg-primary/90 shadow-sm transition-all"
+            >
+              <span className="material-symbols-outlined text-lg">add</span>
+              컨텐츠 생성
+            </button>
+          </div>
+        }
       />
       <main className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12 items-start">
         {/* 좌측: 목록 테이블 (7/12) */}
@@ -173,6 +187,22 @@ export function ContentsList() {
           <ContentsDetail content={loading ? null : selectedContent} />
         </div>
       </main>
+
+      <ContentsCreateModal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onSaved={async () => {
+          try {
+            const list = await getAdminContentsList({ include_deleted: false });
+            setContents(Array.isArray(list) ? list : []);
+            if (Array.isArray(list) && list.length > 0) {
+              setSelectedId(list[0].contentId);
+            }
+          } catch (err) {
+            console.error('컨텐츠 목록 재조회 실패:', err);
+          }
+        }}
+      />
     </div>
   );
 }
