@@ -93,3 +93,30 @@ export const resetUserPassword = async (userCd, newPassword) => {
   });
   return response.data;
 };
+
+// --- Contents (Admin) ---
+
+export const createAdminContents = async (payload) => {
+  const response = await api.post('/api/admin/contents', payload);
+  return response.data;
+};
+
+export const getAdminContentsList = async (params = {}) => {
+  const response = await api.get('/api/admin/contents', { params });
+  return response.data.contents || [];
+};
+
+export const getAdminContentsDetail = async (cntsId) => {
+  const response = await api.get(`/api/admin/contents/${cntsId}`);
+  return response.data.content;
+};
+
+export const patchAdminContents = async (cntsId, payload) => {
+  const response = await api.patch(`/api/admin/contents/${cntsId}`, payload);
+  return response.data;
+};
+
+export const deleteAdminContents = async (cntsId) => {
+  const response = await api.delete(`/api/admin/contents/${cntsId}`);
+  return response.data;
+};

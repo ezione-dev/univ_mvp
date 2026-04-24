@@ -12,6 +12,7 @@ from .routes import (
     auth,
     menu,
     admin,
+    admin_contents,
 )
 from .database import close_pool
 from .middleware.csrf import CSRFMiddleware
@@ -57,6 +58,7 @@ app.include_router(admission.router)
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(menu.router, prefix="/api", tags=["menu"])
 app.include_router(admin.router, prefix="/api", tags=["admin"])
+app.include_router(admin_contents.router, prefix="/api", tags=["admin"])
 
 
 @app.on_event("shutdown")
