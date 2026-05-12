@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import SlotItemRenderer from '../../SlotItemRenderer';
+import YearDependentBadge from '../../common/YearDependentBadge';
+import YearSelector from '../../common/YearSelector';
 
 export default function SlotConfigModal({ slot, assignment, items, onSave, onCancel, onNavigate }) {
+  const currentYear = new Date().getFullYear();
   const [selectedItem, setSelectedItem] = useState(() => {
     if (assignment?.item_id) {
       return items.find((i) => i.item_id === assignment.item_id) || null;
@@ -10,6 +13,7 @@ export default function SlotConfigModal({ slot, assignment, items, onSave, onCan
   });
   const [searchText, setSearchText] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [selectedBaseYear, setSelectedBaseYear] = useState(currentYear - 1);
 
   useEffect(() => {
     if (assignment?.item_id && !selectedItem) {
@@ -26,6 +30,9 @@ export default function SlotConfigModal({ slot, assignment, items, onSave, onCan
   }, [items, searchText, typeFilter]);
 
   const handleSelectItem = (item) => {
+    if (selectedItem?.item_id !== item.item_id) {
+      setSelectedBaseYear(currentYear - 1);
+    }
     setSelectedItem(item);
   };
 
@@ -107,9 +114,14 @@ export default function SlotConfigModal({ slot, assignment, items, onSave, onCan
                         }`}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <span className="px-2 py-1 bg-surface-container-high text-[10px] font-bold text-primary rounded-md uppercase tracking-wider">
-                          {item.mapping_json?.type || '미지정'}
-                        </span>
+                        <div className="flex gap-1">
+                          <span className="px-2 py-1 bg-surface-container-high text-[10px] font-bold text-primary rounded-md uppercase tracking-wider">
+                            {item.mapping_json?.type || '미지정'}
+                          </span>
+                          {item.year_dependent && (
+                            <YearDependentBadge />
+                          )}
+                        </div>
                         <span className="text-[10px] text-on-surface-variant">ID: {item.item_id}</span>
                       </div>
                       <div className="font-bold text-on-surface group-hover:text-primary transition-colors truncate w-full mb-1">
@@ -132,10 +144,16 @@ export default function SlotConfigModal({ slot, assignment, items, onSave, onCan
           </div>
 
           <div className="flex-1 flex flex-col bg-surface">
+            {selectedItem?.year_dependent && (
+              <div className="flex items-center justify-end gap-2 px-6 py-3 border-b border-outline/10 bg-surface-container-low">
+                <span className="text-xs text-on-surface-variant">연도:</span>
+                <YearSelector selectedYear={selectedBaseYear} onYearChange={setSelectedBaseYear} />
+              </div>
+            )}
             <div className="flex items-center justify-center flex-1">
               {selectedItem ? (
                 <div className="w-full h-full p-4">
-                  <SlotItemRenderer itemId={selectedItem.item_id} />
+                  <SlotItemRenderer itemId={selectedItem.item_id} baseYear={selectedItem.year_dependent ? selectedBaseYear : undefined} />
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-on-surface-variant">

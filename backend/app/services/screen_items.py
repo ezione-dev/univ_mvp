@@ -5,6 +5,8 @@ from typing import Any, Optional
 from app.database import fetch_df, get_pool
 from app.services.mapping_validator import validate_mapping_json, MappingValidationError
 
+_YEAR_DEPENDENT_CASE = "CASE WHEN c.user_sql ~ '{{[[:space:]]*base_year[[:space:]]*}}' THEN true ELSE false END AS year_dependent"
+
 
 async def create_item(
     item_nm: str,
@@ -86,10 +88,19 @@ async def update_item(
 
 
 async def get_item(item_id: int) -> Optional[dict]:
-    query = """
-        SELECT item_id, item_nm, shape_cnts_id, sql_cnts_id, mapping_json, reg_dt, mod_dt
-        FROM ts_scr_item
-        WHERE item_id = $1 AND del_fg = 'N'
+    query = f"""
+        SELECT
+            i.item_id,
+            i.item_nm,
+            i.shape_cnts_id,
+            i.sql_cnts_id,
+            i.mapping_json,
+            i.reg_dt,
+            i.mod_dt,
+            {_YEAR_DEPENDENT_CASE}
+        FROM ts_scr_item i
+        LEFT JOIN ts_cnts_info c ON i.sql_cnts_id = c.cnts_id
+        WHERE i.item_id = $1 AND i.del_fg = 'N'
     """
     df = await fetch_df(query, (item_id,))
     if df.empty:
@@ -101,11 +112,20 @@ async def get_item(item_id: int) -> Optional[dict]:
 
 
 async def list_items() -> list[dict]:
-    query = """
-        SELECT item_id, item_nm, shape_cnts_id, sql_cnts_id, mapping_json, reg_dt, mod_dt
-        FROM ts_scr_item
-        WHERE del_fg = 'N'
-        ORDER BY item_id
+    query = f"""
+        SELECT
+            i.item_id,
+            i.item_nm,
+            i.shape_cnts_id,
+            i.sql_cnts_id,
+            i.mapping_json,
+            i.reg_dt,
+            i.mod_dt,
+            {_YEAR_DEPENDENT_CASE}
+        FROM ts_scr_item i
+        LEFT JOIN ts_cnts_info c ON i.sql_cnts_id = c.cnts_id
+        WHERE i.del_fg = 'N'
+        ORDER BY i.item_id
     """
     df = await fetch_df(query, ())
     if df.empty:
