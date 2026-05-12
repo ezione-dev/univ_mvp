@@ -399,14 +399,21 @@ async def create_contents(payload: dict[str, Any]) -> int:
             return cnts_id
 
 
-async def count_contents(include_deleted: bool = False, cnts_tp: Optional[str] = None) -> int:
+async def count_contents(
+    include_deleted: bool = False,
+    cnts_tp: Optional[str | Sequence[str]] = None,
+) -> int:
     where_clauses = []
     params: list[Any] = []
     if not include_deleted:
         where_clauses.append("COALESCE(del_fg, 'N') <> 'Y'")
     if cnts_tp:
-        where_clauses.append("cnts_tp = $1")
-        params.append(cnts_tp)
+        if isinstance(cnts_tp, str):
+            where_clauses.append(f"cnts_tp = ${len(params) + 1}")
+            params.append(cnts_tp)
+        else:
+            where_clauses.append(f"cnts_tp = ANY(${len(params) + 1}::text[])")
+            params.append(list(cnts_tp))
     
     where = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
     df = await fetch_df(
@@ -422,14 +429,23 @@ async def count_contents(include_deleted: bool = False, cnts_tp: Optional[str] =
     return int(df.iloc[0]["total"])
 
 
-async def list_contents(include_deleted: bool = False, page: Optional[int] = None, limit: Optional[int] = None, cnts_tp: Optional[str] = None) -> list[ContentsRow]:
+async def list_contents(
+    include_deleted: bool = False,
+    page: Optional[int] = None,
+    limit: Optional[int] = None,
+    cnts_tp: Optional[str | Sequence[str]] = None,
+) -> list[ContentsRow]:
     where_clauses = []
     params: list[Any] = []
     if not include_deleted:
         where_clauses.append("COALESCE(del_fg, 'N') <> 'Y'")
     if cnts_tp:
-        where_clauses.append(f"cnts_tp = ${len(params) + 1}")
-        params.append(cnts_tp)
+        if isinstance(cnts_tp, str):
+            where_clauses.append(f"cnts_tp = ${len(params) + 1}")
+            params.append(cnts_tp)
+        else:
+            where_clauses.append(f"cnts_tp = ANY(${len(params) + 1}::text[])")
+            params.append(list(cnts_tp))
     
     where = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
     
