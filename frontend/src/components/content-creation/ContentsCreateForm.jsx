@@ -72,6 +72,7 @@ export default function ContentsCreateForm({
   initialContent = null,
   onSaved,
   onCancel,
+  hideGeneralInfo = false,
 }) {
   const [generalInfo, setGeneralInfo] = useState(getInitialGeneralInfo);
   const [contentType, setContentType] = useState('chart');
@@ -146,13 +147,15 @@ export default function ContentsCreateForm({
   };
 
   const handleSave = async () => {
-    const payload = {
-      contentName: generalInfo.contentName,
-      creator: generalInfo.creator,
-      memo: generalInfo.memo,
-      contentType,
-      data: activeData,
-    };
+    const payload = hideGeneralInfo
+      ? { contentType, data: activeData }
+      : {
+          contentName: generalInfo.contentName,
+          creator: generalInfo.creator,
+          memo: generalInfo.memo,
+          contentType,
+          data: activeData,
+        };
 
     const v = validateContentsBeforeSave({ generalInfo, contentType, data: activeData });
     setShowValidation(true);
@@ -193,14 +196,16 @@ export default function ContentsCreateForm({
   return (
     <div>
       <div className="flex flex-col gap-8">
-        <GeneralInfoSection
-          value={generalInfo}
-          onChange={setGeneralInfo}
-          contentType={contentType}
-          onContentTypeChange={setContentType}
-          errors={fieldErrors}
-          showErrors={showValidation}
-        />
+        {!hideGeneralInfo && (
+          <GeneralInfoSection
+            value={generalInfo}
+            onChange={setGeneralInfo}
+            contentType={contentType}
+            onContentTypeChange={setContentType}
+            errors={fieldErrors}
+            showErrors={showValidation}
+          />
+        )}
         <ChartSettings value={chartData} onChange={setChartData} visible={contentType === 'chart'} errors={{ ...(fieldErrors?.chartFields || {}), ...(fieldErrors?.chart || {}) }} showErrors={showValidation} />
         <GridSettings value={gridData} onChange={setGridData} visible={contentType === 'grid'} errors={{ ...(fieldErrors?.gridFields || {}), ...(fieldErrors?.grid || {}) }} showErrors={showValidation} />
         <CardSettings value={cardData} onChange={setCardData} visible={contentType === 'card'} errors={{ ...(fieldErrors?.cardFields || {}), ...(fieldErrors?.card || {}) }} showErrors={showValidation} />

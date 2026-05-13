@@ -73,9 +73,7 @@ async def update_item(
     if not fields:
         return
 
-    fields.append(f"mod_dt = ${idx}")
-    values.append("NOW()")
-    idx += 1
+    fields.append("mod_dt = NOW()")
 
     values.append(item_id)
     query = f"UPDATE ts_scr_item SET {', '.join(fields)} WHERE item_id = ${idx} AND del_fg = 'N'"
@@ -308,9 +306,7 @@ async def patch_screen(scr_id: str, scr_nm: Optional[str] = None) -> None:
     if not fields:
         return
 
-    fields.append(f"mod_dt = ${idx}")
-    values.append("NOW()")
-    idx += 1
+    fields.append("mod_dt = NOW()")
 
     values.append(scr_id)
     query = f"UPDATE ts_scr_info SET {', '.join(fields)} WHERE scr_id = ${idx} AND del_fg = 'N'"
