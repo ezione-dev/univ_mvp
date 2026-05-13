@@ -26,7 +26,8 @@ async def get_item_render(
             ctx[field] = value
 
     try:
-        result = await render_item(item_id, ctx=ctx)
+        caller_roles = _.get("roles", [])
+        result = await render_item(item_id, ctx=ctx, caller_roles=caller_roles)
         return result
     except LookupError as e:
         if str(e) == "item_not_found":

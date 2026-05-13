@@ -21,6 +21,12 @@ export default function CardDetail({ data, className, detailClassName, itemClass
                 <span className="text-on-surface-variant min-w-[80px]">{item.label || '-'}</span>
                 <span className="text-on-surface font-medium">{item.content || '-'}</span>
                 <span className="ml-auto text-xs text-on-surface-variant">
+                  {item.headlineFg && (
+                    <span className="inline-flex items-center gap-0.5 bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-semibold mr-1">
+                      <span className="material-symbols-outlined text-[12px]">push_pin</span>
+                      헤드라인
+                    </span>
+                  )}
                   {formatLabel[item.format] || formatLabel.raw}
                   {item.format !== 'raw' && item.decimalPlaces !== undefined ? ` · 소수 ${item.decimalPlaces}` : ''}
                 </span>

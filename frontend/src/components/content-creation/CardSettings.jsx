@@ -140,7 +140,7 @@ export default function CardSettings({ value, onChange, visible, errors, showErr
                     <p className="mt-1 text-xs text-error">{itemErrors.label}</p>
                   ) : null}
                 </div>
-                <div className="flex flex-col md:col-span-3">
+                <div className="flex flex-col md:col-span-2">
                   <label className="ds-label">데이터 키</label>
                   <input
                     className="ds-input bg-surface-container-low text-on-surface border border-outline-variant focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none rounded-lg px-4 py-3 transition-all"
@@ -152,6 +152,20 @@ export default function CardSettings({ value, onChange, visible, errors, showErr
                   {itemErrors?.content ? (
                     <p className="mt-1 text-xs text-error">{itemErrors.content}</p>
                   ) : null}
+                </div>
+                <div className="flex flex-col md:col-span-1">
+                  <label className="ds-label">헤드라인</label>
+                  <div className="flex items-center h-[48px]">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!item.headlineFg}
+                        onChange={(e) => handleItemChange(index, 'headlineFg', e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-outline/30 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-secondary" />
+                    </label>
+                  </div>
                 </div>
                 <div className="flex flex-col md:col-span-2">
                   <label className="ds-label">포맷</label>

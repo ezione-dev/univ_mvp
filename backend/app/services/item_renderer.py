@@ -331,6 +331,7 @@ def _build_card_model(item_type: str, item: dict, shape_content: dict, preview: 
         return None
 
     headline = None
+    headline_items = []
     headline_taken = False
     out_rows = []
 
@@ -408,6 +409,18 @@ def _build_card_model(item_type: str, item: dict, shape_content: dict, preview: 
             sources.append(f"mapping.items[{idx}]")
         sources.append(f"mapping.items[{idx}].row = {chosen_reason}")
 
+        is_headline_fg = False
+        if idx < len(shape_items) and isinstance(shape_items[idx], dict):
+            is_headline_fg = bool(shape_items[idx].get("headlineFg"))
+
+        if is_headline_fg:
+            headline_items.append({
+                "label": label if label_trim else "",
+                "value": formatted_v,
+                "color": color_hex,
+            })
+            continue
+
         if not label_trim and not headline_taken:
             headline = formatted_v
             headline_taken = True
@@ -421,19 +434,24 @@ def _build_card_model(item_type: str, item: dict, shape_content: dict, preview: 
             "color": color_hex,
         })
 
-    return {
+    result = {
         "title": title,
         "headline": headline,
         "rows": out_rows,
         "sources": sources,
     }
+    if headline_items:
+        result["headlineItems"] = headline_items
+    return result
 
 
-async def render_item(item_id: int, ctx: dict | None = None) -> dict:
+async def render_item(item_id: int, ctx: dict | None = None, caller_roles: list[str] | None = None) -> dict:
     """
     아이템을 조회하고, shape 콘텐츠와 SQL을 실행하여 렌더링 결과를 반환합니다.
     남겨진 정보는 렌더링에 필요한 최소 정볧만 포함합니다.
     """
+    meta = {"success": True, "error_msg": None, "has_base_year_placeholder": False}
+
     item = await get_item(item_id)
     if item is None:
         raise LookupError("item_not_found")
@@ -457,9 +475,27 @@ async def render_item(item_id: int, ctx: dict | None = None) -> dict:
     sql_cnts_id = item.get("sql_cnts_id")
     if sql_cnts_id:
         try:
+            sql_master = await get_contents_master(sql_cnts_id)
+            meta["has_base_year_placeholder"] = "{{base_year}}" in (sql_master.user_sql or "")
             preview = await execute_sql_preview(sql_cnts_id, ctx=ctx)
-        except Exception:
+        except Exception as e:
+            raw_error = str(e)
             preview = {"columns": [], "rows": []}
+            meta["success"] = False
+            meta["error_msg"] = raw_error
+
+    # 비관리자 에러 메시지 마스킹
+    if not meta["success"] and "SYS_ADM" not in (caller_roles or []):
+        meta["error_msg"] = "데이터 조회 중 문제가 발생했습니다."
+
+    # success가 False인 경우 즉시 반환
+    if not meta["success"]:
+        return {
+            "item_id": item_id,
+            "item_nm": item.get("item_nm", ""),
+            "type": None,
+            **meta,
+        }
 
     # 타입 결정
     item_type = _resolve_item_type(item, shape_content or {})
@@ -469,6 +505,7 @@ async def render_item(item_id: int, ctx: dict | None = None) -> dict:
             "item_id": item_id,
             "item_nm": item.get("item_nm", ""),
             "type": None,
+            **meta,
         }
 
     # 타입별 변환
@@ -480,6 +517,7 @@ async def render_item(item_id: int, ctx: dict | None = None) -> dict:
             "type": "chart",
             "chartConfig": model.get("chartConfig"),
             "data": model.get("data", []),
+            **meta,
         }
 
     if item_type == "grid":
@@ -490,11 +528,12 @@ async def render_item(item_id: int, ctx: dict | None = None) -> dict:
             "type": "grid",
             "columns": model.get("columns", []),
             "rows": model.get("rows", []),
+            **meta,
         }
 
     if item_type == "card":
         model = _build_card_model(item_type, item, shape_content or {}, preview or {})
-        return {
+        card_result = {
             "item_id": item_id,
             "item_nm": item.get("item_nm", ""),
             "type": "card",
@@ -502,10 +541,15 @@ async def render_item(item_id: int, ctx: dict | None = None) -> dict:
             "headline": model.get("headline") if model else None,
             "rows": model.get("rows", []) if model else [],
             "sources": model.get("sources", []) if model else [],
+            **meta,
         }
+        if model and model.get("headlineItems"):
+            card_result["headlineItems"] = model["headlineItems"]
+        return card_result
 
     return {
         "item_id": item_id,
         "item_nm": item.get("item_nm", ""),
         "type": None,
+        **meta,
     }

@@ -4,8 +4,8 @@ test.describe('로그인 + 메뉴 조회', () => {
   test('로그인만 테스트', async ({ page }) => {
     await page.goto('/login');
 
-    await page.fill('input[id="loginEmail"]', 'test1@cnu.ac.kr');
-    await page.fill('input[id="password"]', 'dlwldnjs');
+    await page.fill('input[id="loginEmail"]', process.env.TEST_USER_EMAIL);
+    await page.fill('input[id="password"]', process.env.TEST_USER_PASSWORD);
     await page.click('button:has-text("로그인")');
 
     await page.waitForURL('/', { timeout: 10000 });

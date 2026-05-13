@@ -42,7 +42,7 @@ function displayText(v) {
   return String(v);
 }
 
-export function CompositeKpiCardPreview({ title, headline, rows, sources }) {
+export function CompositeKpiCardPreview({ title, headline, headlineItems, rows, sources }) {
   const hasHeadline = headline != null && headline !== "";
   const hasRows = Array.isArray(rows) && rows.length > 0;
 
@@ -65,7 +65,24 @@ export function CompositeKpiCardPreview({ title, headline, rows, sources }) {
         )}
 
         {/* 헤드라인 수치 */}
-        {hasHeadline && (
+        {Array.isArray(headlineItems) && headlineItems.length > 0 && (
+          <div className="overflow-hidden">
+            {headlineItems.map((hi, idx) => (
+              <div key={idx} className="flex flex-col">
+                {hi.label && (
+                  <span className="text-xs text-on-surface-variant/70 truncate">{hi.label}</span>
+                )}
+                <span
+                  className="text-4xl font-semibold tabular-nums leading-tight tracking-tight"
+                  style={hi.color ? { color: hi.color } : undefined}
+                >
+                  {displayText(hi.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        {!headlineItems?.length && hasHeadline && (
           <div className="text-4xl font-semibold tabular-nums leading-tight text-primary tracking-tight">
             {displayText(headline)}
           </div>
@@ -225,7 +242,13 @@ export default function Phase1ItemPreview({ item }) {
       setServerRenderLoading(true);
       try {
         const r = await getItemRender(item.item_id, { base_year: baseYear });
-        if (!cancelled) setServerRender(r);
+        if (!cancelled) {
+          if (r.success === false) {
+            setServerRenderError(r.error_msg || "서버 렌더 결과를 불러오지 못했습니다.");
+          } else {
+            setServerRender(r);
+          }
+        }
       } catch (e) {
         if (!cancelled) {
           setServerRenderError(
@@ -370,13 +393,20 @@ export default function Phase1ItemPreview({ item }) {
               <div className="max-w-[720px]">
                 {serverRender.rows?.length === 0 ? (
                   <div className="rounded-xl border border-outline/15 bg-surface p-6 text-center">
-                    <p className="text-sm text-on-surface-variant">선택하신 {baseYear}년에 표시할 카드 데이터가 없습니다.</p>
-                    <p className="text-xs text-on-surface-variant/60 mt-1">다른 연도를 선택해 주세요.</p>
+                    {(serverRender?.has_base_year_placeholder ?? false) ? (
+                      <>
+                        <p className="text-sm text-on-surface-variant">선택하신 {baseYear}년에 표시할 카드 데이터가 없습니다.</p>
+                        <p className="text-xs text-on-surface-variant/60 mt-1">다른 연도를 선택해 주세요.</p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-on-surface-variant">조회 결과가 비어 있습니다.</p>
+                    )}
                   </div>
                 ) : (
                   <CompositeKpiCardPreview
                     title={serverRender.title}
                     headline={serverRender.headline}
+                    headlineItems={serverRender.headlineItems}
                     rows={Array.isArray(serverRender.rows) ? serverRender.rows : []}
                     sources={serverRender.sources}
                   />
@@ -392,6 +422,7 @@ export default function Phase1ItemPreview({ item }) {
                 <CompositeKpiCardPreview
                   title={cardPreviewModel.title}
                   headline={cardPreviewModel.headline}
+                  headlineItems={cardPreviewModel.headlineItems}
                   rows={cardPreviewModel.rows}
                   sources={cardPreviewModel.sources}
                 />
@@ -438,35 +469,48 @@ export default function Phase1ItemPreview({ item }) {
                 {serverRenderError}
               </div>
             ) : serverRender?.type === "grid" ? (
-              <div className="rounded-xl border border-outline/15 bg-surface p-4 overflow-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-outline/20">
-                      {serverRender.columns.map((c) => (
-                        <th
-                          key={c.dataKey}
-                          className="text-left py-2 px-2 whitespace-nowrap"
-                        >
-                          {c.header || c.dataKey}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {serverRender.rows.slice(0, 25).map((row, i) => (
-                      <tr key={i} className="border-b border-outline/10">
+              serverRender.rows?.length === 0 ? (
+                <div className="rounded-xl border border-outline/15 bg-surface p-6 text-center">
+                  {serverRender.has_base_year_placeholder ? (
+                    <>
+                      <p className="text-sm text-on-surface-variant">선택하신 {baseYear}년에 표시할 그리드 데이터가 없습니다.</p>
+                      <p className="text-xs text-on-surface-variant/60 mt-1">다른 연도를 선택해 주세요.</p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-on-surface-variant">조회 결과가 비어 있습니다.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-outline/15 bg-surface p-4 overflow-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-outline/20">
                         {serverRender.columns.map((c) => (
-                          <td key={c.dataKey} className="py-1.5 px-2">
-                            {row?.[c.dataKey] == null || row?.[c.dataKey] === ""
-                              ? "—"
-                              : String(row[c.dataKey])}
-                          </td>
+                          <th
+                            key={c.dataKey}
+                            className="text-left py-2 px-2 whitespace-nowrap"
+                          >
+                            {c.header || c.dataKey}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {serverRender.rows.slice(0, 25).map((row, i) => (
+                        <tr key={i} className="border-b border-outline/10">
+                          {serverRender.columns.map((c) => (
+                            <td key={c.dataKey} className="py-1.5 px-2">
+                              {row?.[c.dataKey] == null || row?.[c.dataKey] === ""
+                                ? "—"
+                                : String(row[c.dataKey])}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
             ) : gridPreviewModel.columns.length === 0 ? (
               <div className="rounded-xl border border-outline/15 bg-surface p-4 text-sm text-on-surface-variant">
                 미리보기 불가:{" "}
@@ -475,8 +519,14 @@ export default function Phase1ItemPreview({ item }) {
               </div>
             ) : gridPreviewModel.rows.length === 0 ? (
               <div className="rounded-xl border border-outline/15 bg-surface p-6 text-center">
-                <p className="text-sm text-on-surface-variant">선택하신 {baseYear}년에 표시할 그리드 데이터가 없습니다.</p>
-                <p className="text-xs text-on-surface-variant/60 mt-1">다른 연도를 선택해 주세요.</p>
+                {(serverRender?.has_base_year_placeholder ?? false) ? (
+                  <>
+                    <p className="text-sm text-on-surface-variant">선택하신 {baseYear}년에 표시할 그리드 데이터가 없습니다.</p>
+                    <p className="text-xs text-on-surface-variant/60 mt-1">다른 연도를 선택해 주세요.</p>
+                  </>
+                ) : (
+                  <p className="text-sm text-on-surface-variant">조회 결과가 비어 있습니다.</p>
+                )}
               </div>
             ) : (
               <div className="rounded-xl border border-outline/15 bg-surface p-4 overflow-auto">
@@ -553,8 +603,14 @@ export default function Phase1ItemPreview({ item }) {
               <div className="rounded-xl border border-outline/15 bg-surface p-4">
                 {serverRender.data?.length === 0 ? (
                   <div className="h-[360px] flex flex-col items-center justify-center text-center">
-                    <p className="text-sm text-on-surface-variant">선택하신 {baseYear}년에 표시할 차트 데이터가 없습니다.</p>
-                    <p className="text-xs text-on-surface-variant/60 mt-1">다른 연도를 선택해 주세요.</p>
+                    {serverRender.has_base_year_placeholder ? (
+                      <>
+                        <p className="text-sm text-on-surface-variant">선택하신 {baseYear}년에 표시할 차트 데이터가 없습니다.</p>
+                        <p className="text-xs text-on-surface-variant/60 mt-1">다른 연도를 선택해 주세요.</p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-on-surface-variant">조회 결과가 비어 있습니다.</p>
+                    )}
                   </div>
                 ) : (
                   <div className="h-[360px]">
@@ -583,9 +639,15 @@ export default function Phase1ItemPreview({ item }) {
               </div>
             ) : chartPreviewModel.data.length === 0 ||
               !chartPreviewModel.chartConfig ? (
-              <div className="rounded-xl border border-outline/15 bg-surface p-4 text-sm text-on-surface-variant">
-                실 결과를 만들 수 없습니다. 맵핑 필드(category/series)와 SQL
-                결과 컬럼이 일치하는지 확인하세요.
+              <div className="rounded-xl border border-outline/15 bg-surface p-4 text-sm text-on-surface-variant text-center">
+                {(serverRender?.has_base_year_placeholder ?? false) ? (
+                  <>
+                    <p>선택하신 {baseYear}년에 표시할 차트 데이터가 없습니다.</p>
+                    <p className="text-xs text-on-surface-variant/60 mt-1">다른 연도를 선택해 주세요.</p>
+                  </>
+                ) : (
+                  <p>조회 결과가 비어 있습니다.</p>
+                )}
               </div>
             ) : (
               <div className="rounded-xl border border-outline/15 bg-surface p-4">

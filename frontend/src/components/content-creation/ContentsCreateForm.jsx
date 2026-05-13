@@ -157,7 +157,7 @@ export default function ContentsCreateForm({
           data: activeData,
         };
 
-    const v = validateContentsBeforeSave({ generalInfo, contentType, data: activeData });
+    const v = validateContentsBeforeSave({ generalInfo, contentType, data: activeData, skipGeneralInfo: hideGeneralInfo });
     setShowValidation(true);
     setFieldErrors(v.errors);
     if (!v.ok) {

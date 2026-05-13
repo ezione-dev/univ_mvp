@@ -28,7 +28,7 @@ export default function ScreenRenderer({ slots, baseYear, className = '', style 
             className="bg-surface rounded-xl border border-outline/15 overflow-hidden"
             style={slotToGridStyle(slot)}
           >
-            <SlotItemRenderer itemId={slot.item_id} baseYear={baseYear} />
+            <SlotItemRenderer itemId={slot.item_id} baseYear={baseYear} isAdmin />
           </div>
         ) : null
       )}

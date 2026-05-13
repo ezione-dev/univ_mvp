@@ -3,19 +3,34 @@ import { getItemRender } from '../services/adminApi';
 import ChartRenderer from './ChartRenderer';
 import { CompositeKpiCardPreview } from './admin/items/Phase1ItemPreview';
 
-function EmptyState({ year }) {
+function ErrorState({ message }) {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant p-8 text-center">
-      <div className="text-4xl mb-4 opacity-40">📅</div>
-      <p className="text-sm">
-        선택하신 {year}년에 표시할 데이터가 없습니다.
-      </p>
-      <p className="text-xs mt-1 opacity-70">다른 연도를 선택해 주세요.</p>
+    <div className="w-full h-full flex items-center justify-center text-error text-sm p-4">
+      {message}
     </div>
   );
 }
 
-function SlotItemRenderer({ itemId, baseYear }) {
+function EmptyState({ year, hasBaseYearPlaceholder }) {
+  if (hasBaseYearPlaceholder && year != null) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant p-8 text-center">
+        <div className="text-4xl mb-4 opacity-40">📅</div>
+        <p className="text-sm">
+          선택하신 {year}년에 표시할 데이터가 없습니다.
+        </p>
+        <p className="text-xs mt-1 opacity-70">다른 연도를 선택해 주세요.</p>
+      </div>
+    );
+  }
+  return (
+    <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-sm">
+      조회 결과가 비어 있습니다.
+    </div>
+  );
+}
+
+function SlotItemRenderer({ itemId, baseYear, isAdmin = false }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -73,29 +88,25 @@ function SlotItemRenderer({ itemId, baseYear }) {
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-error text-sm p-4">
-        {error}
+      <ErrorState message={error} />
+    );
+  }
+
+  // 서버 렌더 에러 (SQL 실행 실패 등)
+  if (data?.success === false) {
+    return (
+      <div className={`w-full h-full flex items-center justify-center text-sm p-4 ${isAdmin ? 'border-2 border-error/50 rounded-lg bg-error-container/20' : ''}`}>
+        <div className="text-error">{data.error_msg || '데이터 조회 중 문제가 발생했습니다.'}</div>
       </div>
     );
   }
 
   if (!data || !data.type) {
-    if (usedBaseYear != null) {
-      return <EmptyState year={usedBaseYear} />;
-    }
-    return (
-      <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-sm">
-        렌더링할 데이터가 없습니다.
-      </div>
-    );
+    return <EmptyState year={usedBaseYear} hasBaseYearPlaceholder={data?.has_base_year_placeholder} />;
   }
 
   if (!hasData) {
-    return usedBaseYear != null ? <EmptyState year={usedBaseYear} /> : (
-      <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-sm">
-        표시할 데이터가 없습니다.
-      </div>
-    );
+    return <EmptyState year={usedBaseYear} hasBaseYearPlaceholder={data?.has_base_year_placeholder} />;
   }
 
   if (data.type === 'chart') {
@@ -150,6 +161,7 @@ function SlotItemRenderer({ itemId, baseYear }) {
         <CompositeKpiCardPreview
           title={data.title}
           headline={data.headline}
+          headlineItems={data.headlineItems}
           rows={Array.isArray(data.rows) ? data.rows : []}
           sources={[]}
         />
