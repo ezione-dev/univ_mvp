@@ -7,6 +7,8 @@ import Modal from '../../components/common/Modal';
 import ScreenItemFormModal from '../../components/admin/items/ScreenItemFormModal';
 import Phase1ItemPreview from '../../components/admin/items/Phase1ItemPreview';
 import YearDependentBadge from '../../components/common/YearDependentBadge';
+import ContentsEditModal from '../../components/content-creation/ContentsEditModal';
+import { getAdminContentsDetail } from '../../services/adminApi';
 
 function mappingSummary(mapping) {
   if (!mapping || typeof mapping !== 'object') return '—';
@@ -27,6 +29,19 @@ export default function ItemsManagement() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [isContentEditOpen, setIsContentEditOpen] = useState(false);
+  const [editContent, setEditContent] = useState(null);
+
+  const handleContentEdit = async (cntsId) => {
+    if (!cntsId) return;
+    try {
+      const content = await getAdminContentsDetail(cntsId);
+      setEditContent(content);
+      setIsContentEditOpen(true);
+    } catch (e) {
+      console.error('컨텐츠 상세 로드 실패:', e);
+    }
+  };
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -146,12 +161,38 @@ export default function ItemsManagement() {
                           </td>
                           <td className="py-3 px-4 text-on-surface-variant font-mono text-xs whitespace-nowrap">
                             <div className="flex items-center gap-2">
-                              {row.shape_cnts_id ?? '—'}
+                              {row.shape_cnts_id ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleContentEdit(row.shape_cnts_id);
+                                  }}
+                                  className="hover:text-primary hover:underline cursor-pointer"
+                                >
+                                  {row.shape_cnts_id}
+                                </button>
+                              ) : (
+                                <span className="text-on-surface-variant/50">—</span>
+                              )}
                               {row.year_dependent && <YearDependentBadge compact />}
                             </div>
                           </td>
                           <td className="py-3 px-4 text-on-surface-variant font-mono text-xs whitespace-nowrap">
-                            {row.sql_cnts_id ?? '—'}
+                            {row.sql_cnts_id ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleContentEdit(row.sql_cnts_id);
+                                }}
+                                className="hover:text-primary hover:underline cursor-pointer"
+                              >
+                                {row.sql_cnts_id}
+                              </button>
+                            ) : (
+                              <span className="text-on-surface-variant/50">—</span>
+                            )}
                           </td>
                           <td className="py-3 px-4 text-on-surface-variant whitespace-nowrap">
                             {mappingSummary(row.mapping_json)}
@@ -210,12 +251,12 @@ export default function ItemsManagement() {
         onSaved={reload}
       />
 
-      <Modal
+<Modal
         isOpen={deleteOpen}
         title="아이템 삭제"
         description={
           deleteTarget?.item_nm
-            ? `“${deleteTarget.item_nm}”을(를) 삭제할까요?`
+            ? `"${deleteTarget.item_nm}"을(를) 삭제할까요?`
             : '선택한 아이템을 삭제할까요?'
         }
         variant="dialog"
@@ -264,6 +305,21 @@ export default function ItemsManagement() {
       >
         <div className="text-sm text-on-surface-variant">삭제된 아이템은 목록에서 제외됩니다. (논리삭제)</div>
       </Modal>
+
+      <ContentsEditModal
+        isOpen={isContentEditOpen}
+        onClose={() => {
+          setIsContentEditOpen(false);
+          setEditContent(null);
+        }}
+        content={editContent}
+        onSaved={() => {
+          setIsContentEditOpen(false);
+          setEditContent(null);
+          reload();
+        }}
+        hideGeneralInfo
+      />
     </div>
   );
 }

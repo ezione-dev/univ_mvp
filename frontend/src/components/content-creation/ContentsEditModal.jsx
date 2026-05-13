@@ -1,7 +1,7 @@
 import Modal from '../common/Modal';
 import ContentsCreateForm from './ContentsCreateForm';
 
-export default function ContentsEditModal({ isOpen, onClose, content, onSaved }) {
+export default function ContentsEditModal({ isOpen, onClose, content, onSaved, hideGeneralInfo = false }) {
   return (
     <Modal
       isOpen={isOpen}
@@ -13,6 +13,7 @@ export default function ContentsEditModal({ isOpen, onClose, content, onSaved })
       <ContentsCreateForm
         mode="edit"
         initialContent={content}
+        hideGeneralInfo={hideGeneralInfo}
         onCancel={onClose}
         onSaved={(res) => {
           onSaved?.(res);

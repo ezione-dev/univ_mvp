@@ -72,6 +72,11 @@ export default function SqlSettings({ value, onChange, visible, errors, showErro
   const [useBaseYear, setUseBaseYear] = useState(false);
   const [baseYear, setBaseYear] = useState(String(new Date().getFullYear()));
 
+  useEffect(() => {
+    const detected = /{{base_year}}/i.test(sqlValue);
+    setUseBaseYear(detected);
+  }, [sqlValue]);
+
   const [previewRows, setPreviewRows] = useState([]);
   const [previewTruncated, setPreviewTruncated] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
