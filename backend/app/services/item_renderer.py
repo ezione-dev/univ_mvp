@@ -1,5 +1,8 @@
 import json
+import logging
 from typing import Any, Optional
+
+logger = logging.getLogger(__name__)
 
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
@@ -535,7 +538,9 @@ async def render_item(item_id: int, ctx: dict | None = None, caller_roles: list[
         actual_base_year = None
 
         # Fallback: if base year placeholder exists, ctx.base_year is set,
-        # and first execution returned empty rows, try previous 3 years
+        # and first execution returned empty rows, try previous 3 years.
+        # (Note: we only fallback if preview is NOT None. If preview is None,
+        # it means the SQL execution itself failed, which shouldn't trigger fallback.)
         if (
             meta.get("has_base_year_placeholder")
             and ctx is not None
@@ -557,8 +562,16 @@ async def render_item(item_id: int, ctx: dict | None = None, caller_roles: list[
                         if fallback_preview and fallback_preview.get("rows"):
                             preview = fallback_preview
                             actual_base_year = fallback_year
+                            logger.info(
+                                "Base year fallback success: item=%s, from=%s to=%s",
+                                item_id, original_year, fallback_year
+                            )
                             break
-                    except Exception:
+                    except Exception as e:
+                        logger.warning(
+                            "Base year fallback attempt failed: item=%s, year=%s, error=%s",
+                            item_id, fallback_year, str(e)
+                        )
                         continue
 
         # If no fallback happened and data exists, use the originally selected year
