@@ -3,88 +3,9 @@ import { executeSqlPreview, handleApiError } from '../../../services/adminApi';
 import api from '../../../services/api';
 import { CONTENT_TYPE_MAP } from '../../../constants/contentTypes';
 import { ChartDetail, GridDetail, CardDetail, SqlDetail } from '../../content-detail';
+import { ItemEditorPagination } from './ItemEditorPagination';
 // (주의) 카드 equals 미리보기는 selectCardRow(단일 행 선택) 대신
 // sqlRows를 직접 필터링해서 "일치하는 모든 행"을 보여주도록 합니다.
-
-function Pagination({ page, total, pageSize, onChange }) {
-  const totalPages = Math.max(1, Math.ceil((total || 0) / (pageSize || 1)));
-  const current = Math.min(Math.max(1, page), totalPages);
-
-  const range = useMemo(() => {
-    const pages = [];
-    const windowSize = 7; // includes current
-    const half = Math.floor(windowSize / 2);
-    let start = Math.max(1, current - half);
-    let end = Math.min(totalPages, start + windowSize - 1);
-    start = Math.max(1, end - windowSize + 1);
-
-    const push = (v) => pages.push(v);
-    push(1);
-    if (start > 2) push('…');
-    for (let p = Math.max(2, start); p <= Math.min(totalPages - 1, end); p += 1) push(p);
-    if (end < totalPages - 1) push('…');
-    if (totalPages > 1) push(totalPages);
-
-    // de-dupe
-    return pages.filter((v, i) => (i === 0 ? true : pages[i - 1] !== v));
-  }, [current, totalPages]);
-
-  if (totalPages <= 1) return null;
-
-  const go = (p) => {
-    const next = Math.min(Math.max(1, p), totalPages);
-    if (next === current) return;
-    onChange?.(next);
-  };
-
-  const btnBase =
-    'h-9 min-w-9 px-3 rounded-lg text-sm font-medium transition-colors border border-outline/30 bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high disabled:opacity-50 disabled:cursor-not-allowed';
-  const numBase =
-    'h-9 min-w-9 px-3 rounded-lg text-sm font-semibold transition-colors border';
-
-  return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-      <div className="text-xs text-on-surface-variant">
-        총 <span className="font-semibold text-on-surface">{total ?? 0}</span>개 · {current} / {totalPages} 페이지
-      </div>
-      <div className="flex items-center gap-1.5">
-        <button type="button" className={btnBase} onClick={() => go(1)} disabled={current <= 1}>
-          처음
-        </button>
-        <button type="button" className={btnBase} onClick={() => go(current - 1)} disabled={current <= 1}>
-          이전
-        </button>
-        {range.map((v, idx) =>
-          v === '…' ? (
-            <span key={`ellipsis-${idx}`} className="px-2 text-on-surface-variant/70">
-              …
-            </span>
-          ) : (
-            <button
-              key={`p-${v}`}
-              type="button"
-              onClick={() => go(v)}
-              className={
-                v === current
-                  ? `${numBase} border-primary bg-primary text-on-primary shadow-sm`
-                  : `${numBase} border-outline/30 bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high`
-              }
-              aria-current={v === current ? 'page' : undefined}
-            >
-              {v}
-            </button>
-          )
-        )}
-        <button type="button" className={btnBase} onClick={() => go(current + 1)} disabled={current >= totalPages}>
-          다음
-        </button>
-        <button type="button" className={btnBase} onClick={() => go(totalPages)} disabled={current >= totalPages}>
-          끝
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export function FormTab({ selectedCnts, onSelectCnts, onContentDetailChange }) {
   const [contents, setContents] = useState([]);
@@ -244,7 +165,7 @@ export function FormTab({ selectedCnts, onSelectCnts, onContentDetailChange }) {
           </table>
         </div>
 
-        {showPagination && <Pagination page={page} total={total} pageSize={pageSize} onChange={setPage} />}
+        {showPagination && <ItemEditorPagination page={page} total={total} pageSize={pageSize} onChange={setPage} />}
       </div>
 
       <div className="w-80 border-l border-outline/20 pl-6">
@@ -304,6 +225,8 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
       setLoading(true);
       try {
         const params = { page, limit: pageSize, cnts_tp: 'sql' };
+        const q = search.trim();
+        if (q) params.q = q;
         const response = await api.get('/api/admin/contents', { params });
         const sqlContents = response.data.contents || [];
         const totalCount = response.data.total || 0;
@@ -317,7 +240,7 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
       }
     };
     fetchContents();
-  }, [page, pageSize]);
+  }, [page, pageSize, search]);
 
   const handleSelect = async (content) => {
     onSelectSql(content);
@@ -347,10 +270,6 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
       setPreviewLoading(false);
     }
   };
-
-  const filteredContents = contents.filter((c) =>
-    (c.contentName || '').toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <div className="flex gap-6">
@@ -391,14 +310,14 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
                     <div className="text-error text-sm">{error}</div>
                   </td>
                 </tr>
-              ) : filteredContents.length === 0 ? (
+              ) : contents.length === 0 ? (
                 <tr>
                   <td colSpan={3} className="py-10 px-3 text-center text-on-surface-variant">
-                    {contents.length === 0 ? '데이터가 없습니다.' : '검색 결과가 없습니다.'}
+                    {search.trim() ? '검색 결과가 없습니다.' : '데이터가 없습니다.'}
                   </td>
                 </tr>
               ) : (
-                filteredContents.map((content, index) => (
+                contents.map((content, index) => (
                   <tr
                     key={content.cnts_id}
                     onClick={() => handleSelect(content)}
@@ -428,7 +347,7 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
           </table>
         </div>
 
-        {showPagination && <Pagination page={page} total={total} pageSize={pageSize} onChange={setPage} />}
+        {showPagination && <ItemEditorPagination page={page} total={total} pageSize={pageSize} onChange={setPage} />}
       </div>
 
       <div className="w-80 border-l border-outline/20 pl-6">
