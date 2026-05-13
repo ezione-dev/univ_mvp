@@ -229,6 +229,12 @@ class TestCreateMenu:
 
         pool_mock = MagicMock()
         conn_mock = AsyncMock()
+        # asyncpg's conn.transaction() is an async context manager.
+        tx_cm = AsyncMock()
+        tx_cm.__aenter__.return_value = None
+        tx_cm.__aexit__.return_value = None
+        conn_mock.transaction = MagicMock(return_value=tx_cm)
+        
         conn_mock.fetchrow = AsyncMock(return_value={"menu_id": 99})
         pool_mock.acquire.return_value.__aenter__.return_value = conn_mock
 
