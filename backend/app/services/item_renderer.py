@@ -1,5 +1,8 @@
 import json
+import logging
 from typing import Any, Optional
+
+logger = logging.getLogger(__name__)
 
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
@@ -532,6 +535,52 @@ async def render_item(item_id: int, ctx: dict | None = None, caller_roles: list[
         }
 
     if item_type == "card":
+        actual_base_year = None
+
+        # Fallback: if base year placeholder exists, ctx.base_year is set,
+        # and first execution returned empty rows, try previous 3 years.
+        # (Note: we only fallback if preview is NOT None. If preview is None,
+        # it means the SQL execution itself failed, which shouldn't trigger fallback.)
+        if (
+            meta.get("has_base_year_placeholder")
+            and ctx is not None
+            and ctx.get("base_year") is not None
+            and preview is not None
+            and not preview.get("rows")
+        ):
+            try:
+                original_year = int(ctx.get("base_year"))
+            except (TypeError, ValueError):
+                original_year = None
+
+            if original_year is not None:
+                for offset in range(1, 4):
+                    fallback_year = original_year - offset
+                    fallback_ctx = {**(ctx or {}), "base_year": fallback_year}
+                    try:
+                        fallback_preview = await execute_sql_preview(sql_cnts_id, ctx=fallback_ctx)
+                        if fallback_preview and fallback_preview.get("rows"):
+                            preview = fallback_preview
+                            actual_base_year = fallback_year
+                            logger.info(
+                                "Base year fallback success: item=%s, from=%s to=%s",
+                                item_id, original_year, fallback_year
+                            )
+                            break
+                    except Exception as e:
+                        logger.warning(
+                            "Base year fallback attempt failed: item=%s, year=%s, error=%s",
+                            item_id, fallback_year, str(e)
+                        )
+                        continue
+
+        # If no fallback happened and data exists, use the originally selected year
+        if actual_base_year is None and preview and preview.get("rows"):
+            try:
+                actual_base_year = int(ctx.get("base_year")) if ctx else None
+            except (TypeError, ValueError):
+                actual_base_year = None
+
         model = _build_card_model(item_type, item, shape_content or {}, preview or {})
         card_result = {
             "item_id": item_id,
@@ -541,6 +590,7 @@ async def render_item(item_id: int, ctx: dict | None = None, caller_roles: list[
             "headline": model.get("headline") if model else None,
             "rows": model.get("rows", []) if model else [],
             "sources": model.get("sources", []) if model else [],
+            "actual_base_year": actual_base_year,
             **meta,
         }
         if model and model.get("headlineItems"):

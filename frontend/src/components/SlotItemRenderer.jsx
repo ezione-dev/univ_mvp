@@ -164,6 +164,7 @@ function SlotItemRenderer({ itemId, baseYear, isAdmin = false }) {
           headlineItems={data.headlineItems}
           rows={Array.isArray(data.rows) ? data.rows : []}
           sources={[]}
+          actualBaseYear={data.has_base_year_placeholder ? data.actual_base_year : undefined}
         />
       </div>
     );

@@ -42,7 +42,7 @@ function displayText(v) {
   return String(v);
 }
 
-export function CompositeKpiCardPreview({ title, headline, headlineItems, rows, sources }) {
+export function CompositeKpiCardPreview({ title, headline, headlineItems, rows, sources, actualBaseYear }) {
   const hasHeadline = headline != null && headline !== "";
   const hasRows = Array.isArray(rows) && rows.length > 0;
 
@@ -54,14 +54,21 @@ export function CompositeKpiCardPreview({ title, headline, headlineItems, rows, 
         {/* 상단 컬러 액센트 바 (메인 KPI 카드의 하단 바 느낌을 해치지 않게, 얇고 짧게) */}
         <div className="h-0.5 w-10 rounded-full bg-gradient-to-r from-sky-400 to-blue-500 opacity-60 -mt-1" />
 
-        {/* 제목 */}
+        {/* 제목 + 연도 뱃지 */}
         {title && (
-          <span
-            className="text-[13px] font-bold tracking-[0.10em] uppercase text-on-surface-variant/70 leading-snug line-clamp-2 break-words"
-            title={title}
-          >
-            {title}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className="text-[13px] font-bold tracking-[0.10em] uppercase text-on-surface-variant/70 leading-snug line-clamp-2 break-words flex-1"
+              title={title}
+            >
+              {title}
+            </span>
+            {actualBaseYear != null && (
+              <span className="shrink-0 rounded-full text-[11px] font-medium tracking-tight px-2.5 py-0.5 bg-sky-50 text-sky-700 border border-sky-200/60">
+                {actualBaseYear}
+              </span>
+            )}
+          </div>
         )}
 
         {/* 헤드라인 수치 */}
@@ -409,6 +416,7 @@ export default function Phase1ItemPreview({ item }) {
                     headlineItems={serverRender.headlineItems}
                     rows={Array.isArray(serverRender.rows) ? serverRender.rows : []}
                     sources={serverRender.sources}
+                    actualBaseYear={serverRender.has_base_year_placeholder ? serverRender.actual_base_year : undefined}
                   />
                 )}
               </div>
