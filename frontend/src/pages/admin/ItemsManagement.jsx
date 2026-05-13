@@ -176,24 +176,26 @@ export default function ItemsManagement() {
                               ) : (
                                 <span className="text-on-surface-variant/50">—</span>
                               )}
-                              {row.year_dependent && <YearDependentBadge compact />}
                             </div>
                           </td>
                           <td className="py-3 px-4 text-on-surface-variant font-mono text-xs whitespace-nowrap">
-                            {row.sql_cnts_id ? (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleContentEdit(row.sql_cnts_id);
-                                }}
-                                className="hover:text-primary hover:underline cursor-pointer"
-                              >
-                                {row.sql_cnts_id}
-                              </button>
-                            ) : (
-                              <span className="text-on-surface-variant/50">—</span>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {row.sql_cnts_id ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleContentEdit(row.sql_cnts_id);
+                                  }}
+                                  className="hover:text-primary hover:underline cursor-pointer"
+                                >
+                                  {row.sql_cnts_id}
+                                </button>
+                              ) : (
+                                <span className="text-on-surface-variant/50">—</span>
+                              )}
+                              {row.year_dependent && <YearDependentBadge compact />}
+                            </div>
                           </td>
                           <td className="py-3 px-4 text-on-surface-variant whitespace-nowrap">
                             {mappingSummary(row.mapping_json)}
