@@ -248,7 +248,7 @@ export default function ScreenItemFormModal({ isOpen, mode, editItemId, onClose,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-surface rounded-xl shadow-lg w-full max-w-[1100px] max-h-[90vh] flex flex-col">
+      <div className="bg-surface rounded-xl shadow-lg w-full max-w-[1100px] max-h-[90vh] min-h-[70vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline/20">
           <h2 className="text-lg font-semibold text-on-surface">
             {mode === 'create' ? '아이템 등록' : `아이템 수정 (#${editItemId})`}

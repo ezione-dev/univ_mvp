@@ -3,6 +3,7 @@ import { executeSqlPreview, handleApiError } from '../../../services/adminApi';
 import api from '../../../services/api';
 import { CONTENT_TYPE_MAP } from '../../../constants/contentTypes';
 import { ChartDetail, GridDetail, CardDetail, SqlDetail } from '../../content-detail';
+import { ItemEditorPagination } from './ItemEditorPagination';
 // (주의) 카드 equals 미리보기는 selectCardRow(단일 행 선택) 대신
 // sqlRows를 직접 필터링해서 "일치하는 모든 행"을 보여주도록 합니다.
 
@@ -13,28 +14,24 @@ export function FormTab({ selectedCnts, onSelectCnts, onContentDetailChange }) {
   const [error, setError] = useState(null);
   const [contentDetail, setContentDetail] = useState(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(20);
+  const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [showPagination, setShowPagination] = useState(false);
-
-  useEffect(() => {
-    setPage(1);
-  }, [filter]);
 
   useEffect(() => {
     const fetchContents = async () => {
       setLoading(true);
       try {
         const params = { page, limit: pageSize };
-        if (filter !== 'all') {
-          params.cnts_tp = filter;
-        }
+        // "형태" 탭의 전체는 sql을 제외한 (chart/grid/card)만 대상으로 페이징한다.
+        if (filter === 'all') params.cnts_tp = 'chart,grid,card';
+        else params.cnts_tp = filter;
         const response = await api.get('/api/admin/contents', { params });
         const allContents = response.data.contents || [];
         const totalCount = response.data.total || 0;
         setContents(allContents);
         setTotal(totalCount);
-        setShowPagination(totalCount > 50);
+        setShowPagination(totalCount > pageSize);
       } catch (err) {
         setError(handleApiError(err));
       } finally {
@@ -70,7 +67,8 @@ export function FormTab({ selectedCnts, onSelectCnts, onContentDetailChange }) {
     { id: 'card', label: '카드' },
   ];
 
-  const nonSqlContents = contents.filter((c) => c.contentType !== 'sql');
+  // 백엔드에서 cnts_tp 필터링을 하므로, 여기서는 별도 sql 제외 필터링을 하지 않는다.
+  const nonSqlContents = contents;
 
   return (
     <div className="flex gap-6">
@@ -80,7 +78,10 @@ export function FormTab({ selectedCnts, onSelectCnts, onContentDetailChange }) {
             <button
               key={f.id}
               type="button"
-              onClick={() => setFilter(f.id)}
+              onClick={() => {
+                setFilter(f.id);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                 filter === f.id
                   ? 'bg-surface-container-high text-on-surface'
@@ -92,75 +93,79 @@ export function FormTab({ selectedCnts, onSelectCnts, onContentDetailChange }) {
           ))}
         </div>
 
-        {loading && <div className="text-center py-8 text-on-surface-variant">로딩 중...</div>}
-        {error && <div className="text-error text-sm mb-4">{error}</div>}
-
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-outline/20">
-              <th className="text-left py-2 px-3">NO</th>
-              <th className="text-left py-2 px-3">선택</th>
-              <th className="text-left py-2 px-3">콘텐츠명</th>
-              <th className="text-left py-2 px-3">유형</th>
-            </tr>
-          </thead>
-          <tbody>
-            {nonSqlContents.map((content, index) => (
-              <tr
-                key={`${content.cnts_id}-${index}`}
-                onClick={() => onSelectCnts(content)}
-                className={`border-b border-outline/10 cursor-pointer hover:bg-surface-container ${
-                  selectedCnts?.cnts_id === content.cnts_id ? 'bg-surface-container-high text-on-surface' : ''
-                }`}
-              >
-                <td className="py-2 px-3">{index + 1}</td>
-                <td className="py-2 px-3">
-                  <input
-                    type="radio"
-                    checked={selectedCnts?.cnts_id === content.cnts_id}
-                    onChange={() => onSelectCnts(content)}
-                  />
-                </td>
-                <td className="py-2 px-3">{content.contentName}</td>
-                <td className="py-2 px-3">
-                  <span
-                    className="px-2 py-0.5 rounded text-xs font-medium"
-                    style={{
-                      backgroundColor: CONTENT_TYPE_MAP[content.contentType]?.bgColor,
-                      color: CONTENT_TYPE_MAP[content.contentType]?.textColor,
-                    }}
-                  >
-                    {CONTENT_TYPE_MAP[content.contentType]?.label || content.contentType}
-                  </span>
-                </td>
+        {/* 테이블 영역 높이를 10행 기준으로 고정(로딩/빈상태에도 흔들림 방지) */}
+        <div className="min-h-[456px]">
+          <table className="w-full text-sm table-fixed">
+            <thead>
+              <tr className="border-b border-outline/20">
+                <th className="text-left py-2 px-3 w-16 whitespace-nowrap">NO</th>
+                <th className="text-left py-2 px-3 w-16 whitespace-nowrap">선택</th>
+                <th className="text-left py-2 px-3">콘텐츠명</th>
+                <th className="text-left py-2 px-3 w-24 whitespace-nowrap">유형</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="py-10 px-3 text-center text-on-surface-variant">
+                    로딩 중...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={4} className="py-6 px-3">
+                    <div className="text-error text-sm">{error}</div>
+                  </td>
+                </tr>
+              ) : nonSqlContents.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-10 px-3 text-center text-on-surface-variant">
+                    데이터가 없습니다.
+                  </td>
+                </tr>
+              ) : (
+                nonSqlContents.map((content, index) => (
+                  <tr
+                    key={`${content.cnts_id}-${index}`}
+                    onClick={() => onSelectCnts(content)}
+                    className={`border-b border-outline/10 cursor-pointer hover:bg-surface-container ${
+                      selectedCnts?.cnts_id === content.cnts_id ? 'bg-surface-container-high text-on-surface' : ''
+                    }`}
+                  >
+                    <td className="py-2 px-3 w-16 tabular-nums text-on-surface-variant">
+                      {(page - 1) * pageSize + index + 1}
+                    </td>
+                    <td className="py-2 px-3 w-16">
+                      <input
+                        type="radio"
+                        checked={selectedCnts?.cnts_id === content.cnts_id}
+                        onChange={() => onSelectCnts(content)}
+                      />
+                    </td>
+                    <td className="py-2 px-3">
+                      <div className="truncate" title={content.contentName || ''}>
+                        {content.contentName}
+                      </div>
+                    </td>
+                    <td className="py-2 px-3 w-24">
+                      <span
+                        className="px-2 py-0.5 rounded text-xs font-medium"
+                        style={{
+                          backgroundColor: CONTENT_TYPE_MAP[content.contentType]?.bgColor,
+                          color: CONTENT_TYPE_MAP[content.contentType]?.textColor,
+                        }}
+                      >
+                        {CONTENT_TYPE_MAP[content.contentType]?.label || content.contentType}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-        {showPagination && (
-          <div className="flex items-center justify-center gap-4 mt-4">
-            <button
-              type="button"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-surface-container text-on-surface-variant hover:bg-surface-container-high disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              이전
-            </button>
-            <span className="text-sm text-on-surface-variant">
-              {page} / {Math.ceil(total / pageSize)}
-            </span>
-            <button
-              type="button"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= Math.ceil(total / pageSize)}
-              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-surface-container text-on-surface-variant hover:bg-surface-container-high disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              다음
-            </button>
-          </div>
-        )}
+        {showPagination && <ItemEditorPagination page={page} total={total} pageSize={pageSize} onChange={setPage} />}
       </div>
 
       <div className="w-80 border-l border-outline/20 pl-6">
@@ -210,26 +215,24 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(20);
+  const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [showPagination, setShowPagination] = useState(false);
   const [baseYear, setBaseYear] = useState(new Date().getFullYear());
-
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
 
   useEffect(() => {
     const fetchContents = async () => {
       setLoading(true);
       try {
         const params = { page, limit: pageSize, cnts_tp: 'sql' };
+        const q = search.trim();
+        if (q) params.q = q;
         const response = await api.get('/api/admin/contents', { params });
         const sqlContents = response.data.contents || [];
         const totalCount = response.data.total || 0;
         setContents(sqlContents);
         setTotal(totalCount);
-        setShowPagination(totalCount > 50);
+        setShowPagination(totalCount > pageSize);
       } catch (err) {
         setError(handleApiError(err));
       } finally {
@@ -237,7 +240,7 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
       }
     };
     fetchContents();
-  }, [page, pageSize]);
+  }, [page, pageSize, search]);
 
   const handleSelect = async (content) => {
     onSelectSql(content);
@@ -268,10 +271,6 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
     }
   };
 
-  const filteredContents = contents.filter((c) =>
-    (c.contentName || '').toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <div className="flex gap-6">
       <div className="flex-1">
@@ -280,68 +279,75 @@ export function SqlTab({ selectedSql, onSelectSql, onPreviewDataChange }) {
             type="text"
             placeholder="검색..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="w-full px-3 py-2 text-sm bg-surface-container rounded-lg border border-outline focus:outline-none focus:border-primary"
           />
         </div>
 
-        {loading && <div className="text-center py-8 text-on-surface-variant">로딩 중...</div>}
-        {error && <div className="text-error text-sm mb-4">{error}</div>}
-
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-outline/20">
-              <th className="text-left py-2 px-3">선택</th>
-              <th className="text-left py-2 px-3">No</th>
-              <th className="text-left py-2 px-3">데이터조회명</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredContents.map((content, index) => (
-              <tr
-                key={content.cnts_id}
-                onClick={() => handleSelect(content)}
-                className={`border-b border-outline/10 cursor-pointer hover:bg-surface-container ${
-                  selectedSql?.cnts_id === content.cnts_id ? 'bg-surface-container-high text-on-surface' : ''
-                }`}
-              >
-                <td className="py-2 px-3">
-                  <input
-                    type="radio"
-                    checked={selectedSql?.cnts_id === content.cnts_id}
-                    onChange={() => handleSelect(content)}
-                  />
-                </td>
-                <td className="py-2 px-3">{index + 1}</td>
-                <td className="py-2 px-3">{content.contentName}</td>
+        {/* 테이블 영역 높이를 10행 기준으로 고정(로딩/빈상태에도 흔들림 방지) */}
+        <div className="min-h-[456px]">
+          <table className="w-full text-sm table-fixed">
+            <thead>
+              <tr className="border-b border-outline/20">
+                <th className="text-left py-2 px-3 w-16 whitespace-nowrap">선택</th>
+                <th className="text-left py-2 px-3 w-16 whitespace-nowrap">No</th>
+                <th className="text-left py-2 px-3">데이터조회명</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={3} className="py-10 px-3 text-center text-on-surface-variant">
+                    로딩 중...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={3} className="py-6 px-3">
+                    <div className="text-error text-sm">{error}</div>
+                  </td>
+                </tr>
+              ) : contents.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="py-10 px-3 text-center text-on-surface-variant">
+                    {search.trim() ? '검색 결과가 없습니다.' : '데이터가 없습니다.'}
+                  </td>
+                </tr>
+              ) : (
+                contents.map((content, index) => (
+                  <tr
+                    key={content.cnts_id}
+                    onClick={() => handleSelect(content)}
+                    className={`border-b border-outline/10 cursor-pointer hover:bg-surface-container ${
+                      selectedSql?.cnts_id === content.cnts_id ? 'bg-surface-container-high text-on-surface' : ''
+                    }`}
+                  >
+                    <td className="py-2 px-3 w-16">
+                      <input
+                        type="radio"
+                        checked={selectedSql?.cnts_id === content.cnts_id}
+                        onChange={() => handleSelect(content)}
+                      />
+                    </td>
+                    <td className="py-2 px-3 w-16 tabular-nums text-on-surface-variant">
+                      {(page - 1) * pageSize + index + 1}
+                    </td>
+                    <td className="py-2 px-3">
+                      <div className="truncate" title={content.contentName || ''}>
+                        {content.contentName}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-        {showPagination && (
-          <div className="flex items-center justify-center gap-4 mt-4">
-            <button
-              type="button"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-surface-container text-on-surface-variant hover:bg-surface-container-high disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              이전
-            </button>
-            <span className="text-sm text-on-surface-variant">
-              {page} / {Math.ceil(total / pageSize)}
-            </span>
-            <button
-              type="button"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= Math.ceil(total / pageSize)}
-              className="px-3 py-1.5 text-sm font-medium rounded-lg bg-surface-container text-on-surface-variant hover:bg-surface-container-high disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              다음
-            </button>
-          </div>
-        )}
+        {showPagination && <ItemEditorPagination page={page} total={total} pageSize={pageSize} onChange={setPage} />}
       </div>
 
       <div className="w-80 border-l border-outline/20 pl-6">

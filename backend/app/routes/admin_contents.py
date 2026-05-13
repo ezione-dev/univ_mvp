@@ -113,10 +113,19 @@ async def get_admin_contents(
     page: Optional[int] = Query(default=None, ge=1),
     limit: Optional[int] = Query(default=None, ge=1, le=1000),
     cnts_tp: Optional[str] = Query(default=None),
+    q: Optional[str] = Query(default=None, description="cnts_nm 부분 일치 검색(대소문자 무시)"),
     _: dict = Depends(require_sys_adm),
 ):
-    rows = await list_contents(include_deleted=include_deleted, page=page, limit=limit, cnts_tp=cnts_tp)
-    total = await count_contents(include_deleted=include_deleted, cnts_tp=cnts_tp)
+    # cnts_tp supports comma-separated values (e.g. "chart,grid,card") for client-side convenience.
+    cnts_tp_arg: Optional[str | list[str]] = cnts_tp
+    if cnts_tp and "," in cnts_tp:
+        parsed = [p.strip() for p in cnts_tp.split(",") if p.strip()]
+        cnts_tp_arg = parsed or None
+
+    rows = await list_contents(
+        include_deleted=include_deleted, page=page, limit=limit, cnts_tp=cnts_tp_arg, q=q
+    )
+    total = await count_contents(include_deleted=include_deleted, cnts_tp=cnts_tp_arg, q=q)
     out: list[dict[str, Any]] = []
     for r in rows:
         detail = await get_contents_detail(r.cnts_id, r.cnts_tp)

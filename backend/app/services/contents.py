@@ -44,6 +44,21 @@ def _as_str_list(v: Any) -> list[str]:
     return [s] if s else []
 
 
+def _append_cnts_tp_filter(
+    where_clauses: list[str],
+    params: list[Any],
+    cnts_tp: Optional[str | Sequence[str]],
+) -> None:
+    if not cnts_tp:
+        return
+    if isinstance(cnts_tp, str):
+        where_clauses.append(f"cnts_tp = ${len(params) + 1}")
+        params.append(cnts_tp)
+    else:
+        where_clauses.append(f"cnts_tp = ANY(${len(params) + 1}::text[])")
+        params.append(list(cnts_tp))
+
+
 def _grid_sort_to_db(alignment: Any) -> Optional[str]:
     if alignment is None:
         return None
@@ -399,15 +414,21 @@ async def create_contents(payload: dict[str, Any]) -> int:
             return cnts_id
 
 
-async def count_contents(include_deleted: bool = False, cnts_tp: Optional[str] = None) -> int:
+async def count_contents(
+    include_deleted: bool = False,
+    cnts_tp: Optional[str | Sequence[str]] = None,
+    q: Optional[str] = None,
+) -> int:
     where_clauses = []
     params: list[Any] = []
     if not include_deleted:
         where_clauses.append("COALESCE(del_fg, 'N') <> 'Y'")
-    if cnts_tp:
-        where_clauses.append("cnts_tp = $1")
-        params.append(cnts_tp)
-    
+    _append_cnts_tp_filter(where_clauses, params, cnts_tp)
+    q_trim = (q or "").strip()
+    if q_trim:
+        where_clauses.append(f"cnts_nm ILIKE ${len(params) + 1}")
+        params.append(f"%{q_trim}%")
+
     where = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
     df = await fetch_df(
         f"""
@@ -422,15 +443,23 @@ async def count_contents(include_deleted: bool = False, cnts_tp: Optional[str] =
     return int(df.iloc[0]["total"])
 
 
-async def list_contents(include_deleted: bool = False, page: Optional[int] = None, limit: Optional[int] = None, cnts_tp: Optional[str] = None) -> list[ContentsRow]:
+async def list_contents(
+    include_deleted: bool = False,
+    page: Optional[int] = None,
+    limit: Optional[int] = None,
+    cnts_tp: Optional[str | Sequence[str]] = None,
+    q: Optional[str] = None,
+) -> list[ContentsRow]:
     where_clauses = []
     params: list[Any] = []
     if not include_deleted:
         where_clauses.append("COALESCE(del_fg, 'N') <> 'Y'")
-    if cnts_tp:
-        where_clauses.append(f"cnts_tp = ${len(params) + 1}")
-        params.append(cnts_tp)
-    
+    _append_cnts_tp_filter(where_clauses, params, cnts_tp)
+    q_trim = (q or "").strip()
+    if q_trim:
+        where_clauses.append(f"cnts_nm ILIKE ${len(params) + 1}")
+        params.append(f"%{q_trim}%")
+
     where = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
     
     pagination = ""
