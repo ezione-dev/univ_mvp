@@ -6,7 +6,7 @@ export function asNonEmptyString(v) {
 const VALID_CARD_FORMATS = new Set(['raw', 'number', 'percent', 'currency']);
 const VALID_PERCENT_BASES = new Set(['0to1', '0to100']);
 
-export function validateContentsBeforeSave({ generalInfo, contentType, data }) {
+export function validateContentsBeforeSave({ generalInfo, contentType, data, skipGeneralInfo = false }) {
   const errors = {
     generalInfo: {
       contentName: '',
@@ -24,11 +24,13 @@ export function validateContentsBeforeSave({ generalInfo, contentType, data }) {
     sql: { sql: '' },
   };
 
-  if (!asNonEmptyString(generalInfo?.contentName)) errors.generalInfo.contentName = '필수값입니다.';
-  if (!asNonEmptyString(generalInfo?.creator)) errors.generalInfo.creator = '필수값입니다.';
-  if (!asNonEmptyString(generalInfo?.createdAt)) errors.generalInfo.createdAt = '필수값입니다.';
-  if (!asNonEmptyString(generalInfo?.isDeleted)) errors.generalInfo.isDeleted = '필수값입니다.';
-  if (!asNonEmptyString(generalInfo?.generatedAt)) errors.generalInfo.generatedAt = '필수값입니다.';
+  if (!skipGeneralInfo) {
+    if (!asNonEmptyString(generalInfo?.contentName)) errors.generalInfo.contentName = '필수값입니다.';
+    if (!asNonEmptyString(generalInfo?.creator)) errors.generalInfo.creator = '필수값입니다.';
+    if (!asNonEmptyString(generalInfo?.createdAt)) errors.generalInfo.createdAt = '필수값입니다.';
+    if (!asNonEmptyString(generalInfo?.isDeleted)) errors.generalInfo.isDeleted = '필수값입니다.';
+    if (!asNonEmptyString(generalInfo?.generatedAt)) errors.generalInfo.generatedAt = '필수값입니다.';
+  }
 
   if (contentType === 'sql') {
     if (!asNonEmptyString(data?.sql)) errors.sql.sql = '필수값입니다.';
@@ -96,11 +98,11 @@ export function validateContentsBeforeSave({ generalInfo, contentType, data }) {
   }
 
   const firstMessage =
-    errors.generalInfo.contentName ||
-    errors.generalInfo.creator ||
-    errors.generalInfo.createdAt ||
-    errors.generalInfo.isDeleted ||
-    errors.generalInfo.generatedAt ||
+    (!skipGeneralInfo && errors.generalInfo.contentName) ||
+    (!skipGeneralInfo && errors.generalInfo.creator) ||
+    (!skipGeneralInfo && errors.generalInfo.createdAt) ||
+    (!skipGeneralInfo && errors.generalInfo.isDeleted) ||
+    (!skipGeneralInfo && errors.generalInfo.generatedAt) ||
     errors.sql.sql ||
     errors.chartFields.chartTitle ||
     errors.chartFields.chartTitlePosition ||

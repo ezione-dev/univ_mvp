@@ -178,6 +178,10 @@ async def _insert_card_item(
         columns.append("color_hex")
         values.append(_optional_text(item.get("color")))
 
+    if "headline_fg" in table_columns:
+        columns.append("headline_fg")
+        values.append(_bool_to_yn(item.get("headlineFg"), "N"))
+
     if all(col in table_columns for col in CARD_FORMAT_COLUMNS):
         format_values = _card_format_to_db(item)
         for col in CARD_FORMAT_COLUMNS:
@@ -580,6 +584,8 @@ async def get_contents_detail(cnts_id: int, tp: ContentsType) -> dict[str, Any]:
         select_columns = ["header_nm", "data_key", "pos"]
         if "color_hex" in table_columns:
             select_columns.append("color_hex")
+        if "headline_fg" in table_columns:
+            select_columns.append("headline_fg")
         if all(col in table_columns for col in CARD_FORMAT_COLUMNS):
             select_columns.extend(CARD_FORMAT_COLUMNS)
         df = await fetch_df(
@@ -599,6 +605,8 @@ async def get_contents_detail(cnts_id: int, tp: ContentsType) -> dict[str, Any]:
                     "content": r.get("data_key"),
                     "color": r.get("color_hex") or "#002c5a",
                 }
+                if "headline_fg" in table_columns:
+                    item["headlineFg"] = str(r.get("headline_fg") or "N").upper() == "Y"
                 item.update(_card_format_from_db(r))
                 items.append(item)
         return {"items": items}

@@ -40,6 +40,7 @@ export default function ItemsManagement() {
       setIsContentEditOpen(true);
     } catch (e) {
       console.error('컨텐츠 상세 로드 실패:', e);
+      setLoadError(handleApiError(e, '컨텐츠 정보를 불러오지 못했습니다.'));
     }
   };
 
@@ -251,7 +252,7 @@ export default function ItemsManagement() {
         onSaved={reload}
       />
 
-<Modal
+      <Modal
         isOpen={deleteOpen}
         title="아이템 삭제"
         description={

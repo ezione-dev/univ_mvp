@@ -9,6 +9,7 @@ export const DEFAULT_CARD_ITEM = {
   label: '',
   content: '',
   color: '#002c5a',
+  headlineFg: false,
   format: 'raw',
   decimalPlaces: 0,
   thousandSeparator: true,

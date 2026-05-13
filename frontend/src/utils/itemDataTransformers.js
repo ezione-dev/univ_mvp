@@ -369,6 +369,7 @@ export function buildCardPreviewModel(itemType, item, shapeContent, preview) {
   if (mappedItems.length === 0) return null;
 
   let headline = null;
+  const headlineItems = [];
   let headlineTaken = false;
   const outRows = [];
 
@@ -384,12 +385,23 @@ export function buildCardPreviewModel(itemType, item, shapeContent, preview) {
     const shapeItem = Array.isArray(shapeContent?.data?.items) ? shapeContent.data.items[idx] : null;
     const spec = resolveCardFormatSpec(it, shapeItem);
     const formattedValue = formatCardValue(v, spec);
+    const colorHex = shapeItem?.color || null;
+    const isHeadlineFg = !!shapeItem?.headlineFg;
 
     if (field) sources.push(`mapping.items[${idx}].field = ${field}`);
     else sources.push(`mapping.items[${idx}]`);
     if (selectedForItem?.reason) sources.push(`mapping.items[${idx}].rowSelector = ${selectedForItem.reason}`);
     else if (singleRow) sources.push(`mapping.items[${idx}].row = implicit:single-row`);
     else sources.push(`mapping.items[${idx}].row = unset`);
+
+    if (isHeadlineFg) {
+      headlineItems.push({
+        label: labelTrim ? label : '',
+        value: formattedValue,
+        color: colorHex,
+      });
+      return;
+    }
 
     if (!labelTrim && !headlineTaken) {
       headline = formattedValue;
@@ -402,8 +414,9 @@ export function buildCardPreviewModel(itemType, item, shapeContent, preview) {
       value: formattedValue,
       rawValue: v,
       kind: labelTrim ? 'labeled' : 'valueOnly',
+      color: colorHex,
     });
   });
 
-  return { title, headline, rows: outRows, sources };
+  return { title, headlineItems, headline, rows: outRows, sources };
 }
