@@ -98,11 +98,11 @@ export function validateContentsBeforeSave({ generalInfo, contentType, data, ski
   }
 
   const firstMessage =
-    (!skipGeneralInfo && errors.generalInfo.contentName) ||
-    (!skipGeneralInfo && errors.generalInfo.creator) ||
-    (!skipGeneralInfo && errors.generalInfo.createdAt) ||
-    (!skipGeneralInfo && errors.generalInfo.isDeleted) ||
-    (!skipGeneralInfo && errors.generalInfo.generatedAt) ||
+    errors.generalInfo.contentName ||
+    errors.generalInfo.creator ||
+    errors.generalInfo.createdAt ||
+    errors.generalInfo.isDeleted ||
+    errors.generalInfo.generatedAt ||
     errors.sql.sql ||
     errors.chartFields.chartTitle ||
     errors.chartFields.chartTitlePosition ||
