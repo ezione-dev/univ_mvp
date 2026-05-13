@@ -4,7 +4,7 @@ test.describe('SYS_ADM 권한 검증 (CRITICAL 이슈 확인)', () => {
   test('일반 사용자 로그인 후 관리자 페이지 접근 거부', async ({ page }) => {
     await page.goto('/login');
     await page.fill('input[id="loginEmail"]', process.env.TEST_NORMAL_USER_EMAIL);
-    await page.fill('input[id="password"]', process.env.TEST_USER_PASSWORD);
+    await page.fill('input[id="password"]', process.env.TEST_NORMAL_USER_PASSWORD);
     await page.click('button:has-text("로그인")');
 
     await page.waitForURL('/', { timeout: 10000 });

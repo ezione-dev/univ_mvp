@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import ScreenRenderer from './ScreenRenderer';
+import YearSelector from '../common/YearSelector';
 import { getScreen, getScreenSlots, getTemplateSlots } from '../../services/adminApi';
 
 function mergeSlots(templateSlots, assignedSlots) {
@@ -29,6 +30,12 @@ export default function ScreenPreviewModal({ isOpen, onClose, scrId }) {
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [baseYear, setBaseYear] = useState(new Date().getFullYear() - 1);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setBaseYear(new Date().getFullYear() - 1);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen || !scrId) return;
@@ -91,7 +98,12 @@ export default function ScreenPreviewModal({ isOpen, onClose, scrId }) {
           {error}
         </div>
       ) : (
-        <ScreenRenderer slots={slots} />
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-end">
+            <YearSelector selectedYear={baseYear} onYearChange={setBaseYear} />
+          </div>
+          <ScreenRenderer slots={slots} baseYear={baseYear} />
+        </div>
       )}
     </Modal>
   );
